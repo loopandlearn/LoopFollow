@@ -10,9 +10,9 @@ enum AppearanceMode: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .system: return "System"
-        case .light: return "Light"
-        case .dark: return "Dark"
+        case .system: return String(localized: "System", comment: "Appearance mode")
+        case .light: return String(localized: "Light", comment: "Appearance mode")
+        case .dark: return String(localized: "Dark", comment: "Appearance mode")
         }
     }
 

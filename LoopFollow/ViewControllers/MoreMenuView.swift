@@ -158,7 +158,7 @@ struct MoreMenuView: View {
     /// never needs to be kept in sync by hand.
     private var searchItems: [MenuSearchItem] {
         var items: [MenuSearchItem] = [
-            MenuSearchItem(title: "Settings", icon: "gearshape", keywords: [], kind: .settings(.settings)),
+            MenuSearchItem(title: String(localized: "Settings"), icon: "gearshape", keywords: [], kind: .settings(.settings)),
         ]
 
         let settingsSections = SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty)
@@ -173,8 +173,8 @@ struct MoreMenuView: View {
             items.append(MenuSearchItem(title: item.displayName, icon: item.icon, keywords: [], kind: .feature(item)))
         }
 
-        items.append(MenuSearchItem(title: "View Log", icon: "doc.text.magnifyingglass", keywords: ["logging"], kind: .viewLog))
-        items.append(MenuSearchItem(title: "Share Logs", icon: "square.and.arrow.up", keywords: ["logging"], kind: .shareLogs))
+        items.append(MenuSearchItem(title: String(localized: "View Log"), icon: "doc.text.magnifyingglass", keywords: ["logging"], kind: .viewLog))
+        items.append(MenuSearchItem(title: String(localized: "Share Logs"), icon: "square.and.arrow.up", keywords: ["logging"], kind: .shareLogs))
 
         for link in MoreMenuView.supportLinks {
             items.append(MenuSearchItem(title: link.title, icon: link.icon, keywords: ["support", "community"], kind: .link(link.url)))

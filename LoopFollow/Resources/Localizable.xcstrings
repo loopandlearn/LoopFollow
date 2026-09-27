@@ -463,6 +463,17 @@
         }
       }
     },
+    "Advanced" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelişmiş"
+          }
+        }
+      }
+    },
     "Advanced Settings" : {
       "localizations" : {
         "tr" : {
@@ -511,6 +522,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alarm bulunamadı"
+          }
+        }
+      }
+    },
+    "Alarms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alarmlar"
           }
         }
       }
@@ -641,6 +663,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önerilen bolus bu değere eşit veya üstündeyse uyar."
+          }
+        }
+      }
+    },
+    "Alerts when BG goes below a limit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ bir sınırın altına düştüğünde uyarır."
+          }
+        }
+      }
+    },
+    "Alerts when BG rises above a limit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ bir sınırın üstüne çıktığında uyarır."
           }
         }
       }
@@ -820,6 +864,17 @@
         }
       }
     },
+    "All Boluses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm Boluslar"
+          }
+        }
+      }
+    },
     "All Sounds Muted" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -989,6 +1044,39 @@
         }
       }
     },
+    "Auto-Snooze CGM Start" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM Başlangıcında Otomatik Ertele"
+          }
+        }
+      }
+    },
+    "Automatic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik"
+          }
+        }
+      }
+    },
+    "Autosens" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autosens"
+          }
+        }
+      }
+    },
     "Auto‑Snooze CGM Start" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1076,6 +1164,17 @@
         }
       }
     },
+    "BG Update Delay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Güncelleme Gecikmesi"
+          }
+        }
+      }
+    },
     "BG Update Delay (Sec): %@" : {
       "localizations" : {
         "tr" : {
@@ -1108,6 +1207,17 @@
         }
       }
     },
+    "Background Refresh" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka Plan Yenileme"
+          }
+        }
+      }
+    },
     "Background Refresh Type" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1115,6 +1225,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arka Plan Yenileme Türü"
+          }
+        }
+      }
+    },
+    "Basal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bazal"
           }
         }
       }
@@ -1130,6 +1251,17 @@
         }
       }
     },
+    "Battery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pil"
+          }
+        }
+      }
+    },
     "Battery Drop" : {
       "comment" : "Alarm type name",
       "extractionState" : "manual",
@@ -1138,6 +1270,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pil Düşüşü"
+          }
+        }
+      }
+    },
+    "Battery drops quickly." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pil hızla düşüyor."
           }
         }
       }
@@ -1301,6 +1444,17 @@
         }
       }
     },
+    "CAGE" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CAGE"
+          }
+        }
+      }
+    },
     "CHARGING" : {
       "localizations" : {
         "tr" : {
@@ -1329,6 +1483,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "COB Uyarısı"
+          }
+        }
+      }
+    },
+    "CR" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CR"
           }
         }
       }
@@ -1474,6 +1639,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karbonhidrat Miktarı"
+          }
+        }
+      }
+    },
+    "Carbs today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünkü karb."
+          }
+        }
+      }
+    },
+    "Carbs without bolus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolussuz karbonhidrat."
           }
         }
       }
@@ -1639,6 +1826,17 @@
         }
       }
     },
+    "Cone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koni"
+          }
+        }
+      }
+    },
     "Configure Loop APNS" : {
       "localizations" : {
         "tr" : {
@@ -1780,6 +1978,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tüketim Zamanı"
+          }
+        }
+      }
+    },
+    "Contact" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişi"
           }
         }
       }
@@ -1938,6 +2147,17 @@
         }
       }
     },
+    "Custom Sound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel Ses"
+          }
+        }
+      }
+    },
     "Custom sounds stay on this device and aren't included in settings export." : {
       "localizations" : {
         "tr" : {
@@ -1954,6 +2174,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sınırlar (%@)"
+          }
+        }
+      }
+    },
+    "DB Size" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VT Boyutu"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koyu"
           }
         }
       }
@@ -2192,6 +2434,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son profil yüklemelerinde cihaz belirteçleri dönüşümlü olarak değişiyor (%2$@ kayıtta %1$@ belirteç). Bu genellikle aynı Nightscout'a birden fazla uygulama kurulumunun yükleme yaptığı anlamına gelir. Uygulamayı yedek veya kullanılmayan telefonlardan kaldırın."
+          }
+        }
+      }
+    },
+    "Dexcom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dexcom"
           }
         }
       }
@@ -2456,6 +2709,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Süre: %@ dakika"
+          }
+        }
+      }
+    },
+    "Dynamic (BG Range)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dinamik (KŞ Aralığı)"
           }
         }
       }
@@ -2735,6 +2999,17 @@
         }
       }
     },
+    "Excellent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mükemmel"
+          }
+        }
+      }
+    },
     "Existing Temp Target" : {
       "localizations" : {
         "tr" : {
@@ -2824,6 +3099,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "QR kodu oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Fair" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
           }
         }
       }
@@ -3074,6 +3360,17 @@
         }
       }
     },
+    "Good" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İyi"
+          }
+        }
+      }
+    },
     "Grams" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3081,6 +3378,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gram"
+          }
+        }
+      }
+    },
+    "Graph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafik"
           }
         }
       }
@@ -3146,6 +3454,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Izgara Yuvası - CarPlay / Watch"
+          }
+        }
+      }
+    },
+    "Grid Slots" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izgara Yuvaları"
           }
         }
       }
@@ -3268,6 +3587,28 @@
         }
       }
     },
+    "High carbs-on-board." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek aktif karbonhidrat."
+          }
+        }
+      }
+    },
+    "High insulin-on-board." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek aktif insülin."
+          }
+        }
+      }
+    },
     "History" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3297,6 +3638,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat"
+          }
+        }
+      }
+    },
+    "Hours of Prediction" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin Saati"
           }
         }
       }
@@ -3375,6 +3727,17 @@
         }
       }
     },
+    "IAGE" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IAGE"
+          }
+        }
+      }
+    },
     "IOB" : {
       "localizations" : {
         "tr" : {
@@ -3404,6 +3767,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "IOB Uyarısı"
+          }
+        }
+      }
+    },
+    "ISF" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ISF"
           }
         }
       }
@@ -3505,6 +3879,17 @@
         }
       }
     },
+    "Import/Export" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe/Dışa Aktar"
+          }
+        }
+      }
+    },
     "Import/Export Settings" : {
       "localizations" : {
         "tr" : {
@@ -3574,6 +3959,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Artış"
+          }
+        }
+      }
+    },
+    "Information Display" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi Görüntüleme"
           }
         }
       }
@@ -3714,6 +4110,17 @@
         }
       }
     },
+    "Light" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
+          }
+        }
+      }
+    },
     "Line 1" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3732,6 +4139,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Satır 2"
+          }
+        }
+      }
+    },
+    "Lines" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çizgiler"
           }
         }
       }
@@ -3860,6 +4278,28 @@
         }
       }
     },
+    "Loop Remote Control" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Uzaktan Kumanda"
+          }
+        }
+      }
+    },
+    "Loop hasn’t completed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop tamamlanmadı."
+          }
+        }
+      }
+    },
     "LoopFollow APNs Credentials" : {
       "localizations" : {
         "tr" : {
@@ -3909,6 +4349,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop uygulaması süre sonu"
+          }
+        }
+      }
+    },
+    "Looping-app build expiring." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop uygulaması derlemesinin süresi doluyor."
           }
         }
       }
@@ -3966,6 +4417,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alt Sınır"
+          }
+        }
+      }
+    },
+    "Manual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuel"
           }
         }
       }
@@ -4146,6 +4608,28 @@
         }
       }
     },
+    "Min Basal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min Bazal"
+          }
+        }
+      }
+    },
+    "Min/Max" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min/Maks"
+          }
+        }
+      }
+    },
     "Minimum" : {
       "localizations" : {
         "tr" : {
@@ -4284,6 +4768,17 @@
         }
       }
     },
+    "Nightscout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout"
+          }
+        }
+      }
+    },
     "Nightscout Database Size" : {
       "comment" : "Alarm type name",
       "extractionState" : "manual",
@@ -4302,6 +4797,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nightscout URL'si"
+          }
+        }
+      }
+    },
+    "Nightscout database filling up." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout veritabanı doluyor."
+          }
+        }
+      }
+    },
+    "No CGM data for X minutes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X dakikadır CGM verisi yok."
           }
         }
       }
@@ -4608,6 +5125,17 @@
         }
       }
     },
+    "One-time BG limit alert." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tek seferlik KŞ sınırı uyarısı."
+          }
+        }
+      }
+    },
     "Only alert if the current BG is above this value." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4713,6 +5241,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistem Ses Düzeyini Geçersiz Kıl"
+          }
+        }
+      }
+    },
+    "Override ended." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override sona erdi."
+          }
+        }
+      }
+    },
+    "Override just started." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override az önce başladı."
           }
         }
       }
@@ -4877,6 +5427,17 @@
         }
       }
     },
+    "Phone battery low." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telefon pili düşük."
+          }
+        }
+      }
+    },
     "Pick when your day period begins and when your night period begins. Any time from your Day-starts time up until your Night-starts time will count as day; from Night-starts until the next Day-starts will count as night." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4958,6 +5519,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lütfen bekleyin..."
+          }
+        }
+      }
+    },
+    "Poor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zayıf"
           }
         }
       }
@@ -5090,6 +5662,17 @@
         }
       }
     },
+    "Profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
+          }
+        }
+      }
+    },
     "Programmed Basal" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5108,6 +5691,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Protein"
+          }
+        }
+      }
+    },
+    "Pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa"
+          }
+        }
+      }
+    },
+    "Pump Battery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa Pili"
           }
         }
       }
@@ -5155,6 +5760,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pompa İnsülini Uyarısı"
+          }
+        }
+      }
+    },
+    "Pump battery low." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa pili düşük."
+          }
+        }
+      }
+    },
+    "Pump change due." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pompa değişim zamanı."
           }
         }
       }
@@ -5225,6 +5852,28 @@
         }
       }
     },
+    "Rapid downward BG trend." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı KŞ düşüş eğilimi."
+          }
+        }
+      }
+    },
+    "Rapid upward BG trend." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hızlı KŞ yükseliş eğilimi."
+          }
+        }
+      }
+    },
     "Rate of Fall" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5290,6 +5939,17 @@
         }
       }
     },
+    "Recommended bolus issued." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önerilen bolus verildi."
+          }
+        }
+      }
+    },
     "Reconnecting..." : {
       "localizations" : {
         "tr" : {
@@ -5318,6 +5978,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hatırlatma Süresi"
+          }
+        }
+      }
+    },
+    "Reminder when future carbs are due." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelecek karbonhidrat zamanı geldiğinde hatırlatma."
           }
         }
       }
@@ -5407,6 +6078,28 @@
         }
       }
     },
+    "Reservoir level low." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezervuar düzeyi düşük."
+          }
+        }
+      }
+    },
+    "Restart Live Activity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinliği Yeniden Başlat"
+          }
+        }
+      }
+    },
     "Review setup anyway" : {
       "localizations" : {
         "tr" : {
@@ -5487,6 +6180,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tanılamayı yeniden çalıştır"
+          }
+        }
+      }
+    },
+    "SAGE" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAGE"
+          }
+        }
+      }
+    },
+    "SMB" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SMB"
           }
         }
       }
@@ -5912,6 +6627,17 @@
         }
       }
     },
+    "Sensor change due." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensör değişim zamanı."
+          }
+        }
+      }
+    },
     "Server" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6038,6 +6764,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DIA Çizgilerini Göster"
+          }
+        }
+      }
+    },
+    "Show Days Back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gösterilecek Geçmiş Gün"
           }
         }
       }
@@ -6237,6 +6974,17 @@
         }
       }
     },
+    "Small Graph Height" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küçük Grafik Yüksekliği"
+          }
+        }
+      }
+    },
     "Snooze & Mute Options" : {
       "localizations" : {
         "tr" : {
@@ -6331,6 +7079,17 @@
         }
       }
     },
+    "Snoozer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erteleyici"
+          }
+        }
+      }
+    },
     "Snoozer emoji" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6379,6 +7138,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Başlangıç Tarihi"
+          }
+        }
+      }
+    },
+    "Start Override" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override Başlat"
+          }
+        }
+      }
+    },
+    "Static" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sabit"
           }
         }
       }
@@ -6497,6 +7278,28 @@
         }
       }
     },
+    "System" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem"
+          }
+        }
+      }
+    },
+    "TDD" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TDD"
+          }
+        }
+      }
+    },
     "TIR" : {
       "localizations" : {
         "tr" : {
@@ -6559,6 +7362,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sekme %@"
+          }
+        }
+      }
+    },
+    "Tab 1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme 1"
+          }
+        }
+      }
+    },
+    "Tab 2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme 2"
+          }
+        }
+      }
+    },
+    "Tab 3" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme 3"
+          }
+        }
+      }
+    },
+    "Tab 4" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme 4"
           }
         }
       }
@@ -6701,6 +7548,28 @@
         }
       }
     },
+    "Temp target ended." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici hedef sona erdi."
+          }
+        }
+      }
+    },
+    "Temp target started." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçici hedef başladı."
+          }
+        }
+      }
+    },
     "Temporary Alert" : {
       "comment" : "Alarm type name",
       "extractionState" : "manual",
@@ -6781,6 +7650,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İlk 4 öğe sekme çubuğunda görünür. Menü her zaman tüm özellikleri açabilir."
+          }
+        }
+      }
+    },
+    "These buttons show your most-used recent bolus amounts.\n\nThey're based on what you've sent before at similar times on similar days — so if you usually give 4 units before breakfast on weekdays, that button will show up on weekday mornings.\n\nTap a button to fill in the amount. Nothing is sent until you review and confirm." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu düğmeler en sık kullandığınız son bolus miktarlarını gösterir.\n\nBenzer günlerde benzer saatlerde daha önce gönderdiklerinize dayanır — örneğin hafta içi kahvaltıdan önce genellikle 4 ünite veriyorsanız, o düğme hafta içi sabahları görünür.\n\nMiktarı doldurmak için bir düğmeye dokunun. Gözden geçirip onaylayana kadar hiçbir şey gönderilmez."
+          }
+        }
+      }
+    },
+    "These buttons show your most-used recent meals.\n\nThey're based on what you've sent before at similar times on similar days — so if you usually send the same breakfast on weekday mornings, it'll appear as an option.\n\nTap a button to fill in the details. Nothing is sent until you review and confirm." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu düğmeler en sık kullandığınız son öğünleri gösterir.\n\nBenzer günlerde benzer saatlerde daha önce gönderdiklerinize dayanır — örneğin hafta içi sabahları hep aynı kahvaltıyı gönderiyorsanız, seçenek olarak görünür.\n\nAyrıntıları doldurmak için bir düğmeye dokunun. Gözden geçirip onaylayana kadar hiçbir şey gönderilmez."
           }
         }
       }
@@ -7117,6 +8008,17 @@
         }
       }
     },
+    "Trio Remote Control" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio Uzaktan Kumanda"
+          }
+        }
+      }
+    },
     "Trio Remote Control Settings" : {
       "localizations" : {
         "tr" : {
@@ -7234,6 +8136,17 @@
         }
       }
     },
+    "Updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellendi"
+          }
+        }
+      }
+    },
     "Use Anyway" : {
       "localizations" : {
         "tr" : {
@@ -7281,6 +8194,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kullanıcı Bilgileri"
+          }
+        }
+      }
+    },
+    "User Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı Adı"
           }
         }
       }
@@ -7621,6 +8545,17 @@
     },
     "mmol/mol" : {
       "shouldTranslate" : false
+    },
+    "none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "yok"
+          }
+        }
+      }
     },
     "“Default Snooze” controls the default value for how long the alert stays quiet after you press Snooze. \"A snooze duration of 0 means the alarm is acknowledged (silenced), and will alert again next time the condition applies, without time limitation. \" Toggle “Snoozed” to mute this alarm right now." : {
       "localizations" : {

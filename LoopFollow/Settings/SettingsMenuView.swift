@@ -42,8 +42,15 @@ struct SettingsLeaf: Hashable {
     let title: String
     let keywords: [String]
 
-    init(_ title: String, _ keywords: [String] = []) {
-        self.title = title
+    /// `title` is a catalog key; the stored title is localized so Menu search matches what the screen shows.
+    init(_ title: String.LocalizationValue, _ keywords: [String] = []) {
+        self.title = String(localized: title)
+        self.keywords = keywords
+    }
+
+    /// For titles that are already localized (e.g. `InfoType.name`).
+    init(localizedTitle: String, _ keywords: [String] = []) {
+        title = localizedTitle
         self.keywords = keywords
     }
 }
@@ -76,24 +83,24 @@ enum SettingsRoute: Hashable, Identifiable {
     /// included in `menuSections`.
     var title: String {
         switch self {
-        case .nightscout: return "Nightscout"
-        case .dexcom: return "Dexcom"
-        case .general: return "General"
-        case .graph: return "Graph"
-        case .infoDisplay: return "Information Display"
-        case .units: return "Units and Metrics"
-        case .tabSettings: return "Tabs"
-        case .backgroundRefresh: return "Background Refresh"
-        case .importExport: return "Import/Export"
-        case .apn: return "APN"
+        case .nightscout: return String(localized: "Nightscout", comment: "Settings screen title")
+        case .dexcom: return String(localized: "Dexcom", comment: "Settings screen title")
+        case .general: return String(localized: "General", comment: "Settings screen title")
+        case .graph: return String(localized: "Graph", comment: "Settings screen title")
+        case .infoDisplay: return String(localized: "Information Display", comment: "Settings screen title")
+        case .units: return String(localized: "Units and Metrics", comment: "Settings screen title")
+        case .tabSettings: return String(localized: "Tabs", comment: "Settings screen title")
+        case .backgroundRefresh: return String(localized: "Background Refresh", comment: "Settings screen title")
+        case .importExport: return String(localized: "Import/Export", comment: "Settings screen title")
+        case .apn: return String(localized: "APN", comment: "Settings screen title")
         #if !targetEnvironment(macCatalyst)
-            case .liveActivity: return "Live Activity"
+            case .liveActivity: return String(localized: "Live Activity", comment: "Settings screen title")
         #endif
-        case .remote: return "Remote"
-        case .alarmSettings: return "Alarms"
-        case .calendar: return "Calendar"
-        case .contact: return "Contact"
-        case .advanced: return "Advanced"
+        case .remote: return String(localized: "Remote", comment: "Settings screen title")
+        case .alarmSettings: return String(localized: "Alarms", comment: "Settings screen title")
+        case .calendar: return String(localized: "Calendar", comment: "Settings screen title")
+        case .contact: return String(localized: "Contact", comment: "Settings screen title")
+        case .advanced: return String(localized: "Advanced", comment: "Settings screen title")
         case .settings, .aggregatedStats: return ""
         }
     }
@@ -189,7 +196,7 @@ enum SettingsRoute: Hashable, Identifiable {
             ]
         case .infoDisplay:
             return [SettingsLeaf("Hide Information Table")]
-                + InfoType.allCases.map { SettingsLeaf($0.name) }
+                + InfoType.allCases.map { SettingsLeaf(localizedTitle: $0.name) }
         case .units: return [
                 SettingsLeaf("Glucose Unit"),
                 SettingsLeaf("Range Mode", ["tir", "titr", "time in range"]),

@@ -18,15 +18,21 @@ API_LIST = HERE / "localized_apis.txt"
 
 
 def read_api_list():
-    apis, ignored = [], set()
+    """Returns ({api_name: required_label_or_None}, ignored_labels).
+    An entry like `String(localized:` means: calls to String( count, but only the literal
+    carrying the `localized:` label is a key."""
+    apis, ignored = {}, set()
     for line in API_LIST.read_text().splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
         if line.startswith("!"):
             ignored.add(line[1:])
+        elif "(" in line:
+            name, label = line.split("(", 1)
+            apis[name] = label.rstrip(":") or None
         else:
-            apis.append(line.rstrip("(").rstrip(":"))
+            apis[line] = None
     return apis, ignored
 
 
@@ -91,16 +97,16 @@ def literal_keys(roots):
             for m in call.finditer(src):
                 if m.group(1) == "Text" and src[m.start():m.start() + 14].startswith("Text(verbatim"):
                     continue
+                required = apis.get(m.group(1))
                 for label, lit, interpolated in call_literals(src, m.end() - 1):
                     if label in ignored or not lit.strip():
                         continue
-                    after = src[src.index('"', m.end()) :]
+                    if required is not None and label != required:
+                        continue
                     if interpolated:
                         skipped.append((f.name, lit))
                         continue
                     keys.setdefault(lit.replace('\\"', '"').replace("\\n", "\n"), f.name)
-                    if label is None and m.group(1) != "String":
-                        pass
             # "…" + x concatenation is never looked up: drop any key that only appears before a "+"
     # remove literals that are immediately followed by a "+" (String concatenation)
     for root in roots:

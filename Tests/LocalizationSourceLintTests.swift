@@ -51,16 +51,21 @@ struct LocalizationSourceLintTests {
     @Test("every literal passed to a localized API is a catalog key")
     func scannedLiteralsExistInCatalog() throws {
         let listURL = Self.repoRoot.appendingPathComponent("Scripts/localization/localized_apis.txt")
-        var apis: [String] = []
+        // api name -> label the literal must carry (nil = any direct argument), e.g. "String(localized:".
+        var apis: [String: String?] = [:]
         var ignoredLabels: Set<String> = []
         for raw in try String(contentsOf: listURL, encoding: .utf8).split(separator: "\n") {
             let line = raw.trimmingCharacters(in: .whitespaces)
             if line.isEmpty || line.hasPrefix("#") { continue }
-            if line.hasPrefix("!") { ignoredLabels.insert(String(line.dropFirst())) } else {
-                apis.append(String(line.trimmingSuffix(while: { $0 == "(" || $0 == ":" })))
+            if line.hasPrefix("!") { ignoredLabels.insert(String(line.dropFirst())); continue }
+            if let paren = line.firstIndex(of: "(") {
+                let label = String(line[line.index(after: paren)...]).trimmingSuffix(while: { $0 == ":" })
+                apis[String(line[..<paren])] = label.isEmpty ? nil : String(label)
+            } else {
+                apis[line] = .some(nil)
             }
         }
-        let pattern = #"(?<![\w.])\.?("# + apis.map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|") + #")\("#
+        let pattern = #"(?<![\w.])\.?("# + apis.keys.sorted().map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|") + #")\("#
         let regex = try NSRegularExpression(pattern: pattern)
         let catalogURL = Self.repoRoot.appendingPathComponent("LoopFollow/Resources/Localizable.xcstrings")
         let json = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: catalogURL)) as? [String: Any])
@@ -73,9 +78,11 @@ struct LocalizationSourceLintTests {
                 guard let whole = Range(m.range, in: source), let apiRange = Range(m.range(at: 1), in: source) else { continue }
                 if source[apiRange] == "Text", source[whole.lowerBound...].hasPrefix("Text(verbatim") { continue }
                 let open = source.distance(from: source.startIndex, to: whole.upperBound) - 1
+                let required = apis[String(source[apiRange])] ?? nil
                 for (label, literal, interpolated) in Self.callLiterals(chars, open: open) {
                     if interpolated || literal.trimmingCharacters(in: .whitespaces).isEmpty { continue }
                     if let label, ignoredLabels.contains(label) { continue }
+                    if let required, label != required { continue }
                     let key = literal.replacingOccurrences(of: "\\\"", with: "\"").replacingOccurrences(of: "\\n", with: "\n")
                     if !keys.contains(key) { missing.append("\(file.lastPathComponent): \(key)") }
                 }
