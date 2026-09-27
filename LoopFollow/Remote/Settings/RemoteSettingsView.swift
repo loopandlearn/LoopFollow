@@ -270,7 +270,7 @@ struct RemoteSettingsView: View {
                                 .padding(.horizontal, 6)
                                 .background(Color.green.opacity(0.1))
                                 .cornerRadius(4)
-                            Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                            Text("(\(otpTimeRemaining.map { String(localized: "\($0)s left", comment: "OTP seconds remaining") } ?? "-"))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }

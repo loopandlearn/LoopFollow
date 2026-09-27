@@ -448,7 +448,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         let loadingLabel = UILabel()
         loadingLabel.translatesAutoresizingMaskIntoConstraints = false
-        loadingLabel.text = "Loading..."
+        loadingLabel.text = String(localized: "Loading...")
         loadingLabel.textAlignment = .center
         loadingLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         loadingLabel.textColor = UIColor.secondaryLabel
@@ -559,7 +559,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func refresh() {
         LogManager.shared.log(category: .general, message: "Refreshing")
 
-        Observable.shared.minAgoText.value = "Refreshing"
+        Observable.shared.minAgoText.value = String(localized: "Refreshing")
         scheduleAllTasks()
         NightscoutSocketManager.shared.connectIfNeeded()
 
@@ -743,7 +743,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             } else if isNewer {
                 let lastVersionUpdateShown = Storage.shared.lastVersionUpdateNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastVersionUpdateShown) > 1_209_600 { // 2 weeks
-                    self.versionAlert(message: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update.")
+                    self.versionAlert(message: String(localized: "A new version is available: \(latestVersion ?? String(localized: "Unknown")). It is recommended to update."))
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
             }
@@ -753,7 +753,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     func versionAlert(title: String = "Update Available", message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default, handler: nil))
             self.present(alert, animated: true)
         }
     }
@@ -774,8 +774,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
     func expirationAlert() {
         DispatchQueue.main.async {
-            let alert = UIAlertController(title: "App Expiration Warning", message: "This app will expire in less than a week. Please rebuild to continue using it.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            let alert = UIAlertController(title: String(localized: "App Expiration Warning"), message: String(localized: "This app will expire in less than a week. Please rebuild to continue using it."), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default, handler: nil))
             self.present(alert, animated: true)
         }
     }
@@ -930,7 +930,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         var minAgo = ""
         if deltaTime > 9 {
             // write old BG reading and continue pushing out end date to show last entry
-            minAgo = String(Int(deltaTime)) + " min"
+            minAgo = String(localized: "\(Int(deltaTime)) min", comment: "Minutes since last reading, e.g. 5 min")
             eventEndDate = eventStartDate.addingTimeInterval((60 * 10) + (deltaTime * 60))
         }
         var basal = "~"
@@ -1065,7 +1065,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Create Setup Nightscout button
         if setupNightscoutButton == nil {
             setupNightscoutButton = UIButton(type: .system)
-            setupNightscoutButton.setTitle("Setup Nightscout", for: .normal)
+            setupNightscoutButton.setTitle(String(localized: "Setup Nightscout"), for: .normal)
             setupNightscoutButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
             setupNightscoutButton.backgroundColor = UIColor.systemBlue
             setupNightscoutButton.setTitleColor(.white, for: .normal)
@@ -1090,7 +1090,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Create Setup Dexcom Share button
         if setupDexcomButton == nil {
             setupDexcomButton = UIButton(type: .system)
-            setupDexcomButton.setTitle("Setup Dexcom Share", for: .normal)
+            setupDexcomButton.setTitle(String(localized: "Setup Dexcom Share"), for: .normal)
             setupDexcomButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
             setupDexcomButton.backgroundColor = UIColor.systemGreen
             setupDexcomButton.setTitleColor(.white, for: .normal)

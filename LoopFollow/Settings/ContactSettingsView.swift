@@ -137,19 +137,19 @@ struct ContactSettingsView: View {
                 DispatchQueue.main.async {
                     if !granted {
                         viewModel.contactEnabled = false
-                        showAlert(title: "Access Denied", message: "Please allow access to Contacts in Settings to enable this feature.")
+                        showAlert(title: String(localized: "Access Denied"), message: String(localized: "Please allow access to Contacts in Settings to enable this feature."))
                     }
                 }
             }
         } else if status == .denied {
             viewModel.contactEnabled = false
-            showAlert(title: "Access Denied", message: "Access to Contacts is denied. Please go to Settings and enable Contacts access.")
+            showAlert(title: String(localized: "Access Denied"), message: String(localized: "Access to Contacts is denied. Please go to Settings and enable Contacts access."))
         } else if status == .restricted {
             viewModel.contactEnabled = false
-            showAlert(title: "Access Restricted", message: "Access to Contacts is restricted.")
+            showAlert(title: String(localized: "Access Restricted"), message: String(localized: "Access to Contacts is restricted."))
         } else {
             viewModel.contactEnabled = false
-            showAlert(title: "Error", message: "An unknown error occurred while checking Contacts access.")
+            showAlert(title: String(localized: "Error"), message: String(localized: "An unknown error occurred while checking Contacts access."))
         }
     }
 

@@ -371,7 +371,7 @@ extension UIViewController {
         let a = UIAlertController(title: title,
                                   message: message,
                                   preferredStyle: .alert)
-        a.addAction(UIAlertAction(title: "OK", style: .default))
+        a.addAction(UIAlertAction(title: String(localized: "OK"), style: .default))
         present(a, animated: true)
     }
 }

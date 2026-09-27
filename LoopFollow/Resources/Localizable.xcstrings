@@ -125,6 +125,29 @@
     "%@g" : {
       "shouldTranslate" : false
     },
+    "%lld min" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dk"
+          }
+        }
+      }
+    },
+    "%llds left" : {
+      "comment" : "OTP seconds remaining",
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sn kaldı"
+          }
+        }
+      }
+    },
     "(%@ days)" : {
       "localizations" : {
         "tr" : {
@@ -214,6 +237,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "90g"
+          }
+        }
+      }
+    },
+    "A new version is available: %@. It is recommended to update." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni bir sürüm var: %@. Güncellemeniz önerilir."
           }
         }
       }
@@ -341,12 +375,68 @@
         }
       }
     },
+    "Absorption: %g hrs" : {
+      "comment" : "Treatment pill detail",
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emilim: %g sa"
+          }
+        }
+      }
+    },
+    "Access Denied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erişim Reddedildi"
+          }
+        }
+      }
+    },
+    "Access Restricted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erişim Kısıtlı"
+          }
+        }
+      }
+    },
     "Access Token" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erişim Belirteci"
+          }
+        }
+      }
+    },
+    "Access to Contacts is denied. Please go to Settings and enable Contacts access." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişiler erişimi reddedildi. Lütfen Ayarlar'a gidip Kişiler erişimini açın."
+          }
+        }
+      }
+    },
+    "Access to Contacts is restricted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişiler erişimi kısıtlı."
           }
         }
       }
@@ -993,6 +1083,28 @@
         }
       }
     },
+    "An unknown error occurred while checking Contacts access." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kişiler erişimi denetlenirken bilinmeyen bir hata oluştu."
+          }
+        }
+      }
+    },
+    "App Expiration Warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Süre Sonu Uyarısı"
+          }
+        }
+      }
+    },
     "App Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1523,6 +1635,18 @@
         }
       }
     },
+    "Bolus: %g U" : {
+      "comment" : "Treatment pill detail",
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus: %g U"
+          }
+        }
+      }
+    },
     "Boluses" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1848,6 +1972,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karbonhidrat: %.0f g"
+          }
+        }
+      }
+    },
+    "Carbs: %g g" : {
+      "comment" : "Treatment pill detail",
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat: %g g"
           }
         }
       }
@@ -3695,6 +3831,17 @@
         }
       }
     },
+    "From: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak: %@"
+          }
+        }
+      }
+    },
     "Future Carbs Alert" : {
       "comment" : "Alarm type name",
       "extractionState" : "manual",
@@ -3947,6 +4094,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Güvenlik Sınırları"
+          }
+        }
+      }
+    },
+    "HIGH" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YÜKSEK"
           }
         }
       }
@@ -4648,6 +4806,17 @@
         }
       }
     },
+    "LOW" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DÜŞÜK"
+          }
+        }
+      }
+    },
     "Language" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4803,6 +4972,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İstatistikler yükleniyor..."
+          }
+        }
+      }
+    },
+    "Loading..." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleniyor..."
           }
         }
       }
@@ -5787,6 +5967,17 @@
         }
       }
     },
+    "OTP: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OTP: %@"
+          }
+        }
+      }
+    },
     "Off" : {
       "localizations" : {
         "tr" : {
@@ -6213,6 +6404,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aramalar sırasında ses çal"
+          }
+        }
+      }
+    },
+    "Please allow access to Contacts in Settings to enable this feature." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu özelliği açmak için lütfen Ayarlar'dan Kişiler erişimine izin verin."
           }
         }
       }
@@ -6750,6 +6952,17 @@
         }
       }
     },
+    "Refreshing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenileniyor"
+          }
+        }
+      }
+    },
     "Reminder Time" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6886,6 +7099,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı Etkinliği Yeniden Başlat"
+          }
+        }
+      }
+    },
+    "Resume" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürdür"
           }
         }
       }
@@ -7158,6 +7382,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ara"
+          }
+        }
+      }
+    },
+    "Search Log" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlükte Ara"
           }
         }
       }
@@ -7522,6 +7757,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İçe Aktarılacak Ayarlar"
+          }
+        }
+      }
+    },
+    "Setup Dexcom Share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dexcom Share'i Kur"
+          }
+        }
+      }
+    },
+    "Setup Nightscout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout'u Kur"
           }
         }
       }
@@ -8124,6 +8381,17 @@
         }
       }
     },
+    "Suspend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Askıya Al"
+          }
+        }
+      }
+    },
     "Swedish" : {
       "localizations" : {
         "tr" : {
@@ -8659,6 +8927,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pompa pili bu düzeye veya altına indiğinde sizi uyarır."
+          }
+        }
+      }
+    },
+    "This app will expire in less than a week. Please rebuild to continue using it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu uygulamanın süresi bir haftadan kısa sürede dolacak. Kullanmaya devam etmek için lütfen yeniden derleyin."
           }
         }
       }
@@ -9741,6 +10020,17 @@
     },
     "− 30m" : {
       "shouldTranslate" : false
+    },
+    "⚠️ Not Looping!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Loop Çalışmıyor!"
+          }
+        }
+      }
     },
     "⚠️ Please enable at least one limit." : {
       "localizations" : {

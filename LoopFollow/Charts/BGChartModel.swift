@@ -237,19 +237,19 @@ final class BGChartModel: ObservableObject {
         {
             var actionParts: [String] = []
             if let bolusAmount = json["bolus-entry"] as? Double {
-                actionParts.append("Bolus: \(bolusAmount) U")
+                actionParts.append(String(localized: "Bolus: \(bolusAmount, specifier: "%g") U", comment: "Treatment pill detail"))
             }
             if let carbsAmount = json["carbs-entry"] as? Double {
-                actionParts.append("Carbs: \(carbsAmount) g")
+                actionParts.append(String(localized: "Carbs: \(carbsAmount, specifier: "%g") g", comment: "Treatment pill detail"))
             }
             if let absorptionTime = json["absorption-time"] as? Double {
-                actionParts.append("Absorption: \(absorptionTime) hrs")
+                actionParts.append(String(localized: "Absorption: \(absorptionTime, specifier: "%g") hrs", comment: "Treatment pill detail"))
             }
             if let otp = json["otp"] as? String {
-                actionParts.append("OTP: \(otp)")
+                actionParts.append(String(localized: "OTP: \(otp)", comment: "Treatment pill detail"))
             }
             if let enteredBy = json["entered-by"] as? String {
-                actionParts.append("From: \(enteredBy)")
+                actionParts.append(String(localized: "From: \(enteredBy)", comment: "Treatment pill detail: uploader name"))
             }
             if !actionParts.isEmpty {
                 actionContext = " [" + actionParts.joined(separator: ", ") + "]"
@@ -499,10 +499,10 @@ final class BGChartModel: ObservableObject {
             )
         }
         suspends = (showOtherTreatments ? vc.suspendGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Suspend\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "\(String(localized: "Suspend", comment: "Pump suspended pill"))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         resumes = (showOtherTreatments ? vc.resumeGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "\(String(localized: "Resume", comment: "Pump resumed pill"))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         sensorStarts = (showOtherTreatments ? vc.sensorStartGraphData : []).map {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")

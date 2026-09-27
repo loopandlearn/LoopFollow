@@ -93,4 +93,16 @@ struct LocalizationDisplayNameTests {
         #expect(one == "Calculated 1 minute ago")
         #expect(many == "Calculated 5 minutes ago")
     }
+
+    @Test("main screen status strings have Turkish values and keep their argument")
+    func minAgoFormatIsLocalized() throws {
+        let path = try #require(Bundle.main.path(forResource: "tr", ofType: "lproj"))
+        let tr = try #require(Bundle(path: path))
+        for key in ["%lld min", "LOW", "HIGH", "⚠️ Not Looping!", "Refreshing", "Loading...", "Setup Nightscout", "Setup Dexcom Share", "%llds left"] {
+            let v = tr.localizedString(forKey: key, value: "MISSING", table: nil)
+            #expect(v != "MISSING", Comment(rawValue: "no Turkish for \(key)"))
+        }
+        let minAgo = String(format: tr.localizedString(forKey: "%lld min", value: nil, table: nil), 7)
+        #expect(minAgo.contains("7"))
+    }
 }
