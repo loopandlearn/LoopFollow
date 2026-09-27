@@ -736,7 +736,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             if isBlacklisted {
                 let lastBlacklistShown = Storage.shared.lastBlacklistNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastBlacklistShown) > 86400 { // 24 hours
-                    self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
+                    self.versionAlert(message: String(localized: "The current version has a critical issue and should be updated as soon as possible."))
                     Storage.shared.lastBlacklistNotificationShown.value = now
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
                 }
@@ -750,7 +750,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
     }
 
-    func versionAlert(title: String = "Update Available", message: String) {
+    func versionAlert(title: String = String(localized: "Update Available"), message: String) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default, handler: nil))

@@ -33,7 +33,10 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var nightscoutStatus: String = .init(localized: "Checking...")
+    /// Status shown while a check is running; compared by `statusKind`, so it is one shared value.
+    static let checkingStatus = String(localized: "Checking...")
+
+    @Published var nightscoutStatus = NightscoutSettingsViewModel.checkingStatus
 
     /// The most recent verification error, kept so the onboarding address page can
     /// tell "reachable Nightscout that needs a token" apart from "can't reach it".
@@ -70,7 +73,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var webSocketStatus: String = .init(localized: "Disconnected")
+    @Published var webSocketStatus = String(localized: "Disconnected")
 
     var webSocketStatusColor: Color {
         switch NightscoutSocketManager.shared.connectionState {
@@ -130,7 +133,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         // "this is your API secret" verdict.
         provisionedTokenPending = false
         tokenIsVerifiedSecret = false
-        nightscoutStatus = String(localized: "Checking...")
+        nightscoutStatus = Self.checkingStatus
 
         checkStatusWorkItem = DispatchWorkItem {
             self.checkStatusSubject.send()
@@ -299,19 +302,19 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     static func provisioningMessage(for error: Error) -> String {
         guard let nsError = error as? NightscoutUtils.NightscoutError else {
-            return "Could not create a token. Please try again."
+            return String(localized: "Could not create a token. Please try again.", comment: "Token creation error")
         }
         switch nsError {
         case .invalidToken:
-            return "That API secret was rejected. Check it and try again."
+            return String(localized: "That API secret was rejected. Check it and try again.", comment: "Token creation error")
         case .invalidURL, .emptyAddress:
-            return "Please enter a valid site URL first."
+            return String(localized: "Please enter a valid site URL first.", comment: "Token creation error")
         case .siteNotFound:
-            return "Couldn't reach that site. Check the URL."
+            return String(localized: "Couldn't reach that site. Check the URL.", comment: "Token creation error")
         case .networkError:
-            return "Network error. Check your connection and try again."
+            return String(localized: "Network error. Check your connection and try again.", comment: "Token creation error")
         case .tokenRequired, .unknown:
-            return "Could not create a token. Please try again."
+            return String(localized: "Could not create a token. Please try again.", comment: "Token creation error")
         }
     }
 
@@ -351,9 +354,11 @@ class NightscoutSettingsViewModel: ObservableObject {
             tokenIsVerifiedSecret = false
             let authStatus: String
             if Storage.shared.nsAdminAuth.value {
-                authStatus = "Admin"
+                authStatus = String(localized: "Admin", comment: "Nightscout auth level")
             } else {
-                authStatus = "Read" + (Storage.shared.nsWriteAuth.value ? " & Write" : "")
+                authStatus = Storage.shared.nsWriteAuth.value
+                    ? String(localized: "Read & Write", comment: "Nightscout auth level")
+                    : String(localized: "Read", comment: "Nightscout auth level")
             }
 
             nightscoutStatus = String(localized: "OK (\(authStatus))")
@@ -386,7 +391,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         if isConnected { return .connected }
         // Token created and correct, just not accepted by the site yet.
         if provisionedTokenPending { return .pending }
-        if nightscoutStatus == "Checking..." { return .checking }
+        if nightscoutStatus == Self.checkingStatus { return .checking }
         // The site is reachable and simply needs a token — that's an expected
         // step, not an error, so it's shown positively rather than red.
         if addressNeedsToken { return .needsToken }
@@ -398,19 +403,19 @@ class NightscoutSettingsViewModel: ObservableObject {
     var friendlyStatus: String {
         switch statusKind {
         case .idle:
-            return "Enter your site address to connect."
+            return String(localized: "Enter your site address to connect.", comment: "Nightscout connection status")
         case .checking:
             return isConfirmingProvisionedToken
                 ? String(localized: "Finishing connection…")
                 : String(localized: "Checking your connection…")
         case .needsToken:
-            return "Site found — it needs a token."
+            return String(localized: "Site found — it needs a token.", comment: "Nightscout connection status")
         case .pending:
-            return "Token created. Your site can take a few minutes to start accepting it — you can continue."
+            return String(localized: "Token created. Your site can take a few minutes to start accepting it — you can continue.", comment: "Nightscout connection status")
         case .connected:
             if Storage.shared.nsAdminAuth.value { return "Connected — admin access" }
             if Storage.shared.nsWriteAuth.value { return "Connected — read & write" }
-            return "Connected — read-only"
+            return String(localized: "Connected — read-only", comment: "Nightscout connection status")
         case .error:
             return nightscoutStatus
         }

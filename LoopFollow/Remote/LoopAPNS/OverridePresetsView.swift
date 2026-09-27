@@ -523,11 +523,11 @@ enum OverrideError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .nightscoutNotConfigured:
-            return "Nightscout URL and token not configured in settings"
+            return String(localized: "Nightscout URL and token not configured in settings", comment: "Override preset error")
         case .invalidResponse:
-            return "Invalid response from server"
+            return String(localized: "Invalid response from server", comment: "Override preset error")
         case let .serverError(code):
-            return "Server error: \(code)"
+            return String(localized: "Server error: \(code, specifier: "%lld")", comment: "Override preset error; %lld = HTTP status")
         }
     }
 }

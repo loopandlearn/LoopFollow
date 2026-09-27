@@ -98,11 +98,25 @@ struct LocalizationDisplayNameTests {
     func minAgoFormatIsLocalized() throws {
         let path = try #require(Bundle.main.path(forResource: "tr", ofType: "lproj"))
         let tr = try #require(Bundle(path: path))
-        for key in ["%lld min", "LOW", "HIGH", "⚠️ Not Looping!", "Refreshing", "Loading...", "Setup Nightscout", "Setup Dexcom Share", "%llds left"] {
+        for key in ["%@ min ago", "%lld min", "LOW", "HIGH", "⚠️ Not Looping!", "Refreshing", "Loading...", "Setup Nightscout", "Setup Dexcom Share", "%llds left",
+                    "Number of hours before the %lld-day mark that the alert will fire.", "BG Check", "Sensor Start", "Update Available"]
+        {
             let v = tr.localizedString(forKey: key, value: "MISSING", table: nil)
             #expect(v != "MISSING", Comment(rawValue: "no Turkish for \(key)"))
         }
         let minAgo = String(format: tr.localizedString(forKey: "%lld min", value: nil, table: nil), 7)
         #expect(minAgo.contains("7"))
+        // The main screen shows a formatted duration such as "4:35", so its key takes a string argument.
+        let mainScreen = String(format: tr.localizedString(forKey: "%@ min ago", value: nil, table: nil), "4:35")
+        #expect(mainScreen.contains("4:35"))
+    }
+
+    @Test("Nightscout 'checking' state is detected in any language")
+    @MainActor
+    func nightscoutCheckingStateIsLanguageIndependent() {
+        let vm = NightscoutSettingsViewModel()
+        vm.nightscoutURL = "https://example.invalid"
+        vm.nightscoutStatus = String(localized: "Checking...")
+        #expect(vm.statusKind == .checking)
     }
 }

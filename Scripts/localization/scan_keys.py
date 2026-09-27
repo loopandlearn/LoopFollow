@@ -185,7 +185,14 @@ def main() -> int:
     catalog = json.loads(path.read_text(encoding="utf-8"))
     strings = catalog["strings"]
     keys, skipped = literal_keys(roots)
-    missing = sorted(k for k in keys if k not in strings)
+    spec = re.compile(r"%(?:\d+\$)?[-+0#]*\d*(?:\.\d+)?(?:ll|l|h)?[@dDiuUxXoOfeEgGcCsSpaAF]")
+    existing_shapes = {spec.sub("%?", k) for k in strings}
+    missing = []
+    for k in sorted(k for k in keys if k not in strings):
+        if "(interpolated from:" in keys[k] and spec.sub("%?", k) in existing_shapes:
+            print(f"skip (a key with the same text but other specifiers already exists; heuristic type guess?): {k!r}", file=sys.stderr)
+            continue
+        missing.append(k)
     for f, s in skipped:
         print(f"skip (interpolated, needs compiler extraction): {f}: {s}", file=sys.stderr)
     if check:

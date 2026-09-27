@@ -261,7 +261,7 @@ struct MealView: View {
                     }
 
                     if bolusAmount > 0 {
-                        message += String(format: "\nBolus: %.2f U", bolusAmount)
+                        message += "\n" + String(localized: "Bolus: \(bolusAmount, specifier: "%.2f") U")
                     }
 
                     return Alert(

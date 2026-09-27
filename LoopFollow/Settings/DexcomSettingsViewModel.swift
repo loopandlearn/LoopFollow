@@ -51,7 +51,7 @@ class DexcomSettingsViewModel: ObservableObject {
     // MARK: - Verification
 
     @Published var statusKind: ConnectionStatusKind = .idle
-    @Published var statusMessage: String = .init(localized: "Enter your username and password")
+    @Published var statusMessage = String(localized: "Enter your username and password")
 
     /// True when a real Dexcom Share login succeeded.
     @Published private(set) var isVerified: Bool = false

@@ -461,7 +461,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "Bolus", comment: "Chart pill"))\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         carbs = Self.spread((showCarbs ? vc.carbData : []).map {
@@ -475,7 +475,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
-                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "Carbs", comment: "Chart pill"))\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
         let smbPoints = (showBolus ? vc.smbData : []).map {
@@ -485,7 +485,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "SMB", comment: "Chart pill"))\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         (boluses, smbs) = Self.spreadTogether(bolusPoints, smbPoints, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
@@ -495,7 +495,7 @@ final class BGChartModel: ObservableObject {
                 value: Double($0.sgv),
                 sgv: Double($0.sgv),
                 label: "",
-                pillText: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "BG Check", comment: "Chart pill"))\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         suspends = (showOtherTreatments ? vc.suspendGraphData : []).map {
@@ -505,7 +505,7 @@ final class BGChartModel: ObservableObject {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "\(String(localized: "Resume", comment: "Pump resumed pill"))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         sensorStarts = (showOtherTreatments ? vc.sensorStartGraphData : []).map {
-            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
+            TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "\(String(localized: "Sensor Start", comment: "Chart pill"))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
         notes = (showOtherTreatments ? vc.noteGraphData : []).map {
             TreatmentPoint(
@@ -550,7 +550,7 @@ final class BGChartModel: ObservableObject {
                 yBottom: yBottom,
                 yTop: yTop,
                 label: displayName,
-                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "Override", comment: "Chart pill"))\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
         tempTargets = (showOtherTreatments ? vc.tempTargetGraphData : []).map {
@@ -564,7 +564,7 @@ final class BGChartModel: ObservableObject {
                 yBottom: yCenter - 5,
                 yTop: yCenter + 5,
                 label: "Temp Target",
-                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(String(localized: "Temp Target", comment: "Chart pill"))\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
 

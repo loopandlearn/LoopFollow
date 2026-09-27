@@ -188,11 +188,11 @@ struct AlarmsStepView: View {
             let perReading = Localizer.formatQuantity(delta)
 
             if window == 1 {
-                return "Warns when glucose falls by at least \(perReading) \(unit) between two readings."
+                return String(localized: "Warns when glucose falls by at least \(perReading) \(unit) between two readings.", comment: "Onboarding fast-drop explanation")
             }
             let total = Localizer.formatQuantity(delta * Double(window))
             let minutes = window * 5
-            return "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window) readings in a row — about \(total) \(unit) over roughly \(minutes) minutes."
+            return String(localized: "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window, specifier: "%lld") readings in a row — about \(total) \(unit) over roughly \(minutes) minutes.", comment: "Onboarding fast-drop explanation")
         default:
             return nil
         }

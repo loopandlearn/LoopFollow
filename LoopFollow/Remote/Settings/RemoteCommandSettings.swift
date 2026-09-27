@@ -161,7 +161,7 @@ struct RemoteCommandSettings: Codable {
 
         var shouldPromptForURL = false
         var shouldPromptForToken = false
-        var message = String(localized: "")
+        var message = ""
 
         // Check if current user has URL set
         let hasCurrentURL = !currentURL.isEmpty

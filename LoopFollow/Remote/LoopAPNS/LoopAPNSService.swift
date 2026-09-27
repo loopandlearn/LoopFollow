@@ -36,25 +36,25 @@ class LoopAPNSService {
         var errorDescription: String? {
             switch self {
             case .invalidConfiguration:
-                return "Loop APNS Configuration not valid"
+                return String(localized: "Loop APNS Configuration not valid", comment: "Loop APNS error")
             case .jwtError:
-                return "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID"
+                return String(localized: "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID", comment: "Loop APNS error")
             case .networkError:
-                return "Network error occurred"
+                return String(localized: "Network error occurred", comment: "Loop APNS error")
             case .invalidResponse:
-                return "Invalid response from server"
+                return String(localized: "Invalid response from server", comment: "Loop APNS error")
             case .noDeviceToken:
-                return "No device token found in profile"
+                return String(localized: "No device token found in profile", comment: "Loop APNS error")
             case .noBundleIdentifier:
-                return "No bundle identifier found in profile"
+                return String(localized: "No bundle identifier found in profile", comment: "Loop APNS error")
             case .unauthorized:
-                return "Unauthorized - check your API secret"
+                return String(localized: "Unauthorized - check your API secret", comment: "Loop APNS error")
             case .deviceTokenNotConfigured:
-                return "Device token not configured"
+                return String(localized: "Device token not configured", comment: "Loop APNS error")
             case .bundleIdentifierNotConfigured:
-                return "Bundle identifier not configured"
+                return String(localized: "Bundle identifier not configured", comment: "Loop APNS error")
             case .rateLimited:
-                return "Too many requests - please wait a few minutes before trying again"
+                return String(localized: "Too many requests - please wait a few minutes before trying again", comment: "Loop APNS error")
             }
         }
     }

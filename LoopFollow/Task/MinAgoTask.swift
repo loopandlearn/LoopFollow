@@ -39,7 +39,7 @@ extension MainViewController {
         }
 
         let formattedDuration = formatter.string(from: secondsAgo) ?? ""
-        let minAgoDisplayText = formattedDuration + " min ago"
+        let minAgoDisplayText = String(localized: "\(formattedDuration) min ago", comment: "Main screen: time since last reading, e.g. 4:35 min ago")
 
         // Update UI only if the display text has changed
         if minAgoDisplayText != Observable.shared.minAgoText.value {

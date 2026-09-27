@@ -79,6 +79,17 @@
         }
       }
     },
+    "%@ min ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dk önce"
+          }
+        }
+      }
+    },
     "%@ of %@ expected readings" : {
       "localizations" : {
         "en" : {
@@ -241,6 +252,17 @@
         }
       }
     },
+    "A network error occurred." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir ağ hatası oluştu."
+          }
+        }
+      }
+    },
     "A new version is available: %@. It is recommended to update." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -269,6 +291,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arka planda sessiz bir melodi çalarak uygulamayı etkin tutar. Başka uygulamalar tarafından kesilebilir. Sürekli güncelleme sağlar ama daha fazla pil tüketir."
+          }
+        }
+      }
+    },
+    "A token is required." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir belirteç gerekli."
           }
         }
       }
@@ -582,6 +615,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arka plan yenileme türünü ayarlayın."
+          }
+        }
+      }
+    },
+    "Admin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yönetici"
           }
         }
       }
@@ -1094,6 +1138,17 @@
         }
       }
     },
+    "An unknown error occurred." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmeyen bir hata oluştu."
+          }
+        }
+      }
+    },
     "App Expiration Warning" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1375,6 +1430,17 @@
         }
       }
     },
+    "BG Check" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Ölçümü"
+          }
+        }
+      }
+    },
     "BG Limit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1631,6 +1697,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus Artışı: %.3f U"
+          }
+        }
+      }
+    },
+    "Bolus: %.2f U" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bolus: %.2f U"
           }
         }
       }
@@ -2294,6 +2371,17 @@
         }
       }
     },
+    "Connected — read-only" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlı — salt okunur"
+          }
+        }
+      }
+    },
     "Connecting..." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2387,6 +2475,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Başka bir telefondan kopyalayın"
+          }
+        }
+      }
+    },
+    "Could not create a token. Please try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç oluşturulamadı. Lütfen yeniden deneyin."
+          }
+        }
+      }
+    },
+    "Couldn't reach that site. Check the URL." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siteye ulaşılamadı. URL'yi denetleyin."
           }
         }
       }
@@ -2510,6 +2620,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Özel"
+          }
+        }
+      }
+    },
+    "Custom Range" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel Aralık"
           }
         }
       }
@@ -3369,6 +3490,17 @@
         }
       }
     },
+    "Enter your site address to connect." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlanmak için site adresinizi girin."
+          }
+        }
+      }
+    },
     "Enter your username and password" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3396,17 +3528,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hata"
-          }
-        }
-      }
-    },
-    "Est A1C:" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tah. A1C:"
           }
         }
       }
@@ -3533,6 +3654,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Face ID kullanılamıyor. Lütfen Ayarlar'dan bir cihaz parolası ayarlayın."
+          }
+        }
+      }
+    },
+    "Failed generating JWT token, check APNS Key ID, APNS Key and Team ID" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JWT belirteci oluşturulamadı; APNS Anahtar Kimliği, APNS Anahtarı ve Ekip Kimliği'ni denetleyin"
           }
         }
       }
@@ -4775,6 +4907,17 @@
         }
       }
     },
+    "Invalid response from server" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucudan geçersiz yanıt"
+          }
+        }
+      }
+    },
     "Italian" : {
       "localizations" : {
         "tr" : {
@@ -5555,6 +5698,17 @@
         }
       }
     },
+    "Network error occurred" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ağ hatası oluştu"
+          }
+        }
+      }
+    },
     "Network error — check your connection" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5562,6 +5716,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ağ hatası — bağlantınızı denetleyin"
+          }
+        }
+      }
+    },
+    "Network error. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ağ hatası. Bağlantınızı denetleyip yeniden deneyin."
           }
         }
       }
@@ -5650,6 +5815,17 @@
         }
       }
     },
+    "Nightscout URL and token not configured in settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlarda Nightscout URL'si ve belirteci yapılandırılmamış"
+          }
+        }
+      }
+    },
     "Nightscout database filling up." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5713,12 +5889,34 @@
         }
       }
     },
+    "No bundle identifier found in profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilde paket kimliği bulunamadı"
+          }
+        }
+      }
+    },
     "No data available" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Veri yok"
+          }
+        }
+      }
+    },
+    "No device token found in profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilde cihaz belirteci bulunamadı"
           }
         }
       }
@@ -5891,6 +6089,18 @@
         }
       }
     },
+    "Number of hours before the %lld-day mark that the alert will fire." : {
+      "comment" : "Sensor age alarm editor footer; %lld = sensor lifetime in days",
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarının %lld günlük sınırdan kaç saat önce çalacağı."
+          }
+        }
+      }
+    },
     "Number of minutes since the last successful loop. When this time has elapsed, the alarm becomes eligible." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5951,7 +6161,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamam (%@)"
+            "value" : "Bağlı (%@)"
           }
         }
       }
@@ -6462,6 +6672,17 @@
         }
       }
     },
+    "Please enter a valid site URL first." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen önce geçerli bir site URL'si girin."
+          }
+        }
+      }
+    },
     "Please enter your Nightscout URL in Settings." : {
       "localizations" : {
         "tr" : {
@@ -6873,6 +7094,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yükseliş Hızı"
+          }
+        }
+      }
+    },
+    "Read" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okuma"
+          }
+        }
+      }
+    },
+    "Read & Write" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okuma ve Yazma"
           }
         }
       }
@@ -7674,6 +7917,17 @@
         }
       }
     },
+    "Sensor Start" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensör Başlangıcı"
+          }
+        }
+      }
+    },
     "Sensor change due." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7692,6 +7946,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sunucu"
+          }
+        }
+      }
+    },
+    "Server error: %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu hatası: %lld"
           }
         }
       }
@@ -7997,6 +8262,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Site URL'si"
+          }
+        }
+      }
+    },
+    "Site found — it needs a token." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site bulundu — bir belirteç gerekiyor."
           }
         }
       }
@@ -8737,12 +9013,45 @@
         }
       }
     },
+    "That API secret was rejected. Check it and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu API secret reddedildi. Denetleyip yeniden deneyin."
+          }
+        }
+      }
+    },
     "That's your API secret — create a read-only token" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu sizin API secret'ınız — salt okunur bir belirteç oluşturun"
+          }
+        }
+      }
+    },
+    "The URL is invalid." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL geçersiz."
+          }
+        }
+      }
+    },
+    "The address is empty." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres boş."
           }
         }
       }
@@ -8754,6 +9063,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Herhangi bir okuma bu değere eşit veya üstünde olduğunda uyarı devreye girebilir."
+          }
+        }
+      }
+    },
+    "The current version has a critical issue and should be updated as soon as possible." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut sürümde kritik bir sorun var ve en kısa sürede güncellenmelidir."
           }
         }
       }
@@ -8834,12 +9154,56 @@
         }
       }
     },
+    "The site was not found." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site bulunamadı."
+          }
+        }
+      }
+    },
+    "The token is invalid." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç geçersiz."
+          }
+        }
+      }
+    },
     "The top 4 items appear in the tab bar. The Menu can always open every feature." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "İlk 4 öğe sekme çubuğunda görünür. Menü her zaman tüm özellikleri açabilir."
+          }
+        }
+      }
+    },
+    "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değer, sarı düzeye eşit veya üstündeyken sarı, kırmızı düzeye eşit veya üstündeyken kırmızı olur. Aralıktayken yeşil görünür. Yalnızca görsel bir ipucudur — asla alarm tetiklemez."
+          }
+        }
+      }
+    },
+    "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değer, sarı düzeye eşit veya altındayken sarı, kırmızı düzeye eşit veya altındayken kırmızı olur. Aralıktayken yeşil görünür. Yalnızca görsel bir ipucudur — asla alarm tetiklemez."
           }
         }
       }
@@ -9156,13 +9520,35 @@
         }
       }
     },
+    "Time in Range" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef Aralıkta Süre"
+          }
+        }
+      }
+    },
+    "Time in Tight Range" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar Hedef Aralıkta Süre"
+          }
+        }
+      }
+    },
     "Time must be within the next %lld hour" : {
       "extractionState" : "manual",
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saat gelecek %lld saat içinde olmalı"
+            "value" : "Zaman en fazla %lld saat ileride olmalı"
           }
         }
       }
@@ -9173,7 +9559,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saat geçmiş %lld saat içinde olmalı"
+            "value" : "Zaman son %lld saat içinde olmalı"
           }
         }
       }
@@ -9220,12 +9606,34 @@
         }
       }
     },
+    "Token created. Your site can take a few minutes to start accepting it — you can continue." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç oluşturuldu. Sitenizin kabul etmeye başlaması birkaç dakika sürebilir — devam edebilirsiniz."
+          }
+        }
+      }
+    },
     "Tone" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ton"
+          }
+        }
+      }
+    },
+    "Too many requests - please wait a few minutes before trying again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok fazla istek - yeniden denemeden önce lütfen birkaç dakika bekleyin"
           }
         }
       }
@@ -9401,6 +9809,17 @@
         }
       }
     },
+    "Unauthorized - check your API secret" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yetkisiz - API secret'ınızı denetleyin"
+          }
+        }
+      }
+    },
     "Unexpected status code: %lld. %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9484,6 +9903,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şu zamana kadar"
+          }
+        }
+      }
+    },
+    "Update Available" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleme Var"
           }
         }
       }
@@ -9694,6 +10124,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uyarı Süresi"
+          }
+        }
+      }
+    },
+    "Warns when glucose falls by at least %@ %@ between two readings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoz iki okuma arasında en az %1$@ %2$@ düştüğünde uyarır."
+          }
+        }
+      }
+    },
+    "Warns when glucose falls by at least %@ %@ on each of %lld readings in a row — about %@ %@ over roughly %lld minutes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoz art arda %3$lld okumanın her birinde en az %1$@ %2$@ düştüğünde uyarır — yaklaşık %6$lld dakikada toplam %4$@ %5$@."
           }
         }
       }

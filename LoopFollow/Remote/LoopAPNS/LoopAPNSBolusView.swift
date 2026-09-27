@@ -10,7 +10,7 @@ struct LoopAPNSBolusView: View {
     @State private var insulinAmount = HKQuantity(unit: .internationalUnit(), doubleValue: 0.0)
     @State private var isLoading = false
     @State private var showAlert = false
-    @State private var alertMessage = String(localized: "")
+    @State private var alertMessage = ""
     @State private var alertType: AlertType = .success
 
     @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
@@ -166,7 +166,7 @@ struct LoopAPNSBolusView: View {
                                         .padding(.horizontal, 8)
                                         .background(Color.green.opacity(0.1))
                                         .cornerRadius(4)
-                                    Text("(\(otpTimeRemaining.map { String(localized: "\($0)s left", comment: "OTP seconds remaining") } ?? "-"))")
+                                    Text(verbatim: "(\(otpTimeRemaining.map { String(localized: "\($0)s left", comment: "OTP seconds remaining") } ?? "-"))")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
