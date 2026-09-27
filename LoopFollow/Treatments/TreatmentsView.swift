@@ -1226,7 +1226,7 @@ class TreatmentsViewModel: ObservableObject {
                             type: .bolusAutomatic,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
-                            subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
+                            subtitle: isSMB || isTrioSMBType ? String(localized: "SMB") : String(localized: "Automatic Bolus"),
                             icon: "arrowtriangle.down.fill",
                             color: .blue,
                             bgValue: actualBG

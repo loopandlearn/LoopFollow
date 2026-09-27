@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Add SwiftUI/Foundation string-literal keys from the source tree to a String Catalog.
 
-Usage: scan_keys.py <Localizable.xcstrings> [--check] [--roots LoopFollow Shared ...]
+Usage: scan_keys.py <Localizable.xcstrings> [--check] [--interpolations] [--roots LoopFollow Shared ...]
 Reads Scripts/localization/localized_apis.txt: for every listed API, the first "…" literal
 argument of `Api(` or `.api(` is a catalog key. Interpolated literals ("\\(") are skipped
-with a warning (the compiler emits those with printf specifiers; add them from an
--exportLocalizations run). Keys added here carry extractionState "manual". With --check,
+with a warning unless --interpolations is given, which converts them to printf-style keys
+heuristically (%lld for integral-looking expressions, the explicit specifier: when present,
+%@ otherwise) — review those keys before translating. Keys added here carry extractionState "manual". With --check,
 nothing is written and the exit code is 1 when keys are missing.
 """
 import json
@@ -14,6 +15,7 @@ import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
+INTERPOLATIONS = False
 API_LIST = HERE / "localized_apis.txt"
 
 
@@ -53,6 +55,19 @@ def call_literals(src, open_paren):
                 if src[j] == "\\":
                     if j + 1 < n and src[j + 1] == "(":
                         interpolated = True
+                        # skip the whole \(…) expression, including nested parens and quotes
+                        depth, j = 1, j + 2
+                        while j < n and depth:
+                            if src[j] == '"':
+                                j += 1
+                                while j < n and src[j] != '"':
+                                    j += 2 if src[j] == "\\" else 1
+                            elif src[j] == "(":
+                                depth += 1
+                            elif src[j] == ")":
+                                depth -= 1
+                            j += 1
+                        continue
                     j += 2
                     continue
                 j += 1
@@ -75,6 +90,10 @@ def call_literals(src, open_paren):
         elif c == "," and depth_paren == 0 and depth_bracket == 0:
             label = None
             expect_value = True
+        elif c == "?" and depth_paren == 0 and depth_bracket == 0:
+            expect_value = True  # ternary then-branch
+        elif c == ":" and depth_paren == 0 and depth_bracket == 0 and not expect_value:
+            expect_value = True  # ternary else-branch
         elif c == ":" and depth_paren == 0 and depth_bracket == 0 and expect_value:
             m = re.search(r"(\w+)\s*$", src[max(0, i - 40):i])
             label = m.group(1) if m else None
@@ -84,6 +103,40 @@ def call_literals(src, open_paren):
             if not m:
                 expect_value = False
         i += 1
+
+
+INT_HINTS = re.compile(r"^(?:Int\(|UInt\(|(?:[\w.]*\.)?\w*(?:count|Count|hours|Hours|minutes|Minutes|mins|days|Days|seconds|index|Index|statusCode|percent|Percent)\w*$)")
+
+
+def interpolation_key(lit):
+    """Turn `a \\(x) b` into the printf-style key the compiler would emit: `%lld` for expressions
+    that look integral, the explicit `specifier:` when given, `%@` otherwise. Heuristic — review."""
+    out, i, n = [], 0, len(lit)
+    while i < n:
+        if lit.startswith("\\(", i):
+            depth, j = 1, i + 2
+            while j < n and depth:
+                if lit[j] == "(":
+                    depth += 1
+                elif lit[j] == ")":
+                    depth -= 1
+                j += 1
+            expr = lit[i + 2:j - 1].strip()
+            m = re.search(r'specifier:\s*"([^"]+)"', expr)
+            if m:
+                out.append(m.group(1))
+            elif INT_HINTS.search(expr):
+                out.append("%lld")
+            else:
+                out.append("%@")
+            i = j
+        elif lit[i] == "%":
+            out.append("%%")  # a literal percent sign must be escaped in a printf-style key
+            i += 1
+        else:
+            out.append(lit[i])
+            i += 1
+    return "".join(out)
 
 
 def literal_keys(roots):
@@ -105,6 +158,8 @@ def literal_keys(roots):
                         continue
                     if interpolated:
                         skipped.append((f.name, lit))
+                        if INTERPOLATIONS and required == "localized":
+                            keys.setdefault(interpolation_key(lit).replace('\\"', '"').replace("\\n", "\n"), f"{f.name} (interpolated from: {lit})")
                         continue
                     keys.setdefault(lit.replace('\\"', '"').replace("\\n", "\n"), f.name)
             # "…" + x concatenation is never looked up: drop any key that only appears before a "+"
@@ -124,6 +179,8 @@ def main() -> int:
         return 2
     path = pathlib.Path(args[0])
     check = "--check" in args
+    global INTERPOLATIONS
+    INTERPOLATIONS = "--interpolations" in args
     roots = args[args.index("--roots") + 1:] if "--roots" in args else ["LoopFollow"]
     catalog = json.loads(path.read_text(encoding="utf-8"))
     strings = catalog["strings"]

@@ -18,7 +18,7 @@ struct LoopAPNSCarbsView: View {
     @State private var showAbsorptionPickerSheet = false
     @State private var isLoading = false
     @State private var showAlert = false
-    @State private var alertMessage = ""
+    @State private var alertMessage = String(localized: "")
     @State private var alertType: AlertType = .success
     @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
@@ -405,7 +405,7 @@ struct LoopAPNSCarbsView: View {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
                 if !apnsService.validateSetup() {
-                    alertMessage = "Loop APNS setup is incomplete. Please configure all required fields in settings."
+                    alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
                     alertType = .error
                     showAlert = true
                 }
@@ -486,7 +486,7 @@ struct LoopAPNSCarbsView: View {
 
     private func sendCarbs() {
         guard carbsAmount.doubleValue(for: .gram()) > 0 else {
-            alertMessage = "Please enter a valid carb amount"
+            alertMessage = String(localized: "Please enter a valid carb amount")
             alertType = .error
             showAlert = true
             return
@@ -497,7 +497,7 @@ struct LoopAPNSCarbsView: View {
         let carbsValue = carbsAmount.doubleValue(for: .gram())
 
         if carbsValue > maxCarbs {
-            alertMessage = "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount."
+            alertMessage = String(localized: "Carbs amount (\(Int(carbsValue))g) exceeds the maximum allowed (\(Int(maxCarbs))g). Please reduce the amount.")
             alertType = .error
             showAlert = true
             return
@@ -509,14 +509,14 @@ struct LoopAPNSCarbsView: View {
         let latestAcceptedDate = now.addingTimeInterval(60 * 60 * Double(maxFutureHours))
 
         if consumedDate < oldestAcceptedDate {
-            alertMessage = "Time must be within the prior \(maxPastHours) hours"
+            alertMessage = String(localized: "Time must be within the prior \(maxPastHours) hours")
             alertType = .error
             showAlert = true
             return
         }
 
         if consumedDate > latestAcceptedDate {
-            alertMessage = "Time must be within the next \(maxFutureHours) hour"
+            alertMessage = String(localized: "Time must be within the next \(maxFutureHours) hour")
             alertType = .error
             showAlert = true
             return
@@ -531,7 +531,7 @@ struct LoopAPNSCarbsView: View {
 
         // Extract OTP from QR code URL
         guard let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) else {
-            alertMessage = "Invalid QR code URL. Please re-scan the QR code in settings."
+            alertMessage = String(localized: "Invalid QR code URL. Please re-scan the QR code in settings.")
             alertType = .error
             isLoading = false
             showAlert = true

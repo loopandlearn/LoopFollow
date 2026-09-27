@@ -33,7 +33,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var nightscoutStatus: String = "Checking..."
+    @Published var nightscoutStatus: String = .init(localized: "Checking...")
 
     /// The most recent verification error, kept so the onboarding address page can
     /// tell "reachable Nightscout that needs a token" apart from "can't reach it".
@@ -70,7 +70,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var webSocketStatus: String = "Disconnected"
+    @Published var webSocketStatus: String = .init(localized: "Disconnected")
 
     var webSocketStatusColor: Color {
         switch NightscoutSocketManager.shared.connectionState {
@@ -130,7 +130,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         // "this is your API secret" verdict.
         provisionedTokenPending = false
         tokenIsVerifiedSecret = false
-        nightscoutStatus = "Checking..."
+        nightscoutStatus = String(localized: "Checking...")
 
         checkStatusWorkItem = DispatchWorkItem {
             self.checkStatusSubject.send()
@@ -196,7 +196,7 @@ class NightscoutSettingsViewModel: ObservableObject {
         isConfirmingProvisionedToken = true
         provisionedTokenPending = false
         isConnected = false
-        nightscoutStatus = "Finishing connection…"
+        nightscoutStatus = String(localized: "Finishing connection…")
         nightscoutToken = token
         verifyProvisionedTokenLoop(attempt: 0)
     }
@@ -213,7 +213,7 @@ class NightscoutSettingsViewModel: ObservableObject {
                     Storage.shared.nsAdminAuth.value = nsAdminAuth
                     self.updateStatusLabel(error: nil)
                 } else if attempt + 1 < maxAttempts {
-                    self.nightscoutStatus = "Finishing connection…"
+                    self.nightscoutStatus = String(localized: "Finishing connection…")
                     let delay = min(0.5 + Double(attempt) * 0.25, 2.0)
                     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                         self.verifyProvisionedTokenLoop(attempt: attempt + 1)
@@ -321,19 +321,19 @@ class NightscoutSettingsViewModel: ObservableObject {
             isConnected = false
             switch error {
             case .invalidURL:
-                nightscoutStatus = "Invalid URL"
+                nightscoutStatus = String(localized: "Invalid URL")
             case .networkError:
-                nightscoutStatus = "Network Error"
+                nightscoutStatus = String(localized: "Network Error")
             case .invalidToken:
-                nightscoutStatus = "Invalid Token"
+                nightscoutStatus = String(localized: "Invalid Token")
             case .tokenRequired:
-                nightscoutStatus = "Token Required"
+                nightscoutStatus = String(localized: "Token Required")
             case .siteNotFound:
-                nightscoutStatus = "Site Not Found"
+                nightscoutStatus = String(localized: "Site Not Found")
             case .unknown:
-                nightscoutStatus = "Unknown Error"
+                nightscoutStatus = String(localized: "Unknown Error")
             case .emptyAddress:
-                nightscoutStatus = "Address Empty"
+                nightscoutStatus = String(localized: "Address Empty")
             }
             NightscoutSocketManager.shared.disconnect()
 
@@ -356,7 +356,7 @@ class NightscoutSettingsViewModel: ObservableObject {
                 authStatus = "Read" + (Storage.shared.nsWriteAuth.value ? " & Write" : "")
             }
 
-            nightscoutStatus = "OK (\(authStatus))"
+            nightscoutStatus = String(localized: "OK (\(authStatus))")
 
             if nightscoutURL != initialURL || nightscoutToken != initialToken {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)
@@ -400,7 +400,9 @@ class NightscoutSettingsViewModel: ObservableObject {
         case .idle:
             return "Enter your site address to connect."
         case .checking:
-            return isConfirmingProvisionedToken ? "Finishing connection…" : "Checking your connection…"
+            return isConfirmingProvisionedToken
+                ? String(localized: "Finishing connection…")
+                : String(localized: "Checking your connection…")
         case .needsToken:
             return "Site found — it needs a token."
         case .pending:
@@ -426,11 +428,11 @@ class NightscoutSettingsViewModel: ObservableObject {
 
     private func updateWebSocketStatus() {
         switch NightscoutSocketManager.shared.connectionState {
-        case .disconnected: webSocketStatus = "Disconnected"
-        case .connecting: webSocketStatus = "Connecting..."
-        case .connected: webSocketStatus = "Connected"
-        case .authenticated: webSocketStatus = "Connected"
-        case .error: webSocketStatus = "Error"
+        case .disconnected: webSocketStatus = String(localized: "Disconnected")
+        case .connecting: webSocketStatus = String(localized: "Connecting...")
+        case .connected: webSocketStatus = String(localized: "Connected")
+        case .authenticated: webSocketStatus = String(localized: "Connected")
+        case .error: webSocketStatus = String(localized: "Error")
         }
     }
 }

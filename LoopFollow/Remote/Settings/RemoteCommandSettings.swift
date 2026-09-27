@@ -161,7 +161,7 @@ struct RemoteCommandSettings: Codable {
 
         var shouldPromptForURL = false
         var shouldPromptForToken = false
-        var message = ""
+        var message = String(localized: "")
 
         // Check if current user has URL set
         let hasCurrentURL = !currentURL.isEmpty
@@ -174,32 +174,32 @@ struct RemoteCommandSettings: Codable {
         // If current user doesn't have URL but scanned settings do, prompt to set it
         if !hasCurrentURL, hasScannedURL {
             shouldPromptForURL = true
-            message = "The scanned settings include a Nightscout URL. Would you like to set this as your Nightscout address?"
+            message = String(localized: "The scanned settings include a Nightscout URL. Would you like to set this as your Nightscout address?")
         }
 
         // If current user doesn't have token but scanned settings do, prompt to set it
         if !hasCurrentToken, hasScannedToken {
             shouldPromptForToken = true
             if !message.isEmpty {
-                message += "\n\nThe scanned settings also include a token. Would you like to set this as your access token?"
+                message += "\n\n" + String(localized: "The scanned settings also include a token. Would you like to set this as your access token?")
             } else {
-                message = "The scanned settings include a token. Would you like to set this as your access token?"
+                message = String(localized: "The scanned settings include a token. Would you like to set this as your access token?")
             }
         }
 
         // If both have URLs but they don't match, show warning
         if hasCurrentURL, hasScannedURL, currentURL != url {
             shouldPromptForURL = true
-            message = "The scanned Nightscout URL (\(url)) doesn't match your current Nightscout address (\(currentURL)). Would you like to change your Nightscout address to match the scanned settings?"
+            message = String(localized: "The scanned Nightscout URL (\(url)) doesn't match your current Nightscout address (\(currentURL)). Would you like to change your Nightscout address to match the scanned settings?")
         }
 
         // If both have tokens but they don't match, show warning
         if hasCurrentToken, hasScannedToken, currentToken != token {
             shouldPromptForToken = true
             if !message.isEmpty {
-                message += "\n\nThe scanned token doesn't match your current access token. Would you like to update your token?"
+                message += "\n\n" + String(localized: "The scanned token doesn't match your current access token. Would you like to update your token?")
             } else {
-                message = "The scanned token doesn't match your current access token. Would you like to update your token?"
+                message = String(localized: "The scanned token doesn't match your current access token. Would you like to update your token?")
             }
         }
 

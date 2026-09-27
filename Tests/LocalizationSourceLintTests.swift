@@ -91,6 +91,32 @@ struct LocalizationSourceLintTests {
         #expect(missing.isEmpty, Comment(rawValue: "Run Scripts/localization/scan_keys.py and translate:\n" + missing.sorted().joined(separator: "\n")))
     }
 
+    /// `cond ? "A" : "B"` assigned to a variable, returned, or passed to a String parameter never
+    /// reaches the catalog. (Inside Text/Button and LocalizedStringKey parameters the literals are
+    /// keys and are fine; those positions are not matched here.)
+    @Test("no user-facing ternary picks between raw string literals")
+    func noRawTernaryStrings() throws {
+        // "=" means assignment here, not "==", "!=", "<=" or ">=".
+        let pattern = #"((?<![=!<>])=(?!=)|return|title:|subtitle:|message:|actionTitle:|accessibilityLabel\()\s*[^\n?"]+\?\s*"[A-Z][^"]*"\s*:\s*"[A-Z][^"]*""#
+        let regex = try NSRegularExpression(pattern: pattern)
+        let allowed: Set<String> = ["Alarm.swift"] // notification action titles: PR 3
+        var hits: [String] = []
+        for file in try Self.swiftFiles() where !allowed.contains(file.lastPathComponent) {
+            let source = try String(contentsOf: file, encoding: .utf8)
+            for m in regex.matches(in: source, range: NSRange(source.startIndex..., in: source)) {
+                guard let r = Range(m.range, in: source) else { continue }
+                let lineStart = source[..<r.lowerBound].lastIndex(of: "\n").map { source.index(after: $0) } ?? source.startIndex
+                let lineEnd = source[r.upperBound...].firstIndex(of: "\n") ?? source.endIndex
+                let text = source[lineStart ..< lineEnd]
+                // A ternary feeding a LocalizedStringKey is looked up per branch and is fine.
+                if text.contains("LocalizedStringKey") { continue }
+                let line = source[..<r.lowerBound].filter { $0 == "\n" }.count + 1
+                hits.append("\(file.lastPathComponent):\(line)")
+            }
+        }
+        #expect(hits.isEmpty, Comment(rawValue: "Wrap both branches in String(localized:):\n" + hits.joined(separator: "\n")))
+    }
+
     /// Direct string-literal arguments of the call whose "(" sits at `open` (index into `chars`).
     /// Mirrors call_literals() in scan_keys.py. A literal followed by "+" is String concatenation.
     private static func callLiterals(_ chars: [Character], open: Int) -> [(String?, String, Bool)] {
@@ -106,7 +132,20 @@ struct LocalizationSourceLintTests {
                 var interpolated = false
                 while j < chars.count, chars[j] != "\"" {
                     if chars[j] == "\\" {
-                        if j + 1 < chars.count, chars[j + 1] == "(" { interpolated = true }
+                        if j + 1 < chars.count, chars[j + 1] == "(" {
+                            interpolated = true
+                            // Skip the whole \(…) expression, including nested parens and quotes.
+                            var depth = 1
+                            j += 2
+                            while j < chars.count, depth > 0 {
+                                if chars[j] == "\"" {
+                                    j += 1
+                                    while j < chars.count, chars[j] != "\"" { j += chars[j] == "\\" ? 2 : 1 }
+                                } else if chars[j] == "(" { depth += 1 } else if chars[j] == ")" { depth -= 1 }
+                                j += 1
+                            }
+                            continue
+                        }
                         j += 2
                         continue
                     }
@@ -132,8 +171,11 @@ struct LocalizationSourceLintTests {
             case "]": depthBracket -= 1
             case ",":
                 if depthParen == 0, depthBracket == 0 { label = nil; expectValue = true }
+            case "?":
+                if depthParen == 0, depthBracket == 0 { expectValue = true } // ternary then-branch
             case ":":
-                if depthParen == 0, depthBracket == 0, expectValue {
+                if depthParen == 0, depthBracket == 0, !expectValue { expectValue = true } // ternary else-branch
+                else if depthParen == 0, depthBracket == 0, expectValue {
                     var j = i - 1
                     while j >= 0, chars[j] == " " || chars[j] == "\n" { j -= 1 }
                     var name = ""

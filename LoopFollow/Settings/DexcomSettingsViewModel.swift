@@ -51,7 +51,7 @@ class DexcomSettingsViewModel: ObservableObject {
     // MARK: - Verification
 
     @Published var statusKind: ConnectionStatusKind = .idle
-    @Published var statusMessage: String = "Enter your username and password"
+    @Published var statusMessage: String = .init(localized: "Enter your username and password")
 
     /// True when a real Dexcom Share login succeeded.
     @Published private(set) var isVerified: Bool = false
@@ -88,11 +88,11 @@ class DexcomSettingsViewModel: ObservableObject {
         isVerified = false
         if hasCredentials {
             statusKind = .checking
-            statusMessage = "Checking your account…"
+            statusMessage = String(localized: "Checking your account…")
             verifySubject.send()
         } else {
             statusKind = .idle
-            statusMessage = "Enter your username and password"
+            statusMessage = String(localized: "Enter your username and password")
         }
     }
 
@@ -113,25 +113,25 @@ class DexcomSettingsViewModel: ObservableObject {
                     switch error {
                     case .loginError:
                         self.statusKind = .error
-                        self.statusMessage = "Username or password not accepted"
+                        self.statusMessage = String(localized: "Username or password not accepted")
                         self.isVerified = false
                         self.loginRejected = true
                     case .httpError:
                         self.statusKind = .error
-                        self.statusMessage = "Network error — check your connection"
+                        self.statusMessage = String(localized: "Network error — check your connection")
                         self.isVerified = false
                         self.loginRejected = false
                     default:
                         // Login succeeded but there's no recent reading yet; the
                         // credentials are valid, which is all we're confirming.
                         self.statusKind = .connected
-                        self.statusMessage = "Connected"
+                        self.statusMessage = String(localized: "Connected")
                         self.isVerified = true
                         self.loginRejected = false
                     }
                 } else {
                     self.statusKind = .connected
-                    self.statusMessage = "Connected"
+                    self.statusMessage = String(localized: "Connected")
                     self.isVerified = true
                     self.loginRejected = false
                 }

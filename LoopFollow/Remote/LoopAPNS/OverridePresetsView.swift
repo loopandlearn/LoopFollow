@@ -384,7 +384,7 @@ class OverridePresetsViewModel: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.statusMessage = "Failed to load override presets: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to load override presets: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
                 self.isLoading = false
@@ -401,14 +401,14 @@ class OverridePresetsViewModel: ObservableObject {
             try await sendOverrideNotification(preset: preset, duration: duration)
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "\(preset.name) override activated successfully."
+                self.statusMessage = String(localized: "\(preset.name) override activated successfully.")
                 self.alertType = .statusSuccess
                 self.showAlert = true
             }
         } catch {
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Failed to activate override: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to activate override: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
             }
@@ -424,14 +424,14 @@ class OverridePresetsViewModel: ObservableObject {
             try await sendCancelOverrideNotification()
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Active override cancelled successfully."
+                self.statusMessage = String(localized: "Active override cancelled successfully.")
                 self.alertType = .statusSuccess
                 self.showAlert = true
             }
         } catch {
             await MainActor.run {
                 self.isActivating = false
-                self.statusMessage = "Failed to cancel override: \(error.localizedDescription)"
+                self.statusMessage = String(localized: "Failed to cancel override: \(error.localizedDescription)")
                 self.alertType = .statusFailure
                 self.showAlert = true
             }

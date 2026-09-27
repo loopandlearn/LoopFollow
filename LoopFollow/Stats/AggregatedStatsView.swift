@@ -313,6 +313,9 @@ struct InsulinTotalsCard: View {
 }
 
 struct StatsGridView: View {
+    private var a1cTitle: LocalizedStringKey { showGMI ? "GMI" : "Est. A1C" }
+    private var variabilityTitle: LocalizedStringKey { showStdDev ? "Std Deviation" : "CV" }
+
     @ObservedObject var simpleStats: SimpleStatsViewModel
     @Binding var showGMI: Bool
     @Binding var showStdDev: Bool
@@ -333,7 +336,7 @@ struct StatsGridView: View {
                     showGMI.toggle()
                 }) {
                     StatCard(
-                        title: showGMI ? "GMI" : "Est. A1C",
+                        title: a1cTitle,
                         value: showGMI ? formatGMI(simpleStats.avgGlucose) : formatEhbA1c(simpleStats.avgGlucose),
                         unit: UnitSettingsStore.shared.glycemicOutputUnit.rawValue,
                         color: .blue,
@@ -353,7 +356,7 @@ struct StatsGridView: View {
                     showStdDev.toggle()
                 }) {
                     StatCard(
-                        title: showStdDev ? "Std Deviation" : "CV",
+                        title: variabilityTitle,
                         value: showStdDev ? formatStdDev(simpleStats.stdDeviation) : formatCV(simpleStats.coefficientOfVariation),
                         unit: showStdDev ? UnitSettingsStore.shared.glucoseUnit.rawValue : "%",
                         color: .orange,

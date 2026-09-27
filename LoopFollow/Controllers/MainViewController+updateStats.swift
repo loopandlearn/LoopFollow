@@ -25,7 +25,9 @@ extension MainViewController {
             statsDisplayModel.highPercent = String(format: "%.1f%%", stats.percentHigh)
             statsDisplayModel.avgBG = Localizer.toDisplayUnits(String(format: "%.0f", stats.avgBG))
 
-            statsDisplayModel.estA1CTitle = UnitSettingsStore.shared.glycemicMetricMode == .gmi ? "GMI:" : "Est. A1C:"
+            statsDisplayModel.estA1CTitle = UnitSettingsStore.shared.glycemicMetricMode == .gmi
+                ? String(localized: "GMI:")
+                : String(localized: "Est. A1C:")
             if UnitSettingsStore.shared.glycemicOutputUnit == .mmolMol {
                 statsDisplayModel.estA1C = String(format: "%.0f", stats.a1C)
             } else {

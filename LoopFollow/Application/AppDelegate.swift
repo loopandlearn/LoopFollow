@@ -242,7 +242,9 @@ final class AppSceneDelegate: NSObject, UIWindowSceneDelegate {
             return false
         }
         Storage.shared.speakBG.value.toggle()
-        let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
+        let message = Storage.shared.speakBG.value
+            ? String(localized: "BG Speak is now on")
+            : String(localized: "BG Speak is now off")
         speechSynthesizer.speak(AVSpeechUtterance(string: message))
         return true
     }

@@ -95,6 +95,17 @@
         }
       }
     },
+    "%@ override activated successfully." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ override'ı başarıyla etkinleştirildi."
+          }
+        }
+      }
+    },
     "%@ sec" : {
       "localizations" : {
         "tr" : {
@@ -340,6 +351,17 @@
         }
       }
     },
+    "Acknowledge" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onayla"
+          }
+        }
+      }
+    },
     "Activate Override" : {
       "localizations" : {
         "tr" : {
@@ -391,6 +413,17 @@
         }
       }
     },
+    "Active override cancelled successfully." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin override başarıyla iptal edildi."
+          }
+        }
+      }
+    },
     "Add Alarm" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -438,6 +471,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ek Bilgiler"
+          }
+        }
+      }
+    },
+    "Address Empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres Boş"
           }
         }
       }
@@ -938,6 +982,17 @@
         }
       }
     },
+    "An error occurred." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir hata oluştu."
+          }
+        }
+      }
+    },
     "App Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1000,6 +1055,28 @@
         }
       }
     },
+    "Are you sure you want to send the meal data for %@?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için öğün verilerini göndermek istediğinizden emin misiniz?"
+          }
+        }
+      }
+    },
+    "Are you sure you want to send the meal data now?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğün verilerini şimdi göndermek istediğinizden emin misiniz?"
+          }
+        }
+      }
+    },
     "Arrange your tabs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1044,6 +1121,28 @@
         }
       }
     },
+    "Authentication error. Check your certificate or authentication token. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kimlik doğrulama hatası. Sertifikanızı veya kimlik doğrulama belirtecinizi denetleyin. %@"
+          }
+        }
+      }
+    },
+    "Authentication failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kimlik doğrulama başarısız"
+          }
+        }
+      }
+    },
     "Auto-Snooze CGM Start" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1062,6 +1161,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Otomatik"
+          }
+        }
+      }
+    },
+    "Automatic Bolus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik Bolus"
           }
         }
       }
@@ -1164,6 +1274,28 @@
         }
       }
     },
+    "BG Speak is now off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Seslendirme kapatıldı"
+          }
+        }
+      }
+    },
+    "BG Speak is now on" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KŞ Seslendirme açıldı"
+          }
+        }
+      }
+    },
     "BG Update Delay" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1225,6 +1357,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arka Plan Yenileme Türü"
+          }
+        }
+      }
+    },
+    "Bad request. The request was invalid or malformed. %@\n\n%@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatalı istek. İstek geçersiz veya bozuk. %1$@\n\n%2$@"
           }
         }
       }
@@ -1444,6 +1587,17 @@
         }
       }
     },
+    "Bundle identifier not configured" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paket kimliği yapılandırılmamış"
+          }
+        }
+      }
+    },
     "CAGE" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1643,6 +1797,17 @@
         }
       }
     },
+    "Carbs amount (%lldg) exceeds the maximum allowed (%lldg). Please reduce the amount." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat miktarı (%1$lldg) izin verilen en yüksek değeri (%2$lldg) aşıyor. Lütfen miktarı azaltın."
+          }
+        }
+      }
+    },
     "Carbs today" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1676,6 +1841,17 @@
         }
       }
     },
+    "Carbs: %.0f g" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbonhidrat: %.0f g"
+          }
+        }
+      }
+    },
     "Category" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1704,6 +1880,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nightscout profil geçmişi denetleniyor…"
+          }
+        }
+      }
+    },
+    "Checking your account…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hesabınız denetleniyor…"
+          }
+        }
+      }
+    },
+    "Checking your connection…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantınız denetleniyor…"
+          }
+        }
+      }
+    },
+    "Checking..." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denetleniyor..."
           }
         }
       }
@@ -1949,6 +2158,17 @@
         }
       }
     },
+    "Connecting..." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlanıyor..."
+          }
+        }
+      }
+    },
     "Consecutive Drops" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2083,6 +2303,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salt okunur belirteç oluşturuluyor…"
+          }
+        }
+      }
+    },
+    "Credential validation failed: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kimlik bilgisi doğrulaması başarısız: %@"
           }
         }
       }
@@ -2422,6 +2653,28 @@
         }
       }
     },
+    "Device authentication is not available. " : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz kimlik doğrulaması kullanılamıyor. "
+          }
+        }
+      }
+    },
+    "Device token not configured" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz belirteci yapılandırılmamış"
+          }
+        }
+      }
+    },
     "Device tokens are alternating in recent profile uploads (%@ tokens involved across %@ records). This usually means more than one app installation is uploading to the same Nightscout. Remove the app from spare or unused phones." : {
       "localizations" : {
         "en" : {
@@ -2496,6 +2749,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağlantıyı Kes"
+          }
+        }
+      }
+    },
+    "Disconnected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantı yok"
           }
         }
       }
@@ -2969,6 +3233,17 @@
         }
       }
     },
+    "Enter your username and password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı adınızı ve parolanızı girin"
+          }
+        }
+      }
+    },
     "Environment" : {
       "localizations" : {
         "tr" : {
@@ -2985,6 +3260,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hata"
+          }
+        }
+      }
+    },
+    "Est A1C:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tah. A1C:"
+          }
+        }
+      }
+    },
+    "Est. A1C:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tah. A1C:"
           }
         }
       }
@@ -3093,12 +3390,144 @@
         }
       }
     },
+    "Face ID is not available. Please set up a device passcode in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID kullanılamıyor. Lütfen Ayarlar'dan bir cihaz parolası ayarlayın."
+          }
+        }
+      }
+    },
+    "Failed to activate override: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override etkinleştirilemedi: %@"
+          }
+        }
+      }
+    },
+    "Failed to cancel override: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override iptal edilemedi: %@"
+          }
+        }
+      }
+    },
+    "Failed to construct APNs URL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNs URL'si oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Failed to encode or encrypt push message: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anlık bildirim mesajı kodlanamadı veya şifrelenemedi: %@"
+          }
+        }
+      }
+    },
+    "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JWT oluşturulamadı; lütfen APNS Anahtar Kimliği, APNS Anahtarı ve Ekip Kimliği'nin doğru olduğundan emin olun."
+          }
+        }
+      }
+    },
+    "Failed to generate JWT, please check that the token is correct." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JWT oluşturulamadı; lütfen belirtecin doğru olduğundan emin olun."
+          }
+        }
+      }
+    },
     "Failed to generate QR code" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "QR kodu oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Failed to get a valid HTTP response." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli bir HTTP yanıtı alınamadı."
+          }
+        }
+      }
+    },
+    "Failed to initialize security module. Check shared secret." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güvenlik modülü başlatılamadı. Paylaşılan gizli anahtarı denetleyin."
+          }
+        }
+      }
+    },
+    "Failed to load override presets: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override ön ayarları yüklenemedi: %@"
+          }
+        }
+      }
+    },
+    "Failed to send push notification: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anlık bildirim gönderilemedi: %@"
+          }
+        }
+      }
+    },
+    "Failed to serialize APNS payload: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNS yükü serileştirilemedi: %@"
           }
         }
       }
@@ -3171,6 +3600,17 @@
         }
       }
     },
+    "Fat: %.0f g" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağ: %.0f g"
+          }
+        }
+      }
+    },
     "Features" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3199,6 +3639,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bitir"
+          }
+        }
+      }
+    },
+    "Finishing connection…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantı tamamlanıyor…"
           }
         }
       }
@@ -3262,6 +3713,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GMI"
+          }
+        }
+      }
+    },
+    "GMI:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GMI:"
           }
         }
       }
@@ -4027,6 +4489,17 @@
         }
       }
     },
+    "Insulin amount (%.2fU) exceeds the maximum allowed (%.2fU). Please reduce the amount." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnsülin miktarı (%1$.2fU) izin verilen en yüksek değeri (%2$.2fU) aşıyor. Lütfen miktarı azaltın."
+          }
+        }
+      }
+    },
     "Insulin: %@%%" : {
       "localizations" : {
         "tr" : {
@@ -4037,12 +4510,109 @@
         }
       }
     },
+    "Internal server error at APNs. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APNs'de iç sunucu hatası. %@"
+          }
+        }
+      }
+    },
+    "Invalid APNs key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz APNs anahtarı"
+          }
+        }
+      }
+    },
+    "Invalid Key ID" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Anahtar Kimliği"
+          }
+        }
+      }
+    },
     "Invalid QR code URL" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geçersiz QR kodu URL'si"
+          }
+        }
+      }
+    },
+    "Invalid QR code URL. Please re-scan the QR code in settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz QR kodu URL'si. Lütfen ayarlardan QR kodunu yeniden tarayın."
+          }
+        }
+      }
+    },
+    "Invalid Token" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz Belirteç"
+          }
+        }
+      }
+    },
+    "Invalid URL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz URL"
+          }
+        }
+      }
+    },
+    "Invalid input." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz giriş."
+          }
+        }
+      }
+    },
+    "Invalid request: Only POST requests are supported. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz istek: Yalnızca POST istekleri destekleniyor. %@"
+          }
+        }
+      }
+    },
+    "Invalid request: The :path value was incorrect. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçersiz istek: :path değeri yanlıştı. %@"
           }
         }
       }
@@ -4095,6 +4665,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son bağlantı: %@"
+          }
+        }
+      }
+    },
+    "Let's get you connected to your data and set up a few recommended alarms. It only takes a few minutes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sizi verilerinize bağlayalım ve önerilen birkaç alarmı kuralım. Yalnızca birkaç dakika sürer."
           }
         }
       }
@@ -4160,6 +4741,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı Etkinlik"
+          }
+        }
+      }
+    },
+    "Live Activity Restarted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinlik Yeniden Başlatıldı"
           }
         }
       }
@@ -4268,12 +4860,34 @@
         }
       }
     },
+    "Loop APNS Configuration not valid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS yapılandırması geçersiz"
+          }
+        }
+      }
+    },
     "Loop APNS Not Configured" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop APNS Yapılandırılmamış"
+          }
+        }
+      }
+    },
+    "Loop APNS setup is incomplete. Please configure all required fields in settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS kurulumu eksik. Lütfen ayarlardan gerekli tüm alanları yapılandırın."
           }
         }
       }
@@ -4513,6 +5127,17 @@
         }
       }
     },
+    "Maximum: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maksimum: %@"
+          }
+        }
+      }
+    },
     "Meal" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4651,6 +5276,17 @@
         }
       }
     },
+    "Minimum: %@\n" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum: %@\n"
+          }
+        }
+      }
+    },
     "Minutes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4697,6 +5333,17 @@
         }
       }
     },
+    "Missing required fields for command: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komut için gerekli alanlar eksik: %@"
+          }
+        }
+      }
+    },
     "Multiple devices uploading profiles" : {
       "localizations" : {
         "tr" : {
@@ -4713,6 +5360,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ad"
+          }
+        }
+      }
+    },
+    "Network Error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ağ Hatası"
+          }
+        }
+      }
+    },
+    "Network error — check your connection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ağ hatası — bağlantınızı denetleyin"
           }
         }
       }
@@ -4977,6 +5646,17 @@
         }
       }
     },
+    "Not set" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlanmamış"
+          }
+        }
+      }
+    },
     "Note: The meal will be scheduled, but the bolus is enacted immediately." : {
       "localizations" : {
         "tr" : {
@@ -5064,12 +5744,45 @@
         }
       }
     },
+    "OFF" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KAPALI"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "OK (%@)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam (%@)"
+          }
+        }
+      }
+    },
+    "ON" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AÇIK"
           }
         }
       }
@@ -5090,6 +5803,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eski Hesaplama Uyarısı"
+          }
+        }
+      }
+    },
+    "On" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
           }
         }
       }
@@ -5351,6 +6075,17 @@
         }
       }
     },
+    "Payload too large. The notification payload exceeded the size limit. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yük çok büyük. Bildirim yükü boyut sınırını aştı. %@"
+          }
+        }
+      }
+    },
     "Percentage: %@%%" : {
       "localizations" : {
         "tr" : {
@@ -5488,6 +6223,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "APNS komutlarını kullanmak için lütfen Uzaktan Ayarlar'da Loop APNS ayarlarını yapılandırın."
+          }
+        }
+      }
+    },
+    "Please enable Face ID, Touch ID, or set up a device passcode in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen Ayarlar'dan Face ID veya Touch ID'yi açın ya da bir cihaz parolası ayarlayın."
+          }
+        }
+      }
+    },
+    "Please enter a valid carb amount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen geçerli bir karbonhidrat miktarı girin"
+          }
+        }
+      }
+    },
+    "Please enter a valid insulin amount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lütfen geçerli bir insülin miktarı girin"
           }
         }
       }
@@ -5691,6 +6459,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Protein"
+          }
+        }
+      }
+    },
+    "Protein: %.0f g" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein: %.0f g"
           }
         }
       }
@@ -6015,6 +6794,17 @@
         }
       }
     },
+    "Remote command sent. Wait for a notification confirming the result." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzaktan komut gönderildi. Sonucu doğrulayan bildirimi bekleyin."
+          }
+        }
+      }
+    },
     "Remote commands are currently only available for Trio." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6258,6 +7048,17 @@
         }
       }
     },
+    "Scan QR Code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR Kodu Tara"
+          }
+        }
+      }
+    },
     "Scan QR Code from Loop App" : {
       "localizations" : {
         "tr" : {
@@ -6274,6 +7075,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarları İçe Aktarmak için QR Kodu Tara"
+          }
+        }
+      }
+    },
+    "Scan a different code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farklı bir kod tara"
           }
         }
       }
@@ -6649,6 +7461,17 @@
         }
       }
     },
+    "Service unavailable. The server is temporarily unavailable. Try again later. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hizmet kullanılamıyor. Sunucu geçici olarak kullanılamıyor. Daha sonra yeniden deneyin. %@"
+          }
+        }
+      }
+    },
     "Set Up Units" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6900,6 +7723,17 @@
         }
       }
     },
+    "Site Not Found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site Bulunamadı"
+          }
+        }
+      }
+    },
     "Site URL" : {
       "localizations" : {
         "tr" : {
@@ -6981,6 +7815,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Küçük Grafik Yüksekliği"
+          }
+        }
+      }
+    },
+    "Snooze" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ertele"
           }
         }
       }
@@ -7243,6 +8088,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Std Sapma — Standart Sapma, glukozun ortalama etrafında ne kadar dalgalandığı. CV — Varyasyon Katsayısı, bu dalgalanmanın ortalamaya oranı (Std Sapma ÷ ortalama)."
+          }
+        }
+      }
+    },
+    "Std Dev:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Std Sapma:"
           }
         }
       }
@@ -7634,12 +8490,78 @@
         }
       }
     },
+    "The device token is no longer active for the topic. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz belirteci bu konu için artık etkin değil. %@"
+          }
+        }
+      }
+    },
     "The order of Fat and Protein inputs has changed." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağ ve Protein girişlerinin sırası değişti."
+          }
+        }
+      }
+    },
+    "The scanned Nightscout URL (%@) doesn't match your current Nightscout address (%@). Would you like to change your Nightscout address to match the scanned settings?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan Nightscout URL'si (%1$@) mevcut Nightscout adresinizle (%2$@) eşleşmiyor. Nightscout adresinizi taranan ayarlara göre değiştirmek ister misiniz?"
+          }
+        }
+      }
+    },
+    "The scanned settings also include a token. Would you like to set this as your access token?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan ayarlar ayrıca bir belirteç içeriyor. Bunu erişim belirteciniz olarak ayarlamak ister misiniz?"
+          }
+        }
+      }
+    },
+    "The scanned settings include a Nightscout URL. Would you like to set this as your Nightscout address?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan ayarlar bir Nightscout URL'si içeriyor. Bunu Nightscout adresiniz olarak ayarlamak ister misiniz?"
+          }
+        }
+      }
+    },
+    "The scanned settings include a token. Would you like to set this as your access token?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan ayarlar bir belirteç içeriyor. Bunu erişim belirteciniz olarak ayarlamak ister misiniz?"
+          }
+        }
+      }
+    },
+    "The scanned token doesn't match your current access token. Would you like to update your token?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taranan belirteç mevcut erişim belirtecinizle eşleşmiyor. Belirtecinizi güncellemek ister misiniz?"
           }
         }
       }
@@ -7770,6 +8692,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hızlı yükseliş sayılması için glukozun ne kadar yükselmesi gerektiği."
+          }
+        }
+      }
+    },
+    "This recommended bolus was calculated %lld minutes ago. New treatments may have occurred since then. Proceed with caution." : {
+      "comment" : "Alert shown before sending a stale recommended bolus; %lld = minutes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This recommended bolus was calculated %lld minute ago. New treatments may have occurred since then. Proceed with caution."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This recommended bolus was calculated %lld minutes ago. New treatments may have occurred since then. Proceed with caution."
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu önerilen bolus %lld dakika önce hesaplandı. O zamandan beri yeni tedaviler gerçekleşmiş olabilir. Dikkatli ilerleyin."
           }
         }
       }
@@ -7925,6 +8877,28 @@
         }
       }
     },
+    "Time must be within the next %lld hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat gelecek %lld saat içinde olmalı"
+          }
+        }
+      }
+    },
+    "Time must be within the prior %lld hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat geçmiş %lld saat içinde olmalı"
+          }
+        }
+      }
+    },
     "To see your trend, delta, or IOB, include them in another contact or create separate contacts. When using 'Include', select which contact to add the value to." : {
       "localizations" : {
         "tr" : {
@@ -7945,12 +8919,45 @@
         }
       }
     },
+    "Token Required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç Gerekli"
+          }
+        }
+      }
+    },
+    "Token created" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirteç oluşturuldu"
+          }
+        }
+      }
+    },
     "Tone" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ton"
+          }
+        }
+      }
+    },
+    "Too many requests. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok fazla istek. %@"
           }
         }
       }
@@ -7962,6 +8969,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toplam Günlük Doz"
+          }
+        }
+      }
+    },
+    "Touch ID is not available. Please set up a device passcode in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch ID kullanılamıyor. Lütfen Ayarlar'dan bir cihaz parolası ayarlayın."
           }
         }
       }
@@ -8039,6 +9057,17 @@
         }
       }
     },
+    "Try changing Production Environment from %@ to %@ in your Loop APNS settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop APNS ayarlarınızda Production Ortamı'nı %1$@ yerine %2$@ yapmayı deneyin."
+          }
+        }
+      }
+    },
     "Type or paste a token, or a full Nightscout URL that includes a token." : {
       "localizations" : {
         "tr" : {
@@ -8093,6 +9122,17 @@
         }
       }
     },
+    "Unexpected status code: %lld. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beklenmeyen durum kodu: %1$lld. %2$@"
+          }
+        }
+      }
+    },
     "Units" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8115,12 +9155,45 @@
         }
       }
     },
+    "Unknown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmiyor"
+          }
+        }
+      }
+    },
     "Unknown Alert" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bilinmeyen Uyarı"
+          }
+        }
+      }
+    },
+    "Unknown Device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmeyen Cihaz"
+          }
+        }
+      }
+    },
+    "Unknown Error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmeyen Hata"
           }
         }
       }
@@ -8219,12 +9292,54 @@
         }
       }
     },
+    "Username or password not accepted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı adı veya parola kabul edilmedi"
+          }
+        }
+      }
+    },
+    "Valid APNs key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli APNs anahtarı"
+          }
+        }
+      }
+    },
+    "Valid Key ID" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli Anahtar Kimliği"
+          }
+        }
+      }
+    },
     "Validation Error" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doğrulama Hatası"
+          }
+        }
+      }
+    },
+    "Value outside of guardrails: %@\n" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değer güvenlik sınırlarının dışında: %@\n"
           }
         }
       }
@@ -8437,6 +9552,28 @@
         }
       }
     },
+    "You're already set up. You can skip this guide, or walk through it to review your settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurulumunuz zaten tamam. Bu rehberi atlayabilir ya da ayarlarınızı gözden geçirmek için adım adım ilerleyebilirsiniz."
+          }
+        }
+      }
+    },
+    "You're connected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlandınız"
+          }
+        }
+      }
+    },
     "You're ready to go. Adjust everything later from the Menu — and when you have a moment, these are worth a look:" : {
       "localizations" : {
         "tr" : {
@@ -8464,6 +9601,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Veri kaynağınız bağlı ve alarmlarınız hazır — burada kurulacak bir şey yok. Her şeye daha sonra Ayarlar'dan ince ayar yapabilirsiniz."
+          }
+        }
+      }
+    },
+    "Your read-only token is ready. Tap Continue to keep going — your site may take a few minutes to start accepting it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt okunur belirteciniz hazır. Devam etmek için Devam'a dokunun — sitenizin bunu kabul etmeye başlaması birkaç dakika sürebilir."
+          }
+        }
+      }
+    },
+    "Your read-only token is set up. Tap Continue to keep going." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt okunur belirteciniz ayarlandı. Devam etmek için Devam'a dokunun."
           }
         }
       }
