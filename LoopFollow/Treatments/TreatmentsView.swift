@@ -882,13 +882,13 @@ enum TreatmentType: CaseIterable, Hashable {
 
     var displayName: String {
         switch self {
-        case .carb: return "Carbs"
-        case .bolusManual: return "Bolus"
-        case .bolusAutomatic: return "Automatic"
-        case .smb: return "SMB"
-        case .tempBasal: return "Basal"
-        case .override: return "Override"
-        case .tempTarget: return "Temp Target"
+        case .carb: return String(localized: "Carbs", comment: "Treatment type")
+        case .bolusManual: return String(localized: "Bolus", comment: "Treatment type")
+        case .bolusAutomatic: return String(localized: "Automatic", comment: "Treatment type")
+        case .smb: return String(localized: "SMB", comment: "Treatment type")
+        case .tempBasal: return String(localized: "Basal", comment: "Treatment type")
+        case .override: return String(localized: "Override", comment: "Treatment type")
+        case .tempTarget: return String(localized: "Temp Target", comment: "Treatment type")
         }
     }
 }
@@ -904,13 +904,13 @@ enum TreatmentFilter: Hashable {
 
     func displayName(automaticLabel: String) -> String {
         switch self {
-        case .all: return "All"
-        case .carb: return "Carbs"
-        case .basal: return "Basal"
-        case .bolusAll: return "All Boluses"
-        case .bolusAutomatic: return automaticLabel
-        case .bolusSMB: return "SMB"
-        case .bolusManual: return "Manual"
+        case .all: return String(localized: "All", comment: "Treatment filter")
+        case .carb: return String(localized: "Carbs", comment: "Treatment filter")
+        case .basal: return String(localized: "Basal", comment: "Treatment filter")
+        case .bolusAll: return String(localized: "All Boluses", comment: "Treatment filter")
+        case .bolusAutomatic: return automaticLabel == "SMB" ? String(localized: "SMB", comment: "Treatment filter") : String(localized: "Automatic", comment: "Treatment filter")
+        case .bolusSMB: return String(localized: "SMB", comment: "Treatment filter")
+        case .bolusManual: return String(localized: "Manual", comment: "Treatment filter")
         }
     }
 
@@ -1226,7 +1226,7 @@ class TreatmentsViewModel: ObservableObject {
                             type: .bolusAutomatic,
                             date: timestamp,
                             title: String(format: "%.2f U", insulin),
-                            subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
+                            subtitle: isSMB || isTrioSMBType ? String(localized: "SMB") : String(localized: "Automatic Bolus"),
                             icon: "arrowtriangle.down.fill",
                             color: .blue,
                             bgValue: actualBG

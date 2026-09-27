@@ -27,10 +27,10 @@ struct DataAvailabilityInfo {
 
         var description: String {
             switch self {
-            case .excellent: return "Excellent"
-            case .good: return "Good"
-            case .fair: return "Fair"
-            case .poor: return "Poor"
+            case .excellent: return String(localized: "Excellent", comment: "Data availability quality")
+            case .good: return String(localized: "Good", comment: "Data availability quality")
+            case .fair: return String(localized: "Fair", comment: "Data availability quality")
+            case .poor: return String(localized: "Poor", comment: "Data availability quality")
             }
         }
     }

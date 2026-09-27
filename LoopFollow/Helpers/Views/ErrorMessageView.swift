@@ -5,8 +5,8 @@ import Foundation
 import SwiftUI
 
 struct ErrorMessageView: View {
-    var message: String
-    var buttonTitle: String?
+    var message: LocalizedStringKey
+    var buttonTitle: LocalizedStringKey?
     var buttonAction: (() -> Void)?
 
     var body: some View {

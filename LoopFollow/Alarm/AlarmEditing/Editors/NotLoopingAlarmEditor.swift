@@ -11,16 +11,14 @@ struct NotLoopingAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when no successful loop has occurred for the time "
-                    + "you set below.", alarmType: alarm.type
+                text: "Alerts when no successful loop has occurred for the time you set below.", alarmType: alarm.type
             )
 
             AlarmGeneralSection(alarm: $alarm)
 
             AlarmStepperSection(
                 header: "No Loop for…",
-                footer: "Number of minutes since the last successful loop. "
-                    + "When this time has elapsed, the alarm becomes eligible.",
+                footer: "Number of minutes since the last successful loop. When this time has elapsed, the alarm becomes eligible.",
                 title: "Elapsed time",
                 range: 16 ... 61,
                 step: 5,

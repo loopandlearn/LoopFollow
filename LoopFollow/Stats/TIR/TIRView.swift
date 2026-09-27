@@ -89,11 +89,11 @@ struct TIRView: View {
     private var tirTitle: String {
         switch UnitSettingsStore.shared.timeInRangeMode {
         case .tir:
-            return "Time in Range"
+            return String(localized: "Time in Range", comment: "Time-in-range mode title")
         case .titr:
-            return "Time in Tight Range"
+            return String(localized: "Time in Tight Range", comment: "Time-in-range mode title")
         case .custom:
-            return "Custom Range"
+            return String(localized: "Custom Range", comment: "Time-in-range mode title")
         }
     }
 

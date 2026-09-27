@@ -48,7 +48,7 @@ struct UnitsStepView: View {
         onboarding.phaseProgress = .init(page: page.rawValue, count: Page.allCases.count)
     }
 
-    private func header(systemImage: String, title: String, subtitle: String) -> some View {
+    private func header(systemImage: String, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
         Section {
             EmptyView()
         } header: {

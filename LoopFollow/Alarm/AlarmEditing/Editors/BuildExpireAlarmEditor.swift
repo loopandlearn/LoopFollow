@@ -9,8 +9,7 @@ struct BuildExpireAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Sends a reminder before the looping-app build you’re following reaches its "
-                    + "TestFlight or Xcode expiry date. Works with Trio 0.4 and later."
+                text: "Sends a reminder before the looping-app build you’re following reaches its TestFlight or Xcode expiry date. Works with Trio 0.4 and later."
             )
             AlarmGeneralSection(alarm: $alarm)
 

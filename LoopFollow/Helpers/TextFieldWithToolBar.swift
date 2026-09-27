@@ -177,20 +177,20 @@ public struct TextFieldWithToolBar: UIViewRepresentable {
                         formatter.maximumFractionDigits = self.unit.preferredFractionDigits
                         let step = pow(10.0, Double(-formatter.maximumFractionDigits))
 
-                        var message = "Value outside of guardrails: \(text)\n"
+                        var message = String(localized: "Value outside of guardrails: \(text)\n")
 
                         if let minValue = self.parent.minValue {
                             let minVal = minValue.doubleValue(for: self.unit)
                             let adjustedMin = ceil(minVal / step) * step
                             let minQuantity = HKQuantity(unit: self.unit, doubleValue: adjustedMin)
-                            message += "Minimum: \(self.format(quantity: minQuantity, for: self.unit))\n"
+                            message += String(localized: "Minimum: \(self.format(quantity: minQuantity, for: self.unit))\n")
                         }
 
                         if let maxValue = self.parent.maxValue {
                             let maxVal = maxValue.doubleValue(for: self.unit)
                             let adjustedMax = floor(maxVal / step) * step
                             let maxQuantity = HKQuantity(unit: self.unit, doubleValue: adjustedMax)
-                            message += "Maximum: \(self.format(quantity: maxQuantity, for: self.unit))"
+                            message += String(localized: "Maximum: \(self.format(quantity: maxQuantity, for: self.unit))")
                         }
 
                         self.onValidationError(message)

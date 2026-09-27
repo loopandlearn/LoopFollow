@@ -31,7 +31,7 @@ enum SoundFile: Hashable, Identifiable {
                 .replacingOccurrences(of: "_", with: " ")
                 .replacingOccurrences(of: "  ", with: " ")
         case let .custom(uuid):
-            return CustomSoundStore.shared.displayName(for: uuid) ?? "Custom Sound"
+            return CustomSoundStore.shared.displayName(for: uuid) ?? String(localized: "Custom Sound")
         }
     }
 

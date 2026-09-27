@@ -18,7 +18,7 @@ enum TabCustomizationItem: Identifiable, Equatable, Hashable {
     var displayName: String {
         switch self {
         case let .tabItem(item): return item.displayName
-        case .settings: return "Menu"
+        case .settings: return String(localized: "Menu", comment: "Tab customization")
         }
     }
 

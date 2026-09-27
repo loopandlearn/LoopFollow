@@ -7,7 +7,7 @@ import SwiftUI
 /// phases that manage their own internal pages (connect, alarms), so the controls
 /// look and behave identically everywhere.
 struct OnboardingNavFooter: View {
-    var continueTitle: String = "Continue"
+    var continueTitle: LocalizedStringKey = "Continue"
     var continueEnabled: Bool = true
     var showBack: Bool = true
     var onBack: () -> Void

@@ -28,8 +28,7 @@ struct SensorAgeAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Sensor Lifetime",
-                footer: "Number of days your CGM sensor lasts " +
-                    "(e.g. 10 for Dexcom G6, 15 for G7 15-day).",
+                footer: "Number of days your CGM sensor lasts (e.g. 10 for Dexcom G6, 15 for G7 15-day).",
                 title: "Lifetime",
                 range: 7 ... 15,
                 step: 1,
@@ -39,8 +38,7 @@ struct SensorAgeAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Early Reminder",
-                footer: "Number of hours before the \(lifetimeDays)-day mark that the alert " +
-                    "will fire.",
+                footer: "Number of hours before the \(lifetimeDays)-day mark that the alert will fire.",
                 title: "Reminder Time",
                 range: 1 ... 24,
                 step: 1,

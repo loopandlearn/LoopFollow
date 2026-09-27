@@ -162,7 +162,7 @@ struct AlarmSelectionRow: View {
                         }
                     }
 
-                    Text(alarmTypeDescription)
+                    Text(alarm.type.displayName)
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -189,59 +189,6 @@ struct AlarmSelectionRow: View {
         }
         .buttonStyle(.plain)
         .disabled(isDisabled && !isSelected)
-    }
-
-    private var alarmTypeDescription: String {
-        switch alarm.type {
-        case .temporary:
-            return "Temporary Alert"
-        case .iob:
-            return "IOB Alert"
-        case .cob:
-            return "COB Alert"
-        case .low:
-            return "Low BG Alert"
-        case .high:
-            return "High BG Alert"
-        case .fastDrop:
-            return "Fast Drop Alert"
-        case .fastRise:
-            return "Fast Rise Alert"
-        case .missedReading:
-            return "Missed Reading Alert"
-        case .notLooping:
-            return "Not Looping Alert"
-        case .missedBolus:
-            return "Missed Bolus Alert"
-        case .futureCarbs:
-            return "Future Carbs Alert"
-        case .sensorChange:
-            return "Sensor Change Alert"
-        case .pumpChange:
-            return "Pump Change Alert"
-        case .pump:
-            return "Pump Insulin Alert"
-        case .pumpBattery:
-            return "Pump Battery Alert"
-        case .battery:
-            return "Low Battery"
-        case .batteryDrop:
-            return "Battery Drop"
-        case .recBolus:
-            return "Rec. Bolus"
-        case .overrideStart:
-            return "Override Started"
-        case .overrideEnd:
-            return "Override Ended"
-        case .tempTargetStart:
-            return "Temp Target Started"
-        case .tempTargetEnd:
-            return "Temp Target Ended"
-        case .buildExpire:
-            return "Looping app expiration"
-        case .dbSize:
-            return "Nightscout Database Size"
-        }
     }
 }
 

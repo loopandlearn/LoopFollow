@@ -9,9 +9,7 @@ struct FutureCarbsAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when a future-dated carb entry's scheduled time arrives — " +
-                    "a reminder to start eating. Use the max lookahead to ignore " +
-                    "fat/protein entries that are typically scheduled further ahead.",
+                text: "Alerts when a future-dated carb entry's scheduled time arrives — a reminder to start eating. Use the max lookahead to ignore fat/protein entries that are typically scheduled further ahead.",
                 alarmType: alarm.type
             )
 
@@ -19,8 +17,7 @@ struct FutureCarbsAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Max Lookahead",
-                footer: "Only track carb entries scheduled up to this many minutes " +
-                    "in the future. Entries beyond this window are ignored.",
+                footer: "Only track carb entries scheduled up to this many minutes in the future. Entries beyond this window are ignored.",
                 title: "Lookahead",
                 range: 5 ... 120,
                 step: 5,

@@ -57,7 +57,7 @@ struct LoopAPNSBolusView: View {
                                             Text("\(String(format: "%.2f", recommendedBolus))U")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
-                                            Text("Calculated \(minutesSinceCalculation) minute\(minutesSinceCalculation == 1 ? "" : "s") ago")
+                                            Text("Calculated \(minutesSinceCalculation) minutes ago")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
@@ -166,7 +166,7 @@ struct LoopAPNSBolusView: View {
                                         .padding(.horizontal, 8)
                                         .background(Color.green.opacity(0.1))
                                         .cornerRadius(4)
-                                    Text("(" + (otpTimeRemaining.map { "\($0)s left" } ?? "-") + ")")
+                                    Text(verbatim: "(\(otpTimeRemaining.map { String(localized: "\($0)s left", comment: "OTP seconds remaining") } ?? "-"))")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -206,7 +206,7 @@ struct LoopAPNSBolusView: View {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
                 if !apnsService.validateSetup() {
-                    alertMessage = "Loop APNS setup is incomplete. Please configure all required fields in settings."
+                    alertMessage = String(localized: "Loop APNS setup is incomplete. Please configure all required fields in settings.")
                     alertType = .error
                     showAlert = true
                 }
@@ -260,7 +260,7 @@ struct LoopAPNSBolusView: View {
                     // Only show warning if calculation is between 5-12 minutes old
                     if minutesSinceCalculation > 5 && minutesSinceCalculation < 12 && !showOldCalculationWarning {
                         showOldCalculationWarning = true
-                        alertMessage = "This recommended bolus was calculated \(minutesSinceCalculation) minutes ago. New treatments may have occurred since then. Proceed with caution."
+                        alertMessage = String(localized: "This recommended bolus was calculated \(minutesSinceCalculation) minutes ago. New treatments may have occurred since then. Proceed with caution.")
                         alertType = .oldCalculationWarning
                         showAlert = true
                     }
@@ -337,7 +337,7 @@ struct LoopAPNSBolusView: View {
 
     private func sendInsulin() {
         guard insulinAmount.doubleValue(for: .internationalUnit()) > 0 else {
-            alertMessage = "Please enter a valid insulin amount"
+            alertMessage = String(localized: "Please enter a valid insulin amount")
             alertType = .error
             showAlert = true
             return
@@ -348,7 +348,7 @@ struct LoopAPNSBolusView: View {
         let insulinValue = insulinAmount.doubleValue(for: .internationalUnit())
 
         if insulinValue > maxBolus {
-            alertMessage = "Insulin amount (\(String(format: "%.2f", insulinValue))U) exceeds the maximum allowed (\(String(format: "%.2f", maxBolus))U). Please reduce the amount."
+            alertMessage = String(localized: "Insulin amount (\(insulinValue, specifier: "%.2f")U) exceeds the maximum allowed (\(maxBolus, specifier: "%.2f")U). Please reduce the amount.")
             alertType = .error
             showAlert = true
             return
@@ -369,7 +369,7 @@ struct LoopAPNSBolusView: View {
                     self.alertType = .error
                     self.showAlert = true
                 case .failed:
-                    self.alertMessage = "Authentication failed"
+                    self.alertMessage = String(localized: "Authentication failed")
                     self.alertType = .error
                     self.showAlert = true
                 case .canceled:
@@ -385,7 +385,7 @@ struct LoopAPNSBolusView: View {
 
         // Extract OTP from QR code URL
         guard let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) else {
-            alertMessage = "Invalid QR code URL. Please re-scan the QR code in settings."
+            alertMessage = String(localized: "Invalid QR code URL. Please re-scan the QR code in settings.")
             alertType = .error
             isLoading = false
             showAlert = true

@@ -74,7 +74,7 @@ struct AlarmAudioSection: View {
 }
 
 struct AlarmEnumMenuPicker<E: CaseIterable & Hashable & DayNightDisplayable>: View {
-    let title: String
+    let title: LocalizedStringKey
     @Binding var selection: E
     var allowed: [E]
 
@@ -101,7 +101,7 @@ struct AlarmEnumMenuPicker<E: CaseIterable & Hashable & DayNightDisplayable>: Vi
 }
 
 extension AlarmEnumMenuPicker where E: CaseIterable {
-    init(title: String, selection: Binding<E>) {
+    init(title: LocalizedStringKey, selection: Binding<E>) {
         self.title = title
         _selection = selection
         allowed = Array(E.allCases)

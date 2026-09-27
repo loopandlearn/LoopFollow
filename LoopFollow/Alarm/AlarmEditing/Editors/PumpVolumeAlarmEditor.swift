@@ -17,8 +17,7 @@ struct PumpVolumeAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Trigger Level",
-                footer: "An alert fires once the reservoir is at this value "
-                    + "or lower.",
+                footer: "An alert fires once the reservoir is at this value or lower.",
                 title: "Reservoir Below",
                 range: 1 ... 50,
                 step: 1,

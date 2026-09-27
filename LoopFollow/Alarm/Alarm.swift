@@ -11,7 +11,13 @@ protocol DayNightDisplayable {
 
 extension DayNightDisplayable where Self: RawRepresentable, Self.RawValue == String {
     var displayName: String {
-        rawValue == "always" ? "Day & Night" : rawValue.capitalized
+        switch rawValue {
+        case "always": String(localized: "Day & Night", comment: "Alarm schedule option: at any time of day")
+        case "day": String(localized: "Day", comment: "Alarm schedule option: daytime only")
+        case "night": String(localized: "Night", comment: "Alarm schedule option: nighttime only")
+        case "never": String(localized: "Never", comment: "Alarm schedule option: never")
+        default: rawValue.capitalized
+        }
     }
 }
 
@@ -277,7 +283,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
+        AlarmManager.shared.sendNotification(title: type.displayName, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)
@@ -289,7 +295,7 @@ struct Alarm: Identifiable, Codable, Equatable {
 
     init(type: AlarmType) {
         self.type = type
-        name = type.rawValue
+        name = type.displayName
 
         switch type {
         case .buildExpire:
@@ -448,30 +454,30 @@ extension AlarmType {
 
     var blurb: String {
         switch self {
-        case .low: return "Alerts when BG goes below a limit."
-        case .high: return "Alerts when BG rises above a limit."
-        case .fastDrop: return "Rapid downward BG trend."
-        case .fastRise: return "Rapid upward BG trend."
-        case .missedReading: return "No CGM data for X minutes."
-        case .iob: return "High insulin-on-board."
-        case .cob: return "High carbs-on-board."
-        case .missedBolus: return "Carbs without bolus."
-        case .futureCarbs: return "Reminder when future carbs are due."
-        case .recBolus: return "Recommended bolus issued."
-        case .battery: return "Phone battery low."
-        case .batteryDrop: return "Battery drops quickly."
-        case .pump: return "Reservoir level low."
-        case .pumpBattery: return "Pump battery low."
-        case .pumpChange: return "Pump change due."
-        case .sensorChange: return "Sensor change due."
-        case .notLooping: return "Loop hasn’t completed."
-        case .buildExpire: return "Looping-app build expiring."
-        case .dbSize: return "Nightscout database filling up."
-        case .overrideStart: return "Override just started."
-        case .overrideEnd: return "Override ended."
-        case .tempTargetStart: return "Temp target started."
-        case .tempTargetEnd: return "Temp target ended."
-        case .temporary: return "One-time BG limit alert."
+        case .low: return String(localized: "Alerts when BG goes below a limit.", comment: "Alarm type blurb")
+        case .high: return String(localized: "Alerts when BG rises above a limit.", comment: "Alarm type blurb")
+        case .fastDrop: return String(localized: "Rapid downward BG trend.", comment: "Alarm type blurb")
+        case .fastRise: return String(localized: "Rapid upward BG trend.", comment: "Alarm type blurb")
+        case .missedReading: return String(localized: "No CGM data for X minutes.", comment: "Alarm type blurb")
+        case .iob: return String(localized: "High insulin-on-board.", comment: "Alarm type blurb")
+        case .cob: return String(localized: "High carbs-on-board.", comment: "Alarm type blurb")
+        case .missedBolus: return String(localized: "Carbs without bolus.", comment: "Alarm type blurb")
+        case .futureCarbs: return String(localized: "Reminder when future carbs are due.", comment: "Alarm type blurb")
+        case .recBolus: return String(localized: "Recommended bolus issued.", comment: "Alarm type blurb")
+        case .battery: return String(localized: "Phone battery low.", comment: "Alarm type blurb")
+        case .batteryDrop: return String(localized: "Battery drops quickly.", comment: "Alarm type blurb")
+        case .pump: return String(localized: "Reservoir level low.", comment: "Alarm type blurb")
+        case .pumpBattery: return String(localized: "Pump battery low.", comment: "Alarm type blurb")
+        case .pumpChange: return String(localized: "Pump change due.", comment: "Alarm type blurb")
+        case .sensorChange: return String(localized: "Sensor change due.", comment: "Alarm type blurb")
+        case .notLooping: return String(localized: "Loop hasn’t completed.", comment: "Alarm type blurb")
+        case .buildExpire: return String(localized: "Looping-app build expiring.", comment: "Alarm type blurb")
+        case .dbSize: return String(localized: "Nightscout database filling up.", comment: "Alarm type blurb")
+        case .overrideStart: return String(localized: "Override just started.", comment: "Alarm type blurb")
+        case .overrideEnd: return String(localized: "Override ended.", comment: "Alarm type blurb")
+        case .tempTargetStart: return String(localized: "Temp target started.", comment: "Alarm type blurb")
+        case .tempTargetEnd: return String(localized: "Temp target ended.", comment: "Alarm type blurb")
+        case .temporary: return String(localized: "One-time BG limit alert.", comment: "Alarm type blurb")
         }
     }
 }

@@ -9,9 +9,7 @@ struct MissedBolusAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when carbs are logged but no bolus is delivered " +
-                    "within the delay below.  Allows small-carb / treatment " +
-                    "exclusions and pre-bolus detection.",
+                text: "Alerts when carbs are logged but no bolus is delivered within the delay below.  Allows small-carb / treatment exclusions and pre-bolus detection.",
                 alarmType: alarm.type
             )
 
@@ -19,8 +17,7 @@ struct MissedBolusAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Delay",
-                footer: "Minutes to wait after the carb entry before checking " +
-                    "for a bolus.",
+                footer: "Minutes to wait after the carb entry before checking for a bolus.",
                 title: "Delay",
                 range: 5 ... 60,
                 step: 5,
@@ -30,8 +27,7 @@ struct MissedBolusAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Pre-bolus",
-                footer: "Count boluses given up to this many minutes before " +
-                    "the carb entry as valid.",
+                footer: "Count boluses given up to this many minutes before the carb entry as valid.",
                 title: "Pre-Bolus Time",
                 range: 0 ... 45,
                 step: 5,

@@ -5,10 +5,10 @@ import SwiftUI
 
 struct AlarmBGLimitSection: View {
     // ────────── Public API ──────────
-    let header: String?
-    let footer: String?
+    let header: LocalizedStringKey?
+    let footer: LocalizedStringKey?
     let toggleText: String
-    let pickerTitle: String
+    let pickerTitle: LocalizedStringKey
     let range: ClosedRange<Double>
     let defaultOnValue: Double
 
@@ -16,10 +16,10 @@ struct AlarmBGLimitSection: View {
     // ────────────────────────────────
 
     init(
-        header: String? = nil,
-        footer: String? = nil,
+        header: LocalizedStringKey? = nil,
+        footer: LocalizedStringKey? = nil,
         toggleText: String,
-        pickerTitle: String,
+        pickerTitle: LocalizedStringKey,
         range: ClosedRange<Double>,
         defaultOnValue: Double? = nil,
         value: Binding<Double?>
@@ -60,8 +60,8 @@ struct AlarmBGLimitSection: View {
 
     var body: some View {
         Section(
-            header: header.map(Text.init),
-            footer: footer.map(Text.init)
+            header: header.map { Text($0) },
+            footer: footer.map { Text($0) }
         ) {
             Toggle(toggleText, isOn: isOn)
 

@@ -13,12 +13,12 @@ enum TRCCommandType: String, Encodable {
 
     var displayName: String {
         switch self {
-        case .bolus: return "Bolus"
-        case .tempTarget: return "Temp Target"
-        case .cancelTempTarget: return "Cancel Temp Target"
-        case .meal: return "Meal"
-        case .startOverride: return "Start Override"
-        case .cancelOverride: return "Cancel Override"
+        case .bolus: return String(localized: "Bolus", comment: "Trio remote command")
+        case .tempTarget: return String(localized: "Temp Target", comment: "Trio remote command")
+        case .cancelTempTarget: return String(localized: "Cancel Temp Target", comment: "Trio remote command")
+        case .meal: return String(localized: "Meal", comment: "Trio remote command")
+        case .startOverride: return String(localized: "Start Override", comment: "Trio remote command")
+        case .cancelOverride: return String(localized: "Cancel Override", comment: "Trio remote command")
         }
     }
 }
