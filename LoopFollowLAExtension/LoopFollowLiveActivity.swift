@@ -779,12 +779,12 @@ private enum LAColors {
         let low = t.low
         let high = t.high
 
-        if mgdl < low {
-            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / (low - 54.0))
+        if mgdl <= low {
+            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / max(low - 54.0, 1))
             let opacity = min(max(raw, 0.48), 0.85)
             return Color(uiColor: UIColor.systemRed).opacity(opacity)
-        } else if mgdl > high {
-            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / (324.0 - high))
+        } else if mgdl >= high {
+            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / max(324.0 - high, 1))
             let opacity = min(max(raw, 0.44), 0.85)
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
         } else {
@@ -798,9 +798,9 @@ private enum LAColors {
         let low = t.low
         let high = t.high
 
-        if mgdl < low {
+        if mgdl <= low {
             return Color(uiColor: UIColor.systemRed)
-        } else if mgdl > high {
+        } else if mgdl >= high {
             return Color(uiColor: UIColor.systemOrange)
         } else {
             return Color(uiColor: UIColor.systemGreen)
