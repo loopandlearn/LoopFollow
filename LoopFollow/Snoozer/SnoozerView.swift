@@ -13,6 +13,7 @@ struct SnoozerView: View {
     @ObservedObject var directionText = Observable.shared.directionText
     @ObservedObject var deltaText = Observable.shared.deltaText
     @ObservedObject var bgStale = Observable.shared.bgStale
+    @ObservedObject var cgmSensorState = Observable.shared.cgmSensorState
     @ObservedObject var bg = Observable.shared.bg
     @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
 
@@ -209,6 +210,16 @@ struct SnoozerView: View {
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white.opacity(0.6))
                 .frame(maxWidth: .infinity, maxHeight: ageMaxH)
+
+            if let state = cgmSensorState.value {
+                Text("CGM: \(state.summary)")
+                    .font(.system(size: 30, weight: .semibold))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.orange)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(.top, topPad)
         .padding(.horizontal, 16)

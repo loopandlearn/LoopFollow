@@ -186,7 +186,7 @@ class AlarmManager {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
-    func sendNotification(title: String, actionTitle: String? = nil) {
+    func sendNotification(title: String, body: String? = nil, actionTitle: String? = nil) {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
 
         let content = UNMutableNotificationContent()
@@ -194,6 +194,9 @@ class AlarmManager {
         content.subtitle += Observable.shared.bgText.value + " "
         content.subtitle += Observable.shared.directionText.value + " "
         content.subtitle += Observable.shared.deltaText.value
+        if let body {
+            content.body = body
+        }
         content.categoryIdentifier = "category"
         content.sound = .default
 

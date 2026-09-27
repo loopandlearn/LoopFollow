@@ -98,6 +98,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
+    var cgmSensorStates: [CGMSensorState] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""

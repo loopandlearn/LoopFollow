@@ -218,6 +218,14 @@ struct Alarm: Identifiable, Codable, Equatable {
     /// CGM sensor lifetime in days (e.g. 10 for Dexcom G6, 15 for G7 15-day)
     var sensorLifetimeDays: Int?
 
+    /// Extra notification text: the CGM state behind a gap in readings.
+    private var notificationBody: String? {
+        guard type == .missedReading || type == .notLooping,
+              let state = Observable.shared.cgmSensorState.value
+        else { return nil }
+        return "CGM reported: \(state.summary)"
+    }
+
     /// Function for when the alarm is triggered.
     /// If this alarm, all alarms is disabled or snoozed, then should not be called. This or all alarmd could be muted, then this function will just generate a notification.
     func trigger(config: AlarmConfiguration, now: Date) {
@@ -277,7 +285,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
+        AlarmManager.shared.sendNotification(title: type.rawValue, body: notificationBody, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)
