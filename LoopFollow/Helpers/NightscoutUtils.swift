@@ -124,26 +124,41 @@ class NightscoutUtils {
         var request = URLRequest(url: url)
         request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
 
-        let task = URLSession.shared.dataTask(with: request) { data, _, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 completion(.failure(error!))
                 return
             }
 
+            let parsed: Any
             do {
-                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    DispatchQueue.main.async {
-                        completion(.success(jsonObject))
-                    }
-                } else if let jsonArray = try JSONSerialization.jsonObject(with: data, options: []) as? [Any] {
-                    DispatchQueue.main.async {
-                        completion(.success(jsonArray))
-                    }
-                } else {
-                    completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON Structure"])))
-                }
+                parsed = try JSONSerialization.jsonObject(with: data, options: [])
             } catch {
-                completion(.failure(error))
+                // Surface the HTTP status and body prefix when the server
+                // returns something that is not JSON (e.g. a proxy's 502 page);
+                // Foundation's parse error alone hides the real cause.
+                let status = (response as? HTTPURLResponse)?.statusCode
+                let snippet = String(decoding: data.prefix(150), as: UTF8.self)
+                    .replacingOccurrences(of: "\n", with: " ")
+                let description = "Response was not valid JSON (HTTP \(status.map(String.init) ?? "?"), \(data.count) bytes): \(snippet)"
+                completion(.failure(NSError(
+                    domain: "NightscoutUtils",
+                    code: status ?? -3,
+                    userInfo: [NSLocalizedDescriptionKey: description]
+                )))
+                return
+            }
+
+            if let jsonObject = parsed as? [String: Any] {
+                DispatchQueue.main.async {
+                    completion(.success(jsonObject))
+                }
+            } else if let jsonArray = parsed as? [Any] {
+                DispatchQueue.main.async {
+                    completion(.success(jsonArray))
+                }
+            } else {
+                completion(.failure(NSError(domain: "NightscoutUtils", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON Structure"])))
             }
         }
         task.resume()

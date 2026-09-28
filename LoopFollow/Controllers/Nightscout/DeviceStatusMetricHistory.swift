@@ -84,6 +84,10 @@ enum DeviceStatusMetricHistoryParser {
         } ?? entries.first
     }
 
+    static func oldestRecordTimestamp(in entries: [[String: AnyObject]]) -> Date? {
+        entries.compactMap(recordTimestamp(from:)).min()
+    }
+
     private static func samples(from entry: [String: AnyObject]) -> [DeviceStatusMetricSample] {
         let recordDate = recordTimestamp(from: entry)
         var samples: [DeviceStatusMetricSample] = []
@@ -306,6 +310,57 @@ enum DeviceStatusMetricHistoryParser {
     }
 }
 
+/// Plans the one-time on-board history backfill as a series of small,
+/// newest-first time windows. Trio device statuses carry several prediction
+/// arrays each, so a single multi-day request can reach many megabytes and
+/// time out on smaller Nightscout hosts (surfacing as a non-JSON error page).
+enum DeviceStatusMetricBackfill {
+    static let chunkInterval: TimeInterval = 3 * 3600
+    static let futureAllowance: TimeInterval = 10 * 60
+    static let maximumRetryDelay: TimeInterval = 15 * 60
+
+    struct Window: Equatable {
+        let start: Date
+        let end: Date
+    }
+
+    /// The next window to fetch, or nil when the backfill has reached the cutoff.
+    static func window(end: Date, cutoff: Date) -> Window? {
+        guard end > cutoff else { return nil }
+        return Window(start: max(cutoff, end.addingTimeInterval(-chunkInterval)), end: end)
+    }
+
+    /// Where the following window should end. When a response hits the count
+    /// cap, the rest of the same window is paged from the oldest record returned
+    /// so no records are silently dropped.
+    static func nextEnd(
+        after window: Window,
+        returnedCount: Int,
+        requestedCount: Int,
+        oldestReturned: Date?
+    ) -> Date {
+        if returnedCount >= requestedCount,
+           let oldestReturned,
+           oldestReturned > window.start,
+           oldestReturned < window.end
+        {
+            return oldestReturned
+        }
+        return window.start
+    }
+
+    /// Headroom over one status per 5 minutes; a device filter halves the need.
+    static func requestCount(uploaderFiltered: Bool) -> Int {
+        Int(chunkInterval / (5 * 60)) * (uploaderFiltered ? 2 : 4)
+    }
+
+    /// 1, 2, 4, 8 minutes, capped at 15.
+    static func retryDelay(afterFailures failures: Int) -> TimeInterval {
+        let exponent = Double(max(failures, 1) - 1)
+        return min(60 * pow(2, exponent), maximumRetryDelay)
+    }
+}
+
 extension MainViewController {
     func prepareDeviceStatusMetricHistorySource() {
         let source = Storage.shared.url.value + "\u{0}" + Storage.shared.token.value
@@ -317,6 +372,7 @@ extension MainViewController {
         deviceStatusMetricHistoryDevice = ""
         deviceStatusMetricHistoryLoadedDays = 0
         isLoadingDeviceStatusMetricHistory = false
+        resetDeviceStatusMetricBackfillProgress()
         deviceStatusMetricHistory = []
         chartModel.rebuild()
     }
@@ -329,6 +385,7 @@ extension MainViewController {
         deviceStatusMetricHistoryDevice = device
         deviceStatusMetricHistoryLoadedDays = 0
         isLoadingDeviceStatusMetricHistory = false
+        resetDeviceStatusMetricBackfillProgress()
         deviceStatusMetricHistory = []
         chartModel.rebuild()
     }
@@ -340,7 +397,11 @@ extension MainViewController {
         {
             // The app was suspended or offline long enough to miss samples.
             // Re-run the one-time backfill so the visible gap is recovered.
+            // Any in-flight chunk belongs to the old pass, so discard it.
+            deviceStatusMetricHistoryGeneration += 1
             deviceStatusMetricHistoryLoadedDays = 0
+            isLoadingDeviceStatusMetricHistory = false
+            resetDeviceStatusMetricBackfillProgress()
         }
 
         mergeDeviceStatusMetricHistory(incoming)
@@ -386,13 +447,37 @@ extension MainViewController {
         chartModel.rebuild()
     }
 
+    func resetDeviceStatusMetricBackfillProgress() {
+        deviceStatusMetricHistoryBackfillEnd = nil
+        deviceStatusMetricHistoryRetryAt = nil
+        deviceStatusMetricHistoryFailureCount = 0
+    }
+
+    /// Fetches the next backfill window and chains to the one after it on
+    /// success. Progress survives failures, so a retry resumes where it left off.
     func loadDeviceStatusMetricHistoryIfNeeded() {
         let requestedDays = max(Storage.shared.downloadDays.value, 1)
+        let now = Date()
         guard IsNightscoutEnabled(),
               Storage.shared.showIOBCOBHistory.value,
               deviceStatusMetricHistoryLoadedDays < requestedDays,
-              !isLoadingDeviceStatusMetricHistory
+              !isLoadingDeviceStatusMetricHistory,
+              (deviceStatusMetricHistoryRetryAt ?? .distantPast) <= now
         else {
+            return
+        }
+
+        let cutoff = now.addingTimeInterval(-TimeInterval(requestedDays * 24 * 3600))
+        // Resume a partial pass, or extend an already-loaded range further
+        // back when Show Days Back grows, rather than refetching it.
+        let windowEnd = deviceStatusMetricHistoryBackfillEnd
+            ?? (deviceStatusMetricHistoryLoadedDays > 0
+                ? now.addingTimeInterval(-TimeInterval(deviceStatusMetricHistoryLoadedDays * 24 * 3600))
+                : now.addingTimeInterval(DeviceStatusMetricBackfill.futureAllowance))
+
+        guard let window = DeviceStatusMetricBackfill.window(end: windowEnd, cutoff: cutoff) else {
+            deviceStatusMetricHistoryLoadedDays = requestedDays
+            resetDeviceStatusMetricBackfillProgress()
             return
         }
 
@@ -400,19 +485,17 @@ extension MainViewController {
         deviceStatusMetricHistoryGeneration += 1
         let requestGeneration = deviceStatusMetricHistoryGeneration
         let requestedSource = deviceStatusMetricHistorySource
-        let now = Date()
-        let cutoff = now.addingTimeInterval(-TimeInterval(requestedDays * 24 * 3600))
-        let upperBound = now.addingTimeInterval(10 * 60)
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         // Filtering by the current uploader avoids mixing unrelated Loop,
-        // Trio, and xDrip status streams and keeps this one-time request small.
-        let uploaderHeadroom = deviceStatusMetricHistoryDevice.isEmpty ? 4 : 2
-        let estimatedCount = requestedDays * 24 * 12 * uploaderHeadroom
+        // Trio, and xDrip status streams and keeps each request small.
+        let requestedCount = DeviceStatusMetricBackfill.requestCount(
+            uploaderFiltered: !deviceStatusMetricHistoryDevice.isEmpty
+        )
         var parameters = [
-            "find[created_at][$gte]": formatter.string(from: cutoff),
-            "find[created_at][$lte]": formatter.string(from: upperBound),
-            "count": "\(estimatedCount)",
+            "find[created_at][$gte]": formatter.string(from: window.start),
+            "find[created_at][$lte]": formatter.string(from: window.end),
+            "count": "\(requestedCount)",
         ]
         if !deviceStatusMetricHistoryDevice.isEmpty {
             parameters["find[device]"] = deviceStatusMetricHistoryDevice
@@ -429,10 +512,8 @@ extension MainViewController {
                 switch result {
                 case let .success(json):
                     guard let entries = json as? [[String: AnyObject]] else {
-                        self.isLoadingDeviceStatusMetricHistory = false
-                        LogManager.shared.log(
-                            category: .deviceStatus,
-                            message: "Device status history returned an unexpected data structure"
+                        self.handleDeviceStatusMetricBackfillFailure(
+                            "Device status history returned an unexpected data structure"
                         )
                         return
                     }
@@ -443,6 +524,7 @@ extension MainViewController {
                             cutoff: cutoff,
                             now: now
                         )
+                        let oldestReturned = DeviceStatusMetricHistoryParser.oldestRecordTimestamp(in: entries)
 
                         DispatchQueue.main.async {
                             guard requestedSource == self.deviceStatusMetricHistorySource,
@@ -451,8 +533,22 @@ extension MainViewController {
                                 return
                             }
                             self.isLoadingDeviceStatusMetricHistory = false
-                            self.deviceStatusMetricHistoryLoadedDays = requestedDays
-                            // A count=1 response may have arrived while the backfill
+                            self.deviceStatusMetricHistoryRetryAt = nil
+                            self.deviceStatusMetricHistoryFailureCount = 0
+
+                            let nextEnd = DeviceStatusMetricBackfill.nextEnd(
+                                after: window,
+                                returnedCount: entries.count,
+                                requestedCount: requestedCount,
+                                oldestReturned: oldestReturned
+                            )
+                            if nextEnd <= cutoff {
+                                self.deviceStatusMetricHistoryLoadedDays = requestedDays
+                                self.deviceStatusMetricHistoryBackfillEnd = nil
+                            } else {
+                                self.deviceStatusMetricHistoryBackfillEnd = nextEnd
+                            }
+                            // A count=1 response may have arrived while this chunk
                             // was parsing. Preserve those fresher samples on collision.
                             self.mergeDeviceStatusMetricHistory(samples, preferIncoming: false)
                             self.loadDeviceStatusMetricHistoryIfNeeded()
@@ -460,21 +556,31 @@ extension MainViewController {
                     }
 
                 case let .failure(error):
-                    self.isLoadingDeviceStatusMetricHistory = false
-                    LogManager.shared.log(
-                        category: .deviceStatus,
-                        message: "Device status history fetch failed: \(error.localizedDescription)",
-                        limitIdentifier: "Device status history fetch failed"
+                    self.handleDeviceStatusMetricBackfillFailure(
+                        "Device status history fetch failed: \(error.localizedDescription)"
                     )
                 }
             }
         }
     }
 
+    private func handleDeviceStatusMetricBackfillFailure(_ message: String) {
+        isLoadingDeviceStatusMetricHistory = false
+        deviceStatusMetricHistoryFailureCount += 1
+        let delay = DeviceStatusMetricBackfill.retryDelay(afterFailures: deviceStatusMetricHistoryFailureCount)
+        deviceStatusMetricHistoryRetryAt = Date().addingTimeInterval(delay)
+        LogManager.shared.log(
+            category: .deviceStatus,
+            message: "\(message) (attempt \(deviceStatusMetricHistoryFailureCount), retrying in \(Int(delay / 60)) min)",
+            limitIdentifier: "Device status history fetch failed"
+        )
+    }
+
     func clearDeviceStatusMetricHistory() {
         guard !deviceStatusMetricHistory.isEmpty
             || deviceStatusMetricHistoryLoadedDays != 0
             || isLoadingDeviceStatusMetricHistory
+            || deviceStatusMetricHistoryBackfillEnd != nil
             || !deviceStatusMetricHistorySource.isEmpty
         else {
             return
@@ -484,6 +590,7 @@ extension MainViewController {
         deviceStatusMetricHistory = []
         deviceStatusMetricHistoryLoadedDays = 0
         isLoadingDeviceStatusMetricHistory = false
+        resetDeviceStatusMetricBackfillProgress()
         deviceStatusMetricHistorySource = ""
         deviceStatusMetricHistoryDevice = ""
         chartModel.rebuild()

@@ -105,6 +105,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var deviceStatusMetricHistorySource = ""
     var deviceStatusMetricHistoryDevice = ""
     var deviceStatusMetricHistoryGeneration = 0
+    var deviceStatusMetricHistoryBackfillEnd: Date?
+    var deviceStatusMetricHistoryRetryAt: Date?
+    var deviceStatusMetricHistoryFailureCount = 0
     var deviceStatusRequestGeneration = 0
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
