@@ -43,12 +43,6 @@ struct MainHomeView: View {
                     InfoTableView(infoManager: infoManager, timeZoneOverride: timeZoneOverride)
                         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .frame(minWidth: 160, maxWidth: 250)
-                        .overlay(
-                            Rectangle()
-                                .fill(Color(UIColor.darkGray))
-                                .frame(width: 2),
-                            alignment: .leading
-                        )
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
