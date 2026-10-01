@@ -21,6 +21,7 @@ enum GlucoseDisplayUnit: String, Codable, CaseIterable {
 enum TimeInRangeDisplayMode: String, Codable, CaseIterable {
     case tir = "TIR"
     case titr = "TITR"
+    case ting = "TING"
     case custom = "Custom"
 }
 
@@ -69,6 +70,8 @@ final class UnitSettingsStore {
             return (70.0, 180.0)
         case .titr:
             return (70.0, 140.0)
+        case .ting:
+            return (63.0, 140.0)
         case .custom:
             return (Storage.shared.lowLine.value, Storage.shared.highLine.value)
         }

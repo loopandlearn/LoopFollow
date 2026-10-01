@@ -92,6 +92,8 @@ struct TIRView: View {
             return "Time in Range"
         case .titr:
             return "Time in Tight Range"
+        case .ting:
+            return "Time in Normoglycemia"
         case .custom:
             return "Custom Range"
         }
