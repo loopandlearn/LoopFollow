@@ -71,6 +71,7 @@ struct UnitsConfigurationView: View {
                 Picker("Range Mode", selection: $rangeMode) {
                     Text("TIR").tag(TimeInRangeDisplayMode.tir)
                     Text("TITR").tag(TimeInRangeDisplayMode.titr)
+                    Text("TING").tag(TimeInRangeDisplayMode.ting)
                     Text("Custom").tag(TimeInRangeDisplayMode.custom)
                 }
                 .pickerStyle(.segmented)
@@ -104,7 +105,7 @@ struct UnitsConfigurationView: View {
             } header: {
                 Text("Range")
             } footer: {
-                Text("TIR — Time in Range, the share of readings within \(rangeBounds(70, 180)).\nTITR — Time in Tight Range, within \(rangeBounds(70, 140)).\nCustom — set your own low and high.")
+                Text("TIR — Time in Range, the share of readings within \(rangeBounds(70, 180)).\nTITR — Time in Tight Range, within \(rangeBounds(70, 140)).\nTING — Time in Normoglycemia, within \(rangeBounds(63, 140)).\nCustom — set your own low and high.")
             }
 
             Section {
