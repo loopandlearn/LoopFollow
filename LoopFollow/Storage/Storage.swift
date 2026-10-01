@@ -70,6 +70,8 @@ class Storage {
     var colorBGText = StorageValue<Bool>(key: "colorBGText", defaultValue: true)
     var appearanceMode = StorageValue<AppearanceMode>(key: "appearanceMode", defaultValue: .dark)
     var showStats = StorageValue<Bool>(key: "showStats", defaultValue: true)
+    /// Show the home screen stats as a Time in Range band instead of the statistics box.
+    var showTIRBand = StorageValue<Bool>(key: "showTIRBand", defaultValue: false)
     var useIFCC = StorageValue<Bool>(key: "useIFCC", defaultValue: false)
     var showSmallGraph = StorageValue<Bool>(key: "showSmallGraph", defaultValue: true)
     var screenlockSwitchState = StorageValue<Bool>(key: "screenlockSwitchState", defaultValue: true)

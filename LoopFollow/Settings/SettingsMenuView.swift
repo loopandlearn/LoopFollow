@@ -158,6 +158,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 SettingsLeaf("Persistent Notification"),
                 SettingsLeaf("Appearance", ["dark mode", "light mode", "theme"]),
                 SettingsLeaf("Display Stats"),
+                SettingsLeaf("Stats Style", ["time in range band", "statistics box", "tir band", "progress bar"]),
                 SettingsLeaf("Display Small Graph"),
                 SettingsLeaf("Color BG Text"),
                 SettingsLeaf("Keep Screen Active", ["screen lock", "screenlock"]),
@@ -192,6 +193,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 + InfoType.allCases.map { SettingsLeaf($0.name) }
         case .units: return [
                 SettingsLeaf("Glucose Unit"),
+                SettingsLeaf("Home Screen Stats", ["stats style", "time in range band", "statistics box", "progress bar"]),
                 SettingsLeaf("Range Mode", ["tir", "titr", "time in range"]),
                 SettingsLeaf("Glycemic Metrics", ["hba1c", "ehba1c", "gmi"]),
                 SettingsLeaf("Variability", ["standard deviation", "cv"]),
