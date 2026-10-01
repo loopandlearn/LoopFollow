@@ -30,22 +30,6 @@ enum BGChartHistory {
             }
         }
 
-        /// "lower–upper" with the unit once, for the main-graph legend.
-        func rangeLabel(_ lower: Double, _ upper: Double) -> String {
-            let lowerText: String
-            switch self {
-            case .iob: lowerText = Localizer.formatToLocalizedString(lower, maxFractionDigits: 1)
-            case .cob: lowerText = Localizer.formatToLocalizedString(lower, maxFractionDigits: 0)
-            case .sensitivityRatio: lowerText = Localizer.formatToLocalizedString(lower * 100, maxFractionDigits: 0)
-            }
-            return "\(lowerText)–\(axisLabel(upper))"
-        }
-
-        /// Label in the main-graph legend, where space is tight.
-        var shortTitle: String {
-            self == .sensitivityRatio ? "Ratio" : title
-        }
-
         var color: Color {
             switch self {
             case .iob: return Color("Insulin")
@@ -106,8 +90,8 @@ enum BGChartHistory {
         var id: Int { kind.rawValue }
     }
 
-    /// History curves drawn as lines in the bottom band of the main chart. Each
-    /// is scaled to its own range, which the legend states.
+    /// History curves drawn as lines in the bottom band of the main chart, each
+    /// scaled to its own range.
     struct Overlay {
         struct Series: Identifiable {
             let kind: PaneKind
@@ -118,26 +102,13 @@ enum BGChartHistory {
             var color: Color { isNegative ? BGChartHistory.negativeIOBColor : kind.color }
         }
 
-        struct LegendEntry: Identifiable {
-            let kind: PaneKind
-            /// Values at the bottom and top of the band.
-            let range: String
-            /// Set when negative IOB is drawn mirrored in its own color.
-            let hasNegative: Bool
-            var id: Int { kind.rawValue }
-        }
-
         let series: [Series]
-        /// Top of the band, in the main chart's mg/dL scale.
-        let bandTop: Double
-        let legend: [LegendEntry]
     }
 
     static let negativeIOBColor = Color(.systemPink)
 
     static func overlay(kinds: [PaneKind], samples: [DeviceStatusHistorySample], bandTop: Double) -> Overlay? {
         var series: [Overlay.Series] = []
-        var legend: [Overlay.LegendEntry] = []
 
         for kind in kinds {
             let points = points(from: samples, value: kind.value(of:))
@@ -153,8 +124,6 @@ enum BGChartHistory {
                 if !negative.isEmpty {
                     series.append(.init(kind: kind, isNegative: true, points: negative.map { scaled($0, abs($0.value) / magnitude * bandTop) }))
                 }
-                let range = negative.isEmpty ? kind.rangeLabel(0, magnitude) : "±\(kind.axisLabel(magnitude))"
-                legend.append(.init(kind: kind, range: range, hasNegative: !negative.isEmpty))
                 continue
             }
 
@@ -173,11 +142,10 @@ enum BGChartHistory {
             }
             let span = max(upper - lower, .ulpOfOne)
             series.append(.init(kind: kind, isNegative: false, points: points.map { scaled($0, ($0.value - lower) / span * bandTop) }))
-            legend.append(.init(kind: kind, range: kind.rangeLabel(lower, upper), hasNegative: false))
         }
 
         guard !series.isEmpty else { return nil }
-        return Overlay(series: series, bandTop: bandTop, legend: legend)
+        return Overlay(series: series)
     }
 
     private static func scaled(_ point: Point, _ value: Double) -> Point {

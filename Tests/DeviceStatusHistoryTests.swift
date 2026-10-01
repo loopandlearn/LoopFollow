@@ -269,12 +269,10 @@ struct BGChartHistoryTests {
         }
     }
 
-    @Test("The main-graph overlay mirrors negative IOB and names it in the legend")
-    func overlayLegend() throws {
+    @Test("The main-graph overlay mirrors negative IOB inside the band")
+    func overlayNegativeIOB() throws {
         let overlay = try #require(BGChartHistory.overlay(kinds: [.iob], samples: samples([(0, 2), (5, -1)]), bandTop: 60))
         #expect(overlay.series.map(\.isNegative) == [false, true])
-        #expect(overlay.legend.count == 1)
-        #expect(overlay.legend.first?.hasNegative == true)
         let maxDrawn = overlay.series.flatMap(\.points).map(\.value).max() ?? 0
         #expect(maxDrawn <= 60)
         #expect(overlay.series.flatMap(\.points).allSatisfy { $0.value >= 0 })

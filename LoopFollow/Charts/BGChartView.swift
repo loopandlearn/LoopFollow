@@ -280,10 +280,8 @@ private struct MainBGChart: View {
             overrideBandLabelsOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
 
-            historyOverlayLegend
-                .allowsHitTesting(false)
-
-            if !interaction.followLatest {
+            // Hidden while scrubbing, when the user is inspecting rather than navigating.
+            if !interaction.followLatest, !isInspectLatched {
                 jumpToNowButton
                     .frame(width: viewportWidth, height: mainHeight)
             }
@@ -809,12 +807,6 @@ private struct MainBGChart: View {
         case tap
     }
 
-    /// While scrubbing, the BG display and info table show the values at the
-    /// scrubbed time, so the pill carries only what they cannot.
-    private var isRetroScrub: Bool {
-        isInspectLatched
-    }
-
     private func selectionAnchor(for selected: Date, purpose: SelectionPurpose = .scrub) -> SelectionAnchor? {
         let slot = model.scrubSlots.slot(containing: selected)
         let mark = slot.date
@@ -827,11 +819,9 @@ private struct MainBGChart: View {
         let readings = model.bg.filter { slot.contains($0.date) }
         let bandTexts = bandPillTexts(at: mark)
 
-        // Scrubbing: the displays above show the BG and loop values, so the
-        // pill lists only treatments and bands. Taps also list the readings.
-        var texts = treatments.map(\.pillText)
-        if purpose == .tap { texts += readings.map(bgPillText) }
-        texts += bandTexts
+        // Scrubbing shows no pill: the BG display and info table show the
+        // values at the scrubbed time. A tap lists what happened there.
+        let texts = purpose == .tap ? treatments.map(\.pillText) + readings.map(bgPillText) + bandTexts : []
 
         func distanceToMark(_ date: Date) -> TimeInterval { abs(date.timeIntervalSince(mark)) }
 
@@ -969,16 +959,9 @@ private struct MainBGChart: View {
         }
     }
 
-    /// Where the pill goes for an indicator at (x, y). While retro-scrubbing it
-    /// sits at the top of the plot, left of the indicator, clear of the
-    /// forecast drawn to its right; otherwise it hugs the anchor, below it
-    /// when there is room.
+    /// Where the pill goes for an indicator at (x, y): under the anchor when
+    /// there is room, else above it.
     private func pillPosition(x: CGFloat, y: CGFloat, pillW: CGFloat, pillH: CGFloat, viewportWidth: CGFloat) -> CGPoint {
-        if isRetroScrub {
-            let left = x - 10 - pillW / 2
-            let labelX = left - pillW / 2 >= 4 ? left : min(x + 10 + pillW / 2, viewportWidth - pillW / 2 - 4)
-            return CGPoint(x: labelX, y: plotFrame.minY + pillH / 2 + 4)
-        }
         let labelX = min(max(x, pillW / 2 + 4), viewportWidth - pillW / 2 - 4)
         let below = y + 14 + pillH / 2
         let above = y - 14 - pillH / 2
@@ -986,46 +969,11 @@ private struct MainBGChart: View {
         return CGPoint(x: labelX, y: fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4))
     }
 
-    /// Names the history curves drawn in the main graph and the range each
-    /// one's band spans, while the user scrubs the graph.
-    /// Sits in the bottom-right corner, over the forecast side of the graph
-    /// where no history is drawn.
-    @ViewBuilder
-    private var historyOverlayLegend: some View {
-        if let overlay = model.historyOverlay, plotFrame.height > 0, isInspectLatched, selection != nil {
-            VStack(alignment: .leading, spacing: 1) {
-                ForEach(overlay.legend) { entry in
-                    HStack(spacing: 3) {
-                        Capsule()
-                            .fill(entry.kind.color)
-                            .frame(width: 8, height: 3)
-                        if entry.hasNegative {
-                            Capsule()
-                                .fill(BGChartHistory.negativeIOBColor)
-                                .frame(width: 8, height: 3)
-                        }
-                        Text(entry.kind.shortTitle)
-                        Text(entry.range)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .font(.system(size: 10))
-            .padding(.horizontal, 4)
-            .padding(.vertical, 3)
-            .background(RoundedRectangle(cornerRadius: 5).fill(Color(.secondarySystemBackground).opacity(0.9)))
-            .fixedSize()
-            .padding(.trailing, 30)
-            .padding(.bottom, 2)
-            .frame(width: plotFrame.maxX, height: plotFrame.maxY, alignment: .bottomTrailing)
-        }
-    }
-
     /// The forecast the loop made from the scrubbed BG reading, drawn in the
     /// shell like the pill so scrubbing never re-lays the canvas.
     @ViewBuilder
     private func historyForecastOverlay(viewportWidth: CGFloat) -> some View {
-        if isRetroScrub, plotFrame.height > 0,
+        if isInspectLatched, plotFrame.height > 0,
            let readingDate = activeAnchor()?.readingDate,
            let forecast = BGChartHistory.forecast(forReadingAt: readingDate)
         {
