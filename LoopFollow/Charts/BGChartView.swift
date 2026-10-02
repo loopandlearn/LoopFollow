@@ -185,8 +185,8 @@ private struct MainBGChart: View {
     /// away from the live edge, cleared on return to it.
     @State private var autoFollowPausedUntil: Date?
 
-    /// The jump to now button hides while scrubbing and fades back in a moment
-    /// after the finger lifts, so it stays out of the way while reading.
+    /// The jump to now button hides while the user pans, zooms or scrubs and
+    /// fades back in a moment after, so it stays out of the way.
     @State private var showJumpToNow = true
     @State private var jumpToNowFadeTask: Task<Void, Never>?
 
@@ -315,7 +315,9 @@ private struct MainBGChart: View {
         // The displays show the scrubbed time only while the finger is down.
         .onChange(of: isInspectLatched) { _, latched in
             if !latched { RetroSelection.shared.select(nil) }
-            updateJumpToNowVisibility(scrubbing: latched)
+        }
+        .onChange(of: isInteracting) { _, interacting in
+            updateJumpToNowVisibility(interacting: interacting)
         }
         .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
         .onChange(of: interaction.scrollPosition) { _, _ in
@@ -374,9 +376,14 @@ private struct MainBGChart: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
     }
 
-    private func updateJumpToNowVisibility(scrubbing: Bool) {
+    /// A finger is on the chart (scrub, pan, pinch) or a flick is still gliding.
+    private var isInteracting: Bool {
+        isInspectLatched || panBaseline != nil || pinchAnchor != nil || momentumTask != nil
+    }
+
+    private func updateJumpToNowVisibility(interacting: Bool) {
         jumpToNowFadeTask?.cancel()
-        if scrubbing {
+        if interacting {
             showJumpToNow = false
             return
         }
@@ -750,6 +757,9 @@ private struct MainBGChart: View {
         }
         updateRenderWindow(force: true)
         interaction.persistZoom()
+        // A double tap is over at once: hide the button and fade it back in.
+        showJumpToNow = false
+        updateJumpToNowVisibility(interacting: false)
     }
 
     // MARK: Selection
