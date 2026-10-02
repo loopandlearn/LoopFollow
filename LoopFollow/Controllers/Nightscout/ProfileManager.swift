@@ -125,38 +125,57 @@ final class ProfileManager {
     }
 
     func currentISF() -> HKQuantity? {
-        return getCurrentValue(from: isfSchedule)
+        isf(at: Date())
     }
 
     func currentBasal() -> String? {
-        if let basal = getCurrentValue(from: basalSchedule) {
-            return Localizer.formatToLocalizedString(basal, maxFractionDigits: 2, minFractionDigits: 0)
-        }
-        return nil
+        basal(at: Date())
     }
 
     func currentCarbRatio() -> Double? {
-        return getCurrentValue(from: carbRatioSchedule)
+        carbRatio(at: Date())
     }
 
     func currentTargetLow() -> HKQuantity? {
-        return getCurrentValue(from: targetLowSchedule)
+        targetLow(at: Date())
     }
 
     func currentTargetHigh() -> HKQuantity? {
-        return getCurrentValue(from: targetHighSchedule)
+        targetHigh(at: Date())
     }
 
-    private func getCurrentValue<T>(from schedule: [TimeValue<T>]) -> T? {
+    /// The loaded profile's scheduled values at the clock time of `date`.
+    func isf(at date: Date) -> HKQuantity? {
+        value(from: isfSchedule, at: date)
+    }
+
+    func basal(at date: Date) -> String? {
+        value(from: basalSchedule, at: date).map {
+            Localizer.formatToLocalizedString($0, maxFractionDigits: 2, minFractionDigits: 0)
+        }
+    }
+
+    func carbRatio(at date: Date) -> Double? {
+        value(from: carbRatioSchedule, at: date)
+    }
+
+    func targetLow(at date: Date) -> HKQuantity? {
+        value(from: targetLowSchedule, at: date)
+    }
+
+    func targetHigh(at date: Date) -> HKQuantity? {
+        value(from: targetHighSchedule, at: date)
+    }
+
+    private func value<T>(from schedule: [TimeValue<T>], at date: Date) -> T? {
         guard !schedule.isEmpty else { return nil }
 
-        let now = Date()
         var calendar = Calendar.current
         calendar.timeZone = timezone
 
-        let currentTimeInSeconds = calendar.component(.hour, from: now) * 3600 +
-            calendar.component(.minute, from: now) * 60 +
-            calendar.component(.second, from: now)
+        let currentTimeInSeconds = calendar.component(.hour, from: date) * 3600 +
+            calendar.component(.minute, from: date) * 60 +
+            calendar.component(.second, from: date)
 
         var lastValue: T?
         for timeValue in schedule {

@@ -132,6 +132,11 @@ class Storage {
     var showPriorDayTimeLines = StorageValue<Bool>(key: "showPriorDayTimeMarkers", defaultValue: false)
     var showYesterdayLine = StorageValue<Bool>(key: "showYesterdayLine", defaultValue: false)
     var smallGraphTreatments = StorageValue<Bool>(key: "smallGraphTreatments", defaultValue: true)
+    var showIOBGraph = StorageValue<Bool>(key: "showIOBGraph", defaultValue: false)
+    var showCOBGraph = StorageValue<Bool>(key: "showCOBGraph", defaultValue: false)
+    var showSensitivityRatioGraph = StorageValue<Bool>(key: "showSensitivityRatioGraph", defaultValue: false)
+    var showSmoothedBG = StorageValue<Bool>(key: "showSmoothedBG", defaultValue: false)
+    var historyCurvePlacement = StorageValue<HistoryCurvePlacement>(key: "historyCurvePlacement", defaultValue: .separate)
 
     var smallGraphHeight = StorageValue<Int>(key: "smallGraphHeight", defaultValue: 40)
     var predictionToLoad = StorageValue<Double>(key: "predictionToLoad", defaultValue: 1.0)
