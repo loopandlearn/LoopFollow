@@ -185,6 +185,11 @@ private struct MainBGChart: View {
     /// away from the live edge, cleared on return to it.
     @State private var autoFollowPausedUntil: Date?
 
+    /// The jump to now button hides while scrubbing and fades back in a moment
+    /// after the finger lifts, so it stays out of the way while reading.
+    @State private var showJumpToNow = true
+    @State private var jumpToNowFadeTask: Task<Void, Never>?
+
     private var timeZoneForAxis: TimeZone {
         if Storage.shared.graphTimeZoneEnabled.value,
            let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
@@ -280,10 +285,11 @@ private struct MainBGChart: View {
             overrideBandLabelsOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
 
-            // Hidden while scrubbing, when the user is inspecting rather than navigating.
-            if !interaction.followLatest, !isInspectLatched {
+            if !interaction.followLatest {
                 jumpToNowButton
                     .frame(width: viewportWidth, height: mainHeight)
+                    .opacity(showJumpToNow ? 1 : 0)
+                    .allowsHitTesting(showJumpToNow)
             }
         }
         .frame(width: viewportWidth, height: viewport.height, alignment: .topLeading)
@@ -309,6 +315,7 @@ private struct MainBGChart: View {
         // The displays show the scrubbed time only while the finger is down.
         .onChange(of: isInspectLatched) { _, latched in
             if !latched { RetroSelection.shared.select(nil) }
+            updateJumpToNowVisibility(scrubbing: latched)
         }
         .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
         .onChange(of: interaction.scrollPosition) { _, _ in
@@ -346,6 +353,7 @@ private struct MainBGChart: View {
         .onDisappear {
             momentumTask?.cancel()
             momentumTask = nil
+            jumpToNowFadeTask?.cancel()
             resetGestureState()
         }
     }
@@ -364,6 +372,21 @@ private struct MainBGChart: View {
         .padding(.trailing, 44)
         .padding(.bottom, 28)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+
+    private func updateJumpToNowVisibility(scrubbing: Bool) {
+        jumpToNowFadeTask?.cancel()
+        if scrubbing {
+            showJumpToNow = false
+            return
+        }
+        jumpToNowFadeTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.4)) {
+                showJumpToNow = true
+            }
+        }
     }
 
     // MARK: Render window / follow state
