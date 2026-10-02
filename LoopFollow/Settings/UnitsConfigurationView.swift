@@ -25,6 +25,8 @@ struct UnitsConfigurationView: View {
     var sections: Sections = .all
 
     @State private var rangeMode = UnitSettingsStore.shared.timeInRangeMode
+    @ObservedObject private var showStats = Storage.shared.showStats
+    @ObservedObject private var showTIRBand = Storage.shared.showTIRBand
     @State private var glucoseUnit = UnitSettingsStore.shared.glucoseUnit
     @State private var lowValue = Storage.shared.lowLine.value
     @State private var highValue = Storage.shared.highLine.value
@@ -67,6 +69,20 @@ struct UnitsConfigurationView: View {
     @ViewBuilder
     private var statisticsSections: some View {
         Group {
+            Section {
+                Toggle("Display Stats", isOn: $showStats.value)
+                if showStats.value {
+                    Picker("Stats Style", selection: $showTIRBand.value) {
+                        Text("Statistics Box").tag(false)
+                        Text("Time in Range Band").tag(true)
+                    }
+                }
+            } header: {
+                Text("Home Screen Stats")
+            } footer: {
+                Text("Statistics Box shows the pie chart, averages and A1C for the last 24 hours. Time in Range Band shows today's time in range for the Range Mode below. The same setting is in General.")
+            }
+
             Section {
                 Picker("Range Mode", selection: $rangeMode) {
                     Text("TIR").tag(TimeInRangeDisplayMode.tir)

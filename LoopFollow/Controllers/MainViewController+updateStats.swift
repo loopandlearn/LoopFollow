@@ -48,5 +48,41 @@ extension MainViewController {
             statsDisplayModel.pieRange = Double(stats.percentRange)
             statsDisplayModel.pieHigh = Double(stats.percentHigh)
         }
+        updateTIRBand()
+    }
+
+    /// Today's (since midnight) range distribution for the Time in Range band.
+    /// Very low is below 54 mg/dL; low, in range and high follow the Range Mode
+    /// chosen in Settings (TIR, TITR or Custom).
+    func updateTIRBand() {
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        let startOfDay = Calendar.current.startOfDay(for: Date()).timeIntervalSince1970
+        let values = bgData
+            .filter { $0.date >= startOfDay && $0.sgv > 0 }
+            .map { Double($0.sgv) }
+
+        switch UnitSettingsStore.shared.timeInRangeMode {
+        case .tir: statsDisplayModel.bandTitle = "Time in Range"
+        case .titr: statsDisplayModel.bandTitle = "Time in Tight Range"
+        case .custom: statsDisplayModel.bandTitle = "Time in Range"
+        }
+
+        guard !values.isEmpty else {
+            statsDisplayModel.bandHasData = false
+            statsDisplayModel.bandVeryLowPct = 0
+            statsDisplayModel.bandLowPct = 0
+            statsDisplayModel.bandInRangePct = 0
+            statsDisplayModel.bandHighPct = 0
+            return
+        }
+
+        let total = Double(values.count)
+        func pct(_ count: Int) -> Double { Double(count) / total * 100 }
+
+        statsDisplayModel.bandVeryLowPct = pct(values.filter { $0 < 54 }.count)
+        statsDisplayModel.bandLowPct = pct(values.filter { $0 >= 54 && $0 < thresholds.low }.count)
+        statsDisplayModel.bandInRangePct = pct(values.filter { $0 >= thresholds.low && $0 <= thresholds.high }.count)
+        statsDisplayModel.bandHighPct = pct(values.filter { $0 > thresholds.high }.count)
+        statsDisplayModel.bandHasData = true
     }
 }
