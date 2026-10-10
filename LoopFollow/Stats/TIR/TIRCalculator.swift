@@ -102,6 +102,9 @@ class TIRCalculator {
             return (0.0, 0.0, 0.0, 0.0, 0.0)
         }
 
+        let veryLowThreshold = min(veryLowThreshold, lowThreshold)
+        let veryHighThreshold = max(veryHighThreshold, highThreshold)
+
         var veryLowCount = 0
         var lowCount = 0
         var inRangeCount = 0
