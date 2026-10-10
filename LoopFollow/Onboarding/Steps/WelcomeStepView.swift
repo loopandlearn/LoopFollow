@@ -67,7 +67,7 @@ struct WelcomeStepView: View {
         }
     }
 
-    private func primaryLabel(_ text: String) -> some View {
+    private func primaryLabel(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.body.weight(.semibold))
             .frame(maxWidth: .infinity)

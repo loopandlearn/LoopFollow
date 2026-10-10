@@ -9,8 +9,7 @@ struct RecBolusAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when the recommended bolus equals or exceeds the " +
-                    "threshold you set below.",
+                text: "Alerts when the recommended bolus equals or exceeds the threshold you set below.",
                 alarmType: alarm.type
             )
 

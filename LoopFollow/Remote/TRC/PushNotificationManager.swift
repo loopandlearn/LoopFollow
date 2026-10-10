@@ -217,28 +217,28 @@ class PushNotificationManager {
         if teamId.isEmpty { missingFields.append("teamId") }
 
         if !missingFields.isEmpty {
-            let errorMessage = "Missing required fields for command: \(missingFields.joined(separator: ", "))"
+            let errorMessage = String(localized: "Missing required fields for command: \(missingFields.joined(separator: ", "))")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         if let validationErrors = validateCredentials() {
-            let errorMessage = "Credential validation failed: \(validationErrors.joined(separator: ", "))"
+            let errorMessage = String(localized: "Credential validation failed: \(validationErrors.joined(separator: ", "))")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let url = constructAPNsURL() else {
-            let errorMessage = "Failed to construct APNs URL"
+            let errorMessage = String(localized: "Failed to construct APNs URL")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
         }
 
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
-            let errorMessage = "Failed to generate JWT, please check that the token is correct."
+            let errorMessage = String(localized: "Failed to generate JWT, please check that the token is correct.")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
             return
@@ -246,7 +246,7 @@ class PushNotificationManager {
 
         do {
             guard let messenger = SecureMessenger(sharedSecret: sharedSecret) else {
-                let errorMessage = "Failed to initialize security module. Check shared secret."
+                let errorMessage = String(localized: "Failed to initialize security module. Check shared secret.")
                 LogManager.shared.log(category: .apns, message: errorMessage)
                 completion(false, errorMessage)
                 return
@@ -269,7 +269,7 @@ class PushNotificationManager {
 
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
+                    let errorMessage = String(localized: "Failed to send push notification: \(error.localizedDescription)")
                     LogManager.shared.log(category: .apns, message: errorMessage)
                     completion(false, errorMessage)
                     return
@@ -320,7 +320,7 @@ class PushNotificationManager {
             task.resume()
 
         } catch {
-            let errorMessage = "Failed to encode or encrypt push message: \(error.localizedDescription)"
+            let errorMessage = String(localized: "Failed to encode or encrypt push message: \(error.localizedDescription)")
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
         }

@@ -4,8 +4,8 @@
 import SwiftUI
 
 struct LoadingButtonView: View {
-    var buttonText: String
-    var progressText: String
+    var buttonText: LocalizedStringKey
+    var progressText: LocalizedStringKey
     var isLoading: Bool
     var action: () -> Void
     var isDisabled: Bool = false

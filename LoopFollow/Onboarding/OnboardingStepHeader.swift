@@ -11,8 +11,8 @@ import SwiftUI
 /// cards in a plain `VStack`. Callers add their own horizontal padding to match.
 struct OnboardingStepHeader: View {
     let systemImage: String
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
 
     var body: some View {
         // Left-aligned: justified/centered body copy is harder to read, so the

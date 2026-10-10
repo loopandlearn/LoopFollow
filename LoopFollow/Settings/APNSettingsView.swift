@@ -29,7 +29,7 @@ struct APNSettingsView: View {
                         if !keyId.isEmpty {
                             Image(systemName: keyIdValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                                 .foregroundColor(keyIdValid ? .green : .orange)
-                                .accessibilityLabel(keyIdValid ? "Valid Key ID" : "Invalid Key ID")
+                                .accessibilityLabel(keyIdValid ? Text("Valid Key ID") : Text("Invalid Key ID"))
                         }
                     }
                     if !keyId.isEmpty, !keyIdValid {
@@ -46,7 +46,7 @@ struct APNSettingsView: View {
                         if !apnsKey.isEmpty {
                             Image(systemName: apnsKeyValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                                 .foregroundColor(apnsKeyValid ? .green : .orange)
-                                .accessibilityLabel(apnsKeyValid ? "Valid APNs key" : "Invalid APNs key")
+                                .accessibilityLabel(apnsKeyValid ? Text("Valid APNs key") : Text("Invalid APNs key"))
                         }
                     }
                     TogglableSecureInput(

@@ -238,31 +238,30 @@ struct MealView: View {
                     let fatAmount = fat.doubleValue(for: HKUnit.gram())
                     let bolusAmount = bolusAmount.doubleValue(for: .internationalUnit())
 
-                    var message = "Are you sure you want to send the meal data"
-
+                    var message: String
                     if let selectedTime = selectedTime {
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
                         let timeString = timeFormatter.string(from: selectedTime)
-                        message += " for \(timeString)?"
+                        message = String(localized: "Are you sure you want to send the meal data for \(timeString)?")
                     } else {
-                        message += " now?"
+                        message = String(localized: "Are you sure you want to send the meal data now?")
                     }
 
                     if carbsAmount > 0 {
-                        message += String(format: "\nCarbs: %.0f g", carbsAmount)
+                        message += "\n" + String(localized: "Carbs: \(carbsAmount, specifier: "%.0f") g")
                     }
 
                     if proteinAmount > 0 {
-                        message += String(format: "\nProtein: %.0f g", proteinAmount)
+                        message += "\n" + String(localized: "Protein: \(proteinAmount, specifier: "%.0f") g")
                     }
 
                     if fatAmount > 0 {
-                        message += String(format: "\nFat: %.0f g", fatAmount)
+                        message += "\n" + String(localized: "Fat: \(fatAmount, specifier: "%.0f") g")
                     }
 
                     if bolusAmount > 0 {
-                        message += String(format: "\nBolus: %.2f U", bolusAmount)
+                        message += "\n" + String(localized: "Bolus: \(bolusAmount, specifier: "%.2f") U")
                     }
 
                     return Alert(
@@ -281,7 +280,7 @@ struct MealView: View {
                                                 self.alertType = .validationError
                                                 self.showAlert = true
                                             case .failed:
-                                                self.alertMessage = "Authentication failed"
+                                                self.alertMessage = String(localized: "Authentication failed")
                                                 self.alertType = .validationError
                                                 self.showAlert = true
                                             case .canceled:

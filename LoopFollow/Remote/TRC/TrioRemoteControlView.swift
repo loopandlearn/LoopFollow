@@ -33,7 +33,7 @@ struct TrioRemoteControlView: View {
 }
 
 struct CommandButtonView<Destination: View>: View {
-    let command: String
+    let command: LocalizedStringKey
     let iconName: String
     let destination: Destination
     /// Lights the button up with a glow while the corresponding override /

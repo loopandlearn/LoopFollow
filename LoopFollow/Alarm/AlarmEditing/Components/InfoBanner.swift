@@ -5,7 +5,7 @@ import SwiftUI
 
 struct InfoBanner: View {
     /// Main explanatory text
-    let text: String
+    let text: LocalizedStringKey
 
     /// Optional alarm type whose icon you’d like to show.
     /// If `nil`, we fall back to the standard “info” symbol.

@@ -46,7 +46,7 @@ extension MainViewController {
             IsNotLooping = true
             Observable.shared.isNotLooping.value = true
 
-            Observable.shared.loopStatusText.value = "⚠️ Not Looping!"
+            Observable.shared.loopStatusText.value = String(localized: "⚠️ Not Looping!")
             Observable.shared.loopStatusColor.value = .yellow
             #if !targetEnvironment(macCatalyst)
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "notLooping")

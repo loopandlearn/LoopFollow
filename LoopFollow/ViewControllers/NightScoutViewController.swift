@@ -91,11 +91,11 @@ extension NightscoutViewController: WKNavigationDelegate, WKUIDelegate {
     func webView(_: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame _: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         let alertCtrl = UIAlertController(title: nil, message: message, preferredStyle: .alert)
 
-        alertCtrl.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+        alertCtrl.addAction(UIAlertAction(title: String(localized: "OK"), style: .default) { _ in
             completionHandler(true)
         })
 
-        alertCtrl.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+        alertCtrl.addAction(UIAlertAction(title: String(localized: "Cancel"), style: .cancel) { _ in
             completionHandler(false)
         })
 

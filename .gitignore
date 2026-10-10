@@ -88,3 +88,6 @@ docs/LiveActivityTestPlan.md
 CLAUDE.md
 
 node_modules/
+
+# Python helper scripts
+__pycache__/

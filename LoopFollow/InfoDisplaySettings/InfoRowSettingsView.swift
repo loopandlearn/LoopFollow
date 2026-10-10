@@ -91,9 +91,9 @@ struct InfoRowSettingsView: View {
     private func colorFooter(_ config: InfoColorConfig) -> String {
         switch config.direction {
         case .above:
-            return "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm."
+            return String(localized: "The value turns yellow at or above the yellow level and red at or above the red level. In range it shows green. A visual cue only — it never triggers an alarm.", comment: "Info row color footer")
         case .below:
-            return "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm."
+            return String(localized: "The value turns yellow at or below the yellow level and red at or below the red level. In range it shows green. A visual cue only — it never triggers an alarm.", comment: "Info row color footer")
         }
     }
 }

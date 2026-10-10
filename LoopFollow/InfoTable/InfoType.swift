@@ -8,27 +8,27 @@ enum InfoType: Int, CaseIterable, Codable {
 
     var name: String {
         switch self {
-        case .iob: return "IOB"
-        case .cob: return "COB"
-        case .basal: return "Basal"
-        case .override: return "Override"
-        case .battery: return "Battery"
-        case .pump: return "Pump"
-        case .pumpBattery: return "Pump Battery"
-        case .sage: return "SAGE"
-        case .cage: return "CAGE"
-        case .recBolus: return "Rec. Bolus"
-        case .minMax: return "Min/Max"
-        case .carbsToday: return "Carbs today"
-        case .autosens: return "Autosens"
-        case .profile: return "Profile"
-        case .target: return "Target"
-        case .isf: return "ISF"
-        case .carbRatio: return "CR"
-        case .updated: return "Updated"
-        case .tdd: return "TDD"
-        case .iage: return "IAGE"
-        case .dbSize: return "DB Size"
+        case .iob: return String(localized: "IOB", comment: "Info table row")
+        case .cob: return String(localized: "COB", comment: "Info table row")
+        case .basal: return String(localized: "Basal", comment: "Info table row")
+        case .override: return String(localized: "Override", comment: "Info table row")
+        case .battery: return String(localized: "Battery", comment: "Info table row")
+        case .pump: return String(localized: "Pump", comment: "Info table row")
+        case .pumpBattery: return String(localized: "Pump Battery", comment: "Info table row")
+        case .sage: return String(localized: "SAGE", comment: "Info table row")
+        case .cage: return String(localized: "CAGE", comment: "Info table row")
+        case .recBolus: return String(localized: "Rec. Bolus", comment: "Info table row")
+        case .minMax: return String(localized: "Min/Max", comment: "Info table row")
+        case .carbsToday: return String(localized: "Carbs today", comment: "Info table row")
+        case .autosens: return String(localized: "Autosens", comment: "Info table row")
+        case .profile: return String(localized: "Profile", comment: "Info table row")
+        case .target: return String(localized: "Target", comment: "Info table row")
+        case .isf: return String(localized: "ISF", comment: "Info table row")
+        case .carbRatio: return String(localized: "CR", comment: "Info table row")
+        case .updated: return String(localized: "Updated", comment: "Info table row")
+        case .tdd: return String(localized: "TDD", comment: "Info table row")
+        case .iage: return String(localized: "IAGE", comment: "Info table row")
+        case .dbSize: return String(localized: "DB Size", comment: "Info table row")
         }
     }
 

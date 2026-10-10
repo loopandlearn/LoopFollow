@@ -9,9 +9,7 @@ struct FastRiseAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when glucose readings rise rapidly. For example, "
-                    + "three straight readings each climbing by at least the amount "
-                    + "you set.  Optionally limit alerts to only fire above a certain BG.",
+                text: "Alerts when glucose readings rise rapidly. For example, three straight readings each climbing by at least the amount you set.  Optionally limit alerts to only fire above a certain BG.",
                 alarmType: alarm.type
             )
 
@@ -27,8 +25,7 @@ struct FastRiseAlarmEditor: View {
 
             AlarmStepperSection(
                 header: "Consecutive Rises",
-                footer: "Number of rises—each meeting the rate above—"
-                    + "required before an alert fires.",
+                footer: "Number of rises—each meeting the rate above—required before an alert fires.",
                 title: "Rises in a row",
                 range: 1 ... 3,
                 step: 1,
@@ -37,8 +34,7 @@ struct FastRiseAlarmEditor: View {
 
             AlarmBGLimitSection(
                 header: "BG Limit",
-                footer: "When enabled, this alert only fires if the glucose is "
-                    + "above the limit you set.",
+                footer: "When enabled, this alert only fires if the glucose is above the limit you set.",
                 toggleText: "Use BG Limit",
                 pickerTitle: "Rising above",
                 range: 40 ... 300,

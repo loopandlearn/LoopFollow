@@ -9,8 +9,7 @@ struct IOBAlarmEditor: View {
     var body: some View {
         Group {
             InfoBanner(
-                text: "Alerts when insulin-on-board is high, or when several "
-                    + "boluses in quick succession exceed the limits you set.",
+                text: "Alerts when insulin-on-board is high, or when several boluses in quick succession exceed the limits you set.",
                 alarmType: alarm.type
             )
 

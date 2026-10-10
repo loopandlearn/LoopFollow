@@ -12,11 +12,11 @@ enum TabPosition: String, CaseIterable, Codable, Comparable {
 
     var displayName: String {
         switch self {
-        case .position1: return "Tab 1"
-        case .position2: return "Tab 2"
-        case .position3: return "Tab 3"
-        case .position4: return "Tab 4"
-        case .menu, .more, .disabled: return "Menu"
+        case .position1: return String(localized: "Tab 1", comment: "Tab position")
+        case .position2: return String(localized: "Tab 2", comment: "Tab position")
+        case .position3: return String(localized: "Tab 3", comment: "Tab position")
+        case .position4: return String(localized: "Tab 4", comment: "Tab position")
+        case .menu, .more, .disabled: return String(localized: "Menu", comment: "Tab position")
         }
     }
 
@@ -67,13 +67,13 @@ enum TabItem: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .home: return "Home"
-        case .alarms: return "Alarms"
-        case .remote: return "Remote"
-        case .nightscout: return "Nightscout"
-        case .snoozer: return "Snoozer"
-        case .treatments: return "Treatments"
-        case .stats: return "Statistics"
+        case .home: return String(localized: "Home", comment: "Tab / feature name")
+        case .alarms: return String(localized: "Alarms", comment: "Tab / feature name")
+        case .remote: return String(localized: "Remote", comment: "Tab / feature name")
+        case .nightscout: return String(localized: "Nightscout", comment: "Tab / feature name")
+        case .snoozer: return String(localized: "Snoozer", comment: "Tab / feature name")
+        case .treatments: return String(localized: "Treatments", comment: "Tab / feature name")
+        case .stats: return String(localized: "Statistics", comment: "Tab / feature name")
         }
     }
 

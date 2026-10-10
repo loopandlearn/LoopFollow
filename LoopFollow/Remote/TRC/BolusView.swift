@@ -166,7 +166,7 @@ struct BolusView: View {
                                         self.alertType = .validation
                                         self.showAlert = true
                                     case .failed:
-                                        self.alertMessage = "Authentication failed"
+                                        self.alertMessage = String(localized: "Authentication failed")
                                         self.alertType = .validation
                                         self.showAlert = true
                                     case .canceled:
@@ -241,7 +241,7 @@ struct BolusView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("\(InsulinFormatter.shared.string(steppedRec))U")
-                                    Text("Calculated \(mins) minute\(mins == 1 ? "" : "s") ago")
+                                    Text("Calculated \(mins) minutes ago")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -281,7 +281,7 @@ struct BolusView: View {
         if isStale12 { return }
         if isStale5 {
             let mins = Int(ageSec / 60)
-            alertMessage = "This recommended bolus was calculated \(mins) minutes ago. New treatments may have occurred since then. Proceed with caution."
+            alertMessage = String(localized: "This recommended bolus was calculated \(mins) minutes ago. New treatments may have occurred since then. Proceed with caution.")
             alertType = .oldCalculationWarning
             showAlert = true
         } else {

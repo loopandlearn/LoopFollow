@@ -274,7 +274,7 @@ struct DateRangePicker: View {
 }
 
 struct QuickSelectButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let action: () -> Void
 
     var body: some View {

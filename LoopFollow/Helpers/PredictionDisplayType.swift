@@ -7,8 +7,8 @@ enum PredictionDisplayType: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .cone: return "Cone"
-        case .lines: return "Lines"
+        case .cone: return String(localized: "Cone", comment: "Prediction display style")
+        case .lines: return String(localized: "Lines", comment: "Prediction display style")
         }
     }
 }

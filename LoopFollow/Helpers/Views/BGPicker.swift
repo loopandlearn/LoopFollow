@@ -6,7 +6,7 @@ import SwiftUI
 
 /// Lets the user pick a BG-related number (mg/dL or mmol/L) inside any form row.
 struct BGPicker: View {
-    let title: String
+    let title: LocalizedStringKey
     let range: ClosedRange<Double>
     @Binding var value: Double
 

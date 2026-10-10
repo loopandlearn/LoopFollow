@@ -292,9 +292,9 @@ extension MainViewController {
             self.updateBGTextAppearance()
 
             if latestBG <= globalVariables.minDisplayGlucose {
-                Observable.shared.bgText.value = "LOW"
+                Observable.shared.bgText.value = String(localized: "LOW", comment: "BG below sensor range")
             } else if latestBG >= globalVariables.maxDisplayGlucose {
-                Observable.shared.bgText.value = "HIGH"
+                Observable.shared.bgText.value = String(localized: "HIGH", comment: "BG above sensor range")
             } else {
                 Observable.shared.bgText.value = Localizer.toDisplayUnits(String(latestBG))
             }

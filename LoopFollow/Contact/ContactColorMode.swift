@@ -10,9 +10,9 @@ enum ContactColorMode: String, Codable, CaseIterable {
     var displayName: String {
         switch self {
         case .staticColor:
-            return "Static"
+            return String(localized: "Static", comment: "Contact color mode")
         case .dynamic:
-            return "Dynamic (BG Range)"
+            return String(localized: "Dynamic (BG Range)", comment: "Contact color mode")
         }
     }
 

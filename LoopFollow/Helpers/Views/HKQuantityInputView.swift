@@ -6,7 +6,7 @@ import HealthKit
 import SwiftUI
 
 struct HKQuantityInputView: View {
-    var label: String
+    var label: LocalizedStringKey
     @Binding var quantity: HKQuantity
     var unit: HKUnit
     var maxLength: Int
