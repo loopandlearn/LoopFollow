@@ -271,6 +271,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.showGMI.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.statsSinceMidnight.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lowLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.highLine.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.graphTimeZoneEnabled.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.graphTimeZoneIdentifier.$value.map { _ in () }.eraseToAnyPublisher()
         )
