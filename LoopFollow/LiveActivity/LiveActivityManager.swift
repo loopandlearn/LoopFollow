@@ -439,6 +439,7 @@ final class LiveActivityManager {
     private lazy var refreshCoalescer = RefreshCoalescer(delay: 20) { [weak self] reason in
         self?.performRefresh(reason: reason)
     }
+
     /// Set when the user manually swipes away the LA. Blocks auto-restart until
     /// an explicit user action (Restart button, App Intent) clears it.
     /// In-memory only — resets to false on app relaunch, so a kill + relaunch
