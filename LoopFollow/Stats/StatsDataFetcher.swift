@@ -201,16 +201,7 @@ class StatsDataFetcher {
         var lastFoundIndex = 0
 
         for currentEntry in bolusEntries.reversed() {
-            var bolusDate: String
-            if currentEntry["timestamp"] != nil {
-                bolusDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                bolusDate = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
-            guard let parsedDate = NightscoutUtils.parseDate(bolusDate),
+            guard let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry),
                   let bolus = currentEntry["insulin"] as? Double else { continue }
 
             let dateTimeStamp = parsedDate.timeIntervalSince1970
@@ -250,16 +241,7 @@ class StatsDataFetcher {
         var lastFoundIndex = 0
 
         for currentEntry in smbEntries.reversed() {
-            var bolusDate: String
-            if currentEntry["timestamp"] != nil {
-                bolusDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                bolusDate = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
-            guard let parsedDate = NightscoutUtils.parseDate(bolusDate),
+            guard let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry),
                   let bolus = currentEntry["insulin"] as? Double else { continue }
 
             let dateTimeStamp = parsedDate.timeIntervalSince1970
@@ -296,18 +278,9 @@ class StatsDataFetcher {
         var lastFoundBolus = 0
 
         for currentEntry in carbEntries.reversed() {
-            var carbDate: String
-            if currentEntry["timestamp"] != nil {
-                carbDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                carbDate = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
             let absorptionTime = currentEntry["absorptionTime"] as? Int ?? 0
 
-            guard let parsedDate = NightscoutUtils.parseDate(carbDate),
+            guard let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry),
                   let carbs = currentEntry["carbs"] as? Double else { continue }
 
             let dateTimeStamp = parsedDate.timeIntervalSince1970
