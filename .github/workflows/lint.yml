@@ -10,7 +10,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: lint-${{ github.ref }}
+  # Edits that don't change the base branch get their own group, so they never
+  # cancel an in-flight lint run.
+  group: lint-${{ github.ref }}${{ github.event.action == 'edited' && github.event.changes.base == null && format('-noop-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
