@@ -13,7 +13,7 @@ struct TIRView: View {
             ZStack(alignment: .topTrailing) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text(tirTitle)
+                        Text(UnitSettingsStore.shared.timeInRangeTitle)
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
@@ -84,17 +84,6 @@ struct TIRView: View {
             .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-
-    private var tirTitle: String {
-        switch UnitSettingsStore.shared.timeInRangeMode {
-        case .tir:
-            return "Time in Range"
-        case .titr:
-            return "Time in Tight Range"
-        case .custom:
-            return "Custom Range"
-        }
     }
 
     private func formatRange(_: Double) -> String {
