@@ -70,7 +70,7 @@ extension MainViewController {
     /// or Custom). Very low is below 54 mg/dL and very high above 250 mg/dL, or
     /// the range's own bounds when a custom range extends past them.
     func updateTIRBand(periodStart: TimeInterval) {
-        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        let thresholds = UnitSettingsStore.shared.effectiveBandThresholds()
         let values = bgData
             .filter { $0.date >= periodStart && $0.sgv > 0 }
             .map { Double($0.sgv) }
@@ -79,10 +79,10 @@ extension MainViewController {
 
         let percentages = TIRCalculator.calculatePercentages(
             readings: values,
-            veryLowThreshold: 54.0,
+            veryLowThreshold: thresholds.veryLow,
             lowThreshold: thresholds.low,
             highThreshold: thresholds.high,
-            veryHighThreshold: 250.0
+            veryHighThreshold: thresholds.veryHigh
         )
 
         statsDisplayModel.bandVeryLowPct = percentages.veryLow
