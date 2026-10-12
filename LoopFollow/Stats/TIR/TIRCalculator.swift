@@ -91,7 +91,7 @@ class TIRCalculator {
         return tirPoints
     }
 
-    private static func calculatePercentages(readings: [Double],
+    static func calculatePercentages(readings: [Double],
                                              veryLowThreshold: Double,
                                              lowThreshold: Double,
                                              highThreshold: Double,
@@ -108,14 +108,22 @@ class TIRCalculator {
         var highCount = 0
         var veryHighCount = 0
 
-        for glucose in readings {
-            if glucose < veryLowThreshold {
+        // Compare at display precision so readings that show the same value share a band.
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
+        let veryLowLimit = normalize(veryLowThreshold)
+        let lowLimit = normalize(lowThreshold)
+        let highLimit = normalize(highThreshold)
+        let veryHighLimit = normalize(veryHighThreshold)
+
+        for reading in readings {
+            let glucose = normalize(reading)
+            if glucose < veryLowLimit {
                 veryLowCount += 1
-            } else if glucose < lowThreshold {
+            } else if glucose < lowLimit {
                 lowCount += 1
-            } else if glucose > veryHighThreshold {
+            } else if glucose > veryHighLimit {
                 veryHighCount += 1
-            } else if glucose > highThreshold {
+            } else if glucose > highLimit {
                 highCount += 1
             } else {
                 inRangeCount += 1
