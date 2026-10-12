@@ -16,18 +16,20 @@ enum ContactColorMode: String, Codable, CaseIterable {
         }
     }
 
-    /// Returns the appropriate text color based on the mode and BG value
+    /// Returns the appropriate text color based on the mode and BG value (in mg/dL).
     func textColor(for bgValue: Double, staticColor: UIColor) -> UIColor {
         switch self {
         case .staticColor:
             return staticColor
         case .dynamic:
-            let highLine = Storage.shared.highLine.value
-            let lowLine = Storage.shared.lowLine.value
+            let normalize = UnitSettingsStore.shared.normalizeForColorComparison
+            let normalizedBG = normalize(bgValue)
+            let highLine = normalize(Storage.shared.highLine.value)
+            let lowLine = normalize(Storage.shared.lowLine.value)
 
-            if bgValue >= highLine {
+            if normalizedBG >= highLine {
                 return .systemYellow
-            } else if bgValue <= lowLine {
+            } else if normalizedBG <= lowLine {
                 return .systemRed
             } else {
                 return .systemGreen
