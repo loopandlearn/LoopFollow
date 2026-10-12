@@ -30,8 +30,12 @@ enum GlucoseBand {
         let lowLimit = mmol ? GlucoseConversion.toDisplayedMmol(low) : low
         let highLimit = mmol ? GlucoseConversion.toDisplayedMmol(high) : high
 
-        if value <= lowLimit { return .low }
-        if value >= highLimit { return .high }
+        if value <= lowLimit {
+            return .low
+        }
+        if value >= highLimit {
+            return .high
+        }
         return .inRange
     }
 }
