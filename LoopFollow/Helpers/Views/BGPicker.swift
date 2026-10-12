@@ -17,9 +17,10 @@ struct BGPicker: View {
     private var allValues: [Double] {
         if unit == .millimolesPerLiter {
             let step = 0.1
-            let lower = ceil((range.lowerBound / 18) / step) * step
-            let upper = floor((range.upperBound / 18) / step) * step
-            return stride(from: lower, through: upper, by: step).map { $0 * 18 }
+            let factor = GlucoseConversion.mmolToMgDl
+            let lower = ceil((range.lowerBound / factor) / step) * step
+            let upper = floor((range.upperBound / factor) / step) * step
+            return stride(from: lower, through: upper, by: step).map { $0 * factor }
         } else {
             return Array(stride(from: range.lowerBound,
                                 through: range.upperBound,
