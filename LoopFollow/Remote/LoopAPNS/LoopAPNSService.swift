@@ -305,15 +305,6 @@ class LoopAPNSService {
         return regex?.firstMatch(in: text, options: [], range: range) != nil
     }
 
-    /// Provides simple environment guidance for APNS configuration
-    /// - Returns: String with simple guidance to try opposite setting
-    private func getEnvironmentGuidance() -> String {
-        let currentSetting = storage.productionEnvironment.value ? "ON" : "OFF"
-        let trySetting = storage.productionEnvironment.value ? "OFF" : "ON"
-
-        return "Try changing Production Environment from \(currentSetting) to \(trySetting) in your Loop APNS settings."
-    }
-
     /// Sends an APNS notification
     /// - Parameters:
     ///   - deviceToken: The device token to send to
@@ -424,8 +415,7 @@ class LoopAPNSService {
                         LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
                         completion(true, nil)
                     case 400:
-                        let environmentGuidance = self.getEnvironmentGuidance()
-                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)\n\n\(environmentGuidance)"
+                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)"
                         LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
                         completion(false, errorMessage)
                     case 403:
