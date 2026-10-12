@@ -111,6 +111,8 @@ final class BGChartModel: ObservableObject {
     }
 
     @Published var bg: [BGPoint] = []
+    /// Scrub timeline on the BG cadence; rebuilt together with `bg`.
+    private(set) var scrubSlots = BGChartScrubSlots(readingDates: [])
     @Published var bgRuns: [BGRun] = []
     @Published var yesterday: [BGPoint] = []
     @Published var prediction: [BGPoint] = []
@@ -157,6 +159,7 @@ final class BGChartModel: ObservableObject {
     @Published var now: Date = .init()
     @Published var diaMarkers: [Date] = []
     @Published var midnightMarkers: [Date] = []
+    @Published var priorDayTimeMarkers: [Date] = []
     @Published var thirtyMinMark: Date? = nil
     @Published var ninetyMinMark: Date? = nil
 
@@ -179,6 +182,7 @@ final class BGChartModel: ObservableObject {
     @Published var show90Min: Bool = false
     @Published var showMidnight: Bool = false
     @Published var smallGraphTreatments: Bool = true
+    @Published var showPriorDayTime: Bool = false
 
     private static let doseFormatter: NumberFormatter = {
         let nf = NumberFormatter()
@@ -411,6 +415,7 @@ final class BGChartModel: ObservableObject {
         show90Min = Storage.shared.show90MinLine.value
         showMidnight = Storage.shared.showMidnightLines.value
         smallGraphTreatments = Storage.shared.smallGraphTreatments.value
+        showPriorDayTime = Storage.shared.showPriorDayTimeLines.value
 
         // Advanced-settings visibility toggles. The Nightscout controllers
         // collect the data regardless (it also feeds the info rows), so hidden
@@ -430,6 +435,7 @@ final class BGChartModel: ObservableObject {
         let maxDisplay = globalVariables.maxDisplayGlucose
         func clampSgv(_ sgv: Int) -> Double { Double(min(max(sgv, minDisplay), maxDisplay)) }
 
+        scrubSlots = BGChartScrubSlots(readingDates: vc.bgData.map { Date(timeIntervalSince1970: $0.date) })
         bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
 
@@ -596,6 +602,17 @@ final class BGChartModel: ObservableObject {
             }
             return cal
         }()
+
+        // Mark the current local time on each prior day. Calendar arithmetic
+        // preserves the displayed time of day across daylight-saving changes.
+        var priorDayTimes: [Date] = []
+        var priorDayTime = calendar.date(byAdding: .day, value: -1, to: currentNow)
+        while let marker = priorDayTime, marker > domainStart {
+            priorDayTimes.append(marker)
+            priorDayTime = calendar.date(byAdding: .day, value: -1, to: marker)
+        }
+        priorDayTimeMarkers = priorDayTimes
+
         var cursor = calendar.startOfDay(for: domainStart)
         while cursor <= domainEnd {
             if cursor >= domainStart {

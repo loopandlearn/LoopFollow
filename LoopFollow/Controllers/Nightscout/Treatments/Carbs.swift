@@ -13,18 +13,9 @@ extension MainViewController {
         var lastFoundSmb = 0
 
         for currentEntry in entries.reversed() {
-            var carbDate: String
-            if currentEntry["timestamp"] != nil {
-                carbDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                carbDate = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
             let absorptionTime = currentEntry["absorptionTime"] as? Int ?? 0
 
-            guard let parsedDate = NightscoutUtils.parseDate(carbDate),
+            guard let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry),
                   let carbs = currentEntry["carbs"] as? Double else { continue }
 
             let dateTimeStamp = parsedDate.timeIntervalSince1970
