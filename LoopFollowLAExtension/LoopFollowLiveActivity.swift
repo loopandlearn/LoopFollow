@@ -809,27 +809,8 @@ private enum LAFormat {
 // MARK: - Threshold-driven colors
 
 private enum LAColors {
-    /// Which side of the thresholds a reading falls on, compared at display precision
-    /// so the color always matches the number shown (two mg/dL values can both show "3.9").
-    private enum Band { case low, high, inRange }
-
-    private static func band(for snapshot: GlucoseSnapshot, low: Double, high: Double) -> Band {
-        let mgdl = snapshot.glucose
-        let value: Double
-        let lowLimit: Double
-        let highLimit: Double
-        switch snapshot.unit {
-        case .mgdl:
-            (value, lowLimit, highLimit) = (mgdl, low, high)
-        case .mmol:
-            value = GlucoseConversion.toDisplayedMmol(mgdl)
-            lowLimit = GlucoseConversion.toDisplayedMmol(low)
-            highLimit = GlucoseConversion.toDisplayedMmol(high)
-        }
-
-        if value <= lowLimit { return .low }
-        if value >= highLimit { return .high }
-        return .inRange
+    private static func band(for snapshot: GlucoseSnapshot, low: Double, high: Double) -> GlucoseBand {
+        GlucoseBand.of(snapshot.glucose, low: low, high: high, mmol: snapshot.unit == .mmol)
     }
 
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {

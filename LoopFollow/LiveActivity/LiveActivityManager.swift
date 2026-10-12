@@ -52,9 +52,7 @@ final class LiveActivityManager {
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.handleThresholdChange()
-            }
+            self?.refreshFromCurrentState(reason: "thresholds changed")
         }
         .store(in: &cancellables)
     }
@@ -218,44 +216,6 @@ final class LiveActivityManager {
             await activity.update(content)
             LogManager.shared.log(category: .general, message: "[LA] resign-active flush sent seq=\(nextSeq)", isDebug: true)
             // Also send APNs so the extension receives the latest token-based update.
-            if let token = pushToken {
-                await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
-            }
-        }
-    }
-
-    /// Pushes an immediate update when the custom low/high lines are edited.
-    /// TIR and TITR use fixed ranges, so the lines only affect LA colors in custom mode.
-    @MainActor
-    private func handleThresholdChange() {
-        guard UnitSettingsStore.shared.timeInRangeMode == .custom else { return }
-
-        writeThresholds()
-
-        guard Storage.shared.laEnabled.value, let activity = current else { return }
-
-        let provider = StorageCurrentGlucoseStateProvider()
-        guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else { return }
-
-        GlucoseSnapshotStore.shared.save(snapshot)
-
-        seq += 1
-        let nextSeq = seq
-        let state = GlucoseLiveActivityAttributes.ContentState(
-            snapshot: snapshot,
-            seq: nextSeq,
-            reason: "threshold-changed",
-            producedAt: Date(),
-        )
-        let content = ActivityContent(
-            state: state,
-            staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
-            relevanceScore: 100.0,
-        )
-
-        Task {
-            await activity.update(content)
-            LogManager.shared.log(category: .general, message: "[LA] threshold-changed flush sent seq=\(nextSeq)", isDebug: true)
             if let token = pushToken {
                 await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
             }
