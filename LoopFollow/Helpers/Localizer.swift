@@ -74,6 +74,25 @@ final class UnitSettingsStore {
         }
     }
 
+    /// Normalizes a mg/dL glucose value to the precision of the current display unit.
+    ///
+    /// When the display unit is mmol/L, values are shown rounded to one decimal place.
+    /// This means two distinct mg/dL readings (e.g. 70 and 71) can both display as the
+    /// same mmol/L string (e.g. "3.9"). Comparing raw mg/dL values against a threshold
+    /// in that case produces a color that doesn't match the displayed number.
+    ///
+    /// Call this on both the reading *and* the threshold before doing a color comparison
+    /// so that the result is always consistent with what the user sees on screen.
+    func normalizeForColorComparison(_ mgdl: Double) -> Double {
+        switch glucoseUnit {
+        case .mgdL:
+            return mgdl
+        case .mmolL:
+            // Round to one decimal place, matching the display precision for mmol/L.
+            return GlucoseConversion.toDisplayedMmol(mgdl)
+        }
+    }
+
     var glycemicMetricMode: GlycemicMetricMode {
         get {
             Storage.shared.showGMI.value ? .gmi : .ehba1c
