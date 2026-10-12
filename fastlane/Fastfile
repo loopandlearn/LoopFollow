@@ -65,7 +65,12 @@ platform :ios do
       api_key: api_key,
     )
 
-    current_build_number = previous_build_number + 1
+    # Use the GitHub Actions run number so the TestFlight build number matches
+    # the run shown on GitHub. Fall back to previous + 1 when the run number is
+    # unavailable or not higher than the latest TestFlight build (TestFlight
+    # rejects build numbers that do not increase).
+    run_number = ENV["GITHUB_RUN_NUMBER"].to_i
+    current_build_number = [previous_build_number + 1, run_number].max
 
     increment_build_number(
       xcodeproj: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
