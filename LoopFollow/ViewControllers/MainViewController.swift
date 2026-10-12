@@ -832,15 +832,10 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
             if Storage.shared.colorBGText.value {
-                let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-                let normalize = UnitSettingsStore.shared.normalizeForColorComparison
-                let bgValue = normalize(Double(latestBG))
-                if bgValue >= normalize(thresholds.high) {
-                    Observable.shared.bgTextColor.value = .yellow
-                } else if bgValue <= normalize(thresholds.low) {
-                    Observable.shared.bgTextColor.value = .red
-                } else {
-                    Observable.shared.bgTextColor.value = .green
+                switch UnitSettingsStore.shared.glucoseBand(for: Double(latestBG)) {
+                case .high: Observable.shared.bgTextColor.value = .yellow
+                case .low: Observable.shared.bgTextColor.value = .red
+                case .inRange: Observable.shared.bgTextColor.value = .green
                 }
             } else {
                 Observable.shared.bgTextColor.value = .primary

@@ -261,14 +261,10 @@ final class BGChartModel: ObservableObject {
     }
 
     private func colorFor(_ sgv: Int, thresholds: (low: Double, high: Double)) -> Color {
-        let normalize = UnitSettingsStore.shared.normalizeForColorComparison
-        let bgValue = normalize(Double(sgv))
-        if bgValue >= normalize(thresholds.high) {
-            return .yellow
-        } else if bgValue <= normalize(thresholds.low) {
-            return .red
-        } else {
-            return .green
+        switch UnitSettingsStore.shared.glucoseBand(for: Double(sgv), thresholds: thresholds) {
+        case .high: return .yellow
+        case .low: return .red
+        case .inRange: return .green
         }
     }
 

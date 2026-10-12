@@ -22,17 +22,10 @@ enum ContactColorMode: String, Codable, CaseIterable {
         case .staticColor:
             return staticColor
         case .dynamic:
-            let normalize = UnitSettingsStore.shared.normalizeForColorComparison
-            let normalizedBG = normalize(bgValue)
-            let highLine = normalize(Storage.shared.highLine.value)
-            let lowLine = normalize(Storage.shared.lowLine.value)
-
-            if normalizedBG >= highLine {
-                return .systemYellow
-            } else if normalizedBG <= lowLine {
-                return .systemRed
-            } else {
-                return .systemGreen
+            switch UnitSettingsStore.shared.glucoseBand(for: bgValue) {
+            case .high: return .systemYellow
+            case .low: return .systemRed
+            case .inRange: return .systemGreen
             }
         }
     }
