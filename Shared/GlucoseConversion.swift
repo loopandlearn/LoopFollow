@@ -26,10 +26,12 @@ enum GlucoseBand {
     /// Classifies a mg/dL reading at the precision shown to the user, so the result
     /// always matches the displayed number. A reading on a line is low or high.
     static func of(_ mgdl: Double, low: Double, high: Double, mmol: Bool) -> GlucoseBand {
-        let display: (Double) -> Double = mmol ? GlucoseConversion.toDisplayedMmol : { $0 }
-        let value = display(mgdl)
-        if value <= display(low) { return .low }
-        if value >= display(high) { return .high }
+        let value = mmol ? GlucoseConversion.toDisplayedMmol(mgdl) : mgdl
+        let lowLimit = mmol ? GlucoseConversion.toDisplayedMmol(low) : low
+        let highLimit = mmol ? GlucoseConversion.toDisplayedMmol(high) : high
+
+        if value <= lowLimit { return .low }
+        if value >= highLimit { return .high }
         return .inRange
     }
 }
