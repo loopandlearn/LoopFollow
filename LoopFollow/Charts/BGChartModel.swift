@@ -261,9 +261,11 @@ final class BGChartModel: ObservableObject {
     }
 
     private func colorFor(_ sgv: Int, thresholds: (low: Double, high: Double)) -> Color {
-        if Double(sgv) >= thresholds.high {
+        let normalize = UnitSettingsStore.shared.normalizeForColorComparison
+        let bgValue = normalize(Double(sgv))
+        if bgValue >= normalize(thresholds.high) {
             return .yellow
-        } else if Double(sgv) <= thresholds.low {
+        } else if bgValue <= normalize(thresholds.low) {
             return .red
         } else {
             return .green

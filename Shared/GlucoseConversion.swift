@@ -10,4 +10,9 @@ enum GlucoseConversion {
     static func toMmol(_ mgdl: Double) -> Double {
         mgdl * mgDlToMmolL
     }
+
+    /// Converts mg/dL to mmol/L rounded to the one-decimal precision used for display.
+    static func toDisplayedMmol(_ mgdl: Double) -> Double {
+        (toMmol(mgdl) * 10).rounded() / 10
+    }
 }
