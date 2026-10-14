@@ -141,6 +141,12 @@ final class BGChartModel: ObservableObject {
     @Published var sensorStarts: [TreatmentPoint] = []
     @Published var notes: [TreatmentPoint] = []
 
+    /// Device status history panes under the main chart, in display order.
+    @Published var historyPanes: [BGChartHistory.Pane] = []
+    @Published var smoothedBG: [BGChartHistory.Point] = []
+    /// History curves in the main chart's bottom band, when placed there.
+    @Published var historyOverlay: BGChartHistory.Overlay?
+
     @Published var overrides: [BandRect] = []
     @Published var tempTargets: [BandRect] = []
 
@@ -623,6 +629,27 @@ final class BGChartModel: ObservableObject {
         }
         midnightMarkers = midnights
 
+        rebuildHistory(from: currentNow.addingTimeInterval(-hoursBack - BGChartHistory.maxJoinGap))
+
         generation &+= 1
+    }
+
+    private func rebuildHistory(from start: Date) {
+        let enabledKinds = BGChartHistory.PaneKind.allCases.filter(\.isEnabled)
+        let showSmoothed = Storage.shared.showSmoothedBG.value && Storage.shared.device.value != "Loop"
+        let startTime = start.timeIntervalSince1970
+        let samples = enabledKinds.isEmpty && !showSmoothed
+            ? []
+            : DeviceStatusHistory.shared.state.samples.filter { $0.date >= startTime }
+
+        if Storage.shared.historyCurvePlacement.value == .mainGraph {
+            historyPanes = []
+            // The band stays below the low line so it does not cover in-range readings.
+            historyOverlay = BGChartHistory.overlay(kinds: enabledKinds, samples: samples, bandTop: min(maxBG * 0.22, lowLine * 0.9))
+        } else {
+            historyPanes = enabledKinds.compactMap { BGChartHistory.pane(kind: $0, samples: samples) }
+            historyOverlay = nil
+        }
+        smoothedBG = showSmoothed ? BGChartHistory.points(from: samples) { $0.smoothedBG } : []
     }
 }

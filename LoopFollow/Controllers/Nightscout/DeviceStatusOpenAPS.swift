@@ -105,6 +105,11 @@ extension MainViewController {
                 }
             }
 
+            // Smoothed BG: the glucose the algorithm ran on (smoothed in Trio)
+            if let smoothedBG = enactedOrSuggested["bg"] as? Double, smoothedBG > 0 {
+                infoManager.updateInfoData(type: .smoothedBG, value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: smoothedBG))
+            }
+
             // Autosens
             if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"

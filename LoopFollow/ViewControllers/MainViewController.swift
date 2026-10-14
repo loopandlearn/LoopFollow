@@ -233,6 +233,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // setup display for NS vs Dex
         showHideNSDetails()
 
+        DeviceStatusHistory.shared.onChange = { [weak self] in
+            self?.chartModel.rebuild()
+        }
+        DeviceStatusHistory.shared.start()
+
         scheduleAllTasks()
         setupNightscoutSocket()
 
