@@ -55,13 +55,23 @@ extension MainViewController {
             if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                 infoManager.updateInfoData(type: .iob, value: insulinMetric)
                 latestIOB = insulinMetric
+                Storage.shared.lastIOBTime.value = Date().timeIntervalSince1970
                 Observable.shared.iobText.value = insulinMetric.formattedValue()
+            } else if let lastKnown = Storage.shared.lastIOB.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastIOBTime.value)
+            {
+                infoManager.updateInfoData(type: .iob, value: InsulinMetric(value: lastKnown))
             }
 
             // COB
             if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
                 infoManager.updateInfoData(type: .cob, value: cobMetric)
                 latestCOB = cobMetric
+                Storage.shared.lastCOBTime.value = Date().timeIntervalSince1970
+            } else if let lastKnown = Storage.shared.lastCOB.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastCOBTime.value)
+            {
+                infoManager.updateInfoData(type: .cob, value: CarbMetric(value: lastKnown))
             }
 
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject],

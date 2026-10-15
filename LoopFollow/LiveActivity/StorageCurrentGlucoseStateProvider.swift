@@ -34,12 +34,15 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
 
     // MARK: - Secondary Metrics
 
+    // The values below follow the device status grace period, like the info rows:
+    // the last known value is shown while it was received within the last 15 minutes.
+
     var iob: Double? {
-        Storage.shared.lastIOB.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastIOBTime.value) ? Storage.shared.lastIOB.value : nil
     }
 
     var cob: Double? {
-        Storage.shared.lastCOB.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastCOBTime.value) ? Storage.shared.lastCOB.value : nil
     }
 
     // MARK: - Extended Metrics
@@ -65,11 +68,11 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     }
 
     var battery: Double? {
-        Observable.shared.deviceBatteryLevel.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastUploaderRecordTime.value) ? Observable.shared.deviceBatteryLevel.value : nil
     }
 
     var pumpBattery: Double? {
-        Observable.shared.pumpBatteryLevel.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastPumpBatteryTime.value) ? Observable.shared.pumpBatteryLevel.value : nil
     }
 
     var basalRate: String {
@@ -81,11 +84,11 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
     }
 
     var autosens: Double? {
-        Storage.shared.lastAutosens.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastAutosensTime.value) ? Storage.shared.lastAutosens.value : nil
     }
 
     var tdd: Double? {
-        Storage.shared.lastTdd.value
+        DeviceStatusGrace.isFresh(Storage.shared.lastTddTime.value) ? Storage.shared.lastTdd.value : nil
     }
 
     var targetLowMgdl: Double? {

@@ -100,6 +100,13 @@ class Storage {
     var lastBasal = StorageValue<String>(key: "lastBasal", defaultValue: "")
     var lastPumpReservoirU = StorageValue<Double?>(key: "lastPumpReservoirU", defaultValue: nil)
     var pumpReservoirCache = StorageValue<PumpReservoirCache?>(key: "pumpReservoirCache", defaultValue: nil)
+    // When each device status field was last received, for the 15 minute grace period
+    var lastIOBTime = StorageValue<TimeInterval>(key: "lastIOBTime", defaultValue: 0)
+    var lastCOBTime = StorageValue<TimeInterval>(key: "lastCOBTime", defaultValue: 0)
+    var lastTddTime = StorageValue<TimeInterval>(key: "lastTddTime", defaultValue: 0)
+    var lastAutosensTime = StorageValue<TimeInterval>(key: "lastAutosensTime", defaultValue: 0)
+    var lastPumpBatteryTime = StorageValue<TimeInterval>(key: "lastPumpBatteryTime", defaultValue: 0)
+    var lastUploaderRecordTime = StorageValue<TimeInterval>(key: "lastUploaderRecordTime", defaultValue: 0)
     var lastAutosens = StorageValue<Double?>(key: "lastAutosens", defaultValue: nil)
     var lastTdd = StorageValue<Double?>(key: "lastTdd", defaultValue: nil)
     var lastTargetLowMgdl = StorageValue<Double?>(key: "lastTargetLowMgdl", defaultValue: nil)
