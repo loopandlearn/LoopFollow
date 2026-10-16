@@ -8,6 +8,7 @@ import SwiftUI
 extension MainViewController {
     func DeviceStatusLoop(formatter: ISO8601DateFormatter, lastLoopRecord: [String: AnyObject]) {
         Storage.shared.device.value = "Loop"
+        Storage.shared.loopRemoteCommands.value = (lastLoopRecord["testingDetails"] as? [String: AnyObject])?["remoteCommands"] as? [String] ?? []
 
         if Storage.shared.remoteType.value == .trc {
             Storage.shared.remoteType.value = .none

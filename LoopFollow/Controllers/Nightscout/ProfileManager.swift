@@ -122,6 +122,7 @@ final class ProfileManager {
         }
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
+        Storage.shared.remoteCommands.value = profileData.remoteCommands ?? []
     }
 
     func currentISF() -> HKQuantity? {
