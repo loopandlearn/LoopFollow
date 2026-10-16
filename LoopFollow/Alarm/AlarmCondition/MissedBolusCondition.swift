@@ -37,8 +37,12 @@ struct MissedBolusCondition: AlarmCondition {
         guard carb.grams > minCarbGr else { return false }
 
         //  – ignore if BG is low
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
         if let latestBG = data.bgReadings.last,
-           Double(latestBG.sgv) <= minBG { return false }
+           normalize(Double(latestBG.sgv)) <= normalize(minBG)
+        {
+            return false
+        }
 
         // ────────────────────────────────
         // 2. already alerted for this carb?

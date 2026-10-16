@@ -773,36 +773,39 @@ private enum LAFormat {
 // MARK: - Threshold-driven colors
 
 private enum LAColors {
+    private static func band(for snapshot: GlucoseSnapshot, low: Double, high: Double) -> GlucoseBand {
+        GlucoseBand.of(snapshot.glucose, low: low, high: high, mmol: snapshot.unit == .mmol)
+    }
+
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = snapshot.glucose
         let t = LAAppGroupSettings.thresholdsMgdl()
         let low = t.low
         let high = t.high
 
-        if mgdl < low {
-            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / (low - 54.0))
+        switch band(for: snapshot, low: low, high: high) {
+        case .low:
+            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / max(low - 54.0, 1))
             let opacity = min(max(raw, 0.48), 0.85)
             return Color(uiColor: UIColor.systemRed).opacity(opacity)
-        } else if mgdl > high {
-            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / (324.0 - high))
+        case .high:
+            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / max(324.0 - high, 1))
             let opacity = min(max(raw, 0.44), 0.85)
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
-        } else {
+        case .inRange:
             return Color(uiColor: UIColor.systemGreen).opacity(0.36)
         }
     }
 
     static func keyline(for snapshot: GlucoseSnapshot) -> Color {
-        let mgdl = snapshot.glucose
         let t = LAAppGroupSettings.thresholdsMgdl()
-        let low = t.low
-        let high = t.high
 
-        if mgdl < low {
+        switch band(for: snapshot, low: t.low, high: t.high) {
+        case .low:
             return Color(uiColor: UIColor.systemRed)
-        } else if mgdl > high {
+        case .high:
             return Color(uiColor: UIColor.systemOrange)
-        } else {
+        case .inRange:
             return Color(uiColor: UIColor.systemGreen)
         }
     }

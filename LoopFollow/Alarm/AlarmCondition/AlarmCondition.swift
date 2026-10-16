@@ -22,7 +22,8 @@ extension AlarmCondition {
     func passesBGLimits(alarm: Alarm, data: AlarmData) -> Bool {
         let bgReading = data.bgReadings.last?.sgv
         let haveBG = (bgReading ?? 0) > 0
-        let bgValue = Double(bgReading ?? 0)
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
+        let bgValue = normalize(Double(bgReading ?? 0))
 
         // ────────────────────────────────────
         // 1. BG-based alarms always need data
@@ -46,7 +47,7 @@ extension AlarmCondition {
         // BG-based alarms already bailed out above.
         guard haveBG else { return false }
 
-        switch (alarm.belowBG, alarm.aboveBG) {
+        switch (alarm.belowBG.map(normalize), alarm.aboveBG.map(normalize)) {
         case let (lo?, hi?):
             return lo < hi ? (bgValue <= lo || bgValue >= hi) // fire outside band
                 : (hi <= bgValue && bgValue <= lo) // fire inside band

@@ -27,17 +27,13 @@ class StatsData {
         coefficientOfVariation = 0.0
 
         let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-        let lowThreshold = thresholds.low
-        let highThreshold = thresholds.high
 
         for i in 0 ..< bgData.count {
             // Set low/range/high counts for pie chart and %'s
-            if Double(bgData[i].sgv) < lowThreshold {
-                countLow += 1
-            } else if Double(bgData[i].sgv) > highThreshold {
-                countHigh += 1
-            } else {
-                countRange += 1
+            switch UnitSettingsStore.shared.glucoseBand(for: Double(bgData[i].sgv), thresholds: thresholds) {
+            case .low: countLow += 1
+            case .high: countHigh += 1
+            case .inRange: countRange += 1
             }
 
             // set total bg for average

@@ -22,8 +22,11 @@ struct LowBGCondition: AlarmCondition {
         guard let belowBG = alarm.belowBG else { return false }
         guard let latest = data.bgReadings.last, latest.sgv > 0 else { return false }
 
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
+        let lowLimit = normalize(belowBG)
+
         func isLow(_ g: GlucoseValue) -> Bool {
-            g.sgv > 0 && Double(g.sgv) <= belowBG
+            g.sgv > 0 && normalize(Double(g.sgv)) <= lowLimit
         }
 
         // ────────────────────────────────

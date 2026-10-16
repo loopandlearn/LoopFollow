@@ -274,7 +274,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.useIFCC.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.showGMI.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher()
+            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lowLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.highLine.$value.map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
@@ -287,6 +289,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .sink { [weak self] _ in
                 self?.updateBGGraphSettings()
                 self?.updateBGGraph()
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "range mode changed")
+                self?.updateStats()
             }
             .store(in: &cancellables)
 
@@ -833,13 +837,10 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         if bgData.count > 0 {
             let latestBG = bgData[bgData.count - 1].sgv
             if Storage.shared.colorBGText.value {
-                let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-                if Double(latestBG) >= thresholds.high {
-                    Observable.shared.bgTextColor.value = .yellow
-                } else if Double(latestBG) <= thresholds.low {
-                    Observable.shared.bgTextColor.value = .red
-                } else {
-                    Observable.shared.bgTextColor.value = .green
+                switch UnitSettingsStore.shared.glucoseBand(for: Double(latestBG)) {
+                case .high: Observable.shared.bgTextColor.value = .yellow
+                case .low: Observable.shared.bgTextColor.value = .red
+                case .inRange: Observable.shared.bgTextColor.value = .green
                 }
             } else {
                 Observable.shared.bgTextColor.value = .primary

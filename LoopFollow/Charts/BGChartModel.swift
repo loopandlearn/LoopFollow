@@ -267,12 +267,10 @@ final class BGChartModel: ObservableObject {
     }
 
     private func colorFor(_ sgv: Int, thresholds: (low: Double, high: Double)) -> Color {
-        if Double(sgv) >= thresholds.high {
-            return .yellow
-        } else if Double(sgv) <= thresholds.low {
-            return .red
-        } else {
-            return .green
+        switch UnitSettingsStore.shared.glucoseBand(for: Double(sgv), thresholds: thresholds) {
+        case .high: return .yellow
+        case .low: return .red
+        case .inRange: return .green
         }
     }
 

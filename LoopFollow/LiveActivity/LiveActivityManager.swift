@@ -5,6 +5,7 @@
 #if !targetEnvironment(macCatalyst)
 
 @preconcurrency import ActivityKit
+import Combine
 import Foundation
 import os
 import UIKit
@@ -42,6 +43,16 @@ final class LiveActivityManager {
         )
         startPushToStartTokenObservation()
         startActivityUpdatesObservation()
+
+        Publishers.Merge(
+            Storage.shared.lowLine.$value.map { _ in () },
+            Storage.shared.highLine.$value.map { _ in () }
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in
+            self?.refreshFromCurrentState(reason: "thresholds changed")
+        }
+        .store(in: &cancellables)
     }
 
     // MARK: - Push-to-start observation
@@ -182,10 +193,7 @@ final class LiveActivityManager {
         let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else { return }
 
-        LAAppGroupSettings.setThresholds(
-            lowMgdl: Storage.shared.lowLine.value,
-            highMgdl: Storage.shared.highLine.value,
-        )
+        writeThresholds()
         GlucoseSnapshotStore.shared.save(snapshot)
 
         seq += 1
@@ -430,6 +438,7 @@ final class LiveActivityManager {
     /// and arrives within a few seconds of the first request.
     private static let pushToStartTokenRetryDelay: TimeInterval = 10
 
+    private var cancellables = Set<AnyCancellable>()
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
     private var updateTask: Task<Void, Never>?
@@ -624,10 +633,7 @@ final class LiveActivityManager {
 
         let provider = StorageCurrentGlucoseStateProvider()
         if let snapshot = GlucoseSnapshotBuilder.build(from: provider) {
-            LAAppGroupSettings.setThresholds(
-                lowMgdl: Storage.shared.lowLine.value,
-                highMgdl: Storage.shared.highLine.value,
-            )
+            writeThresholds()
             LAAppGroupSettings.setDisplayName(
                 Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "LoopFollow",
                 show: Storage.shared.showDisplayName.value
@@ -904,6 +910,12 @@ final class LiveActivityManager {
         }
     }
 
+    /// Publishes the range for the selected time-in-range mode, matching the chart and BG header.
+    private func writeThresholds() {
+        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
+        LAAppGroupSettings.setThresholds(lowMgdl: thresholds.low, highMgdl: thresholds.high)
+    }
+
     private func performRefresh(reason: String) {
         let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else {
@@ -928,12 +940,10 @@ final class LiveActivityManager {
         let forceRefreshNeeded = timeSinceLastUpdate >= 5 * 60
         // Capture dedup result BEFORE saving so the store comparison is valid.
         let snapshotUnchanged = GlucoseSnapshotStore.shared.load() == snapshot
+        let thresholdsChanged = LAAppGroupSettings.thresholdsMgdl() != UnitSettingsStore.shared.effectiveThresholds()
 
         // Store + Watch: always update, independent of LA state.
-        LAAppGroupSettings.setThresholds(
-            lowMgdl: Storage.shared.lowLine.value,
-            highMgdl: Storage.shared.highLine.value,
-        )
+        writeThresholds()
         GlucoseSnapshotStore.shared.save(snapshot)
         // WatchConnectivityManager.shared.send(snapshot: snapshot)
 
@@ -946,7 +956,7 @@ final class LiveActivityManager {
             LogManager.shared.log(category: .general, message: "[LA] refresh: LA update skipped — dismissedByUser=true reason=\(reason)")
             return
         }
-        guard !snapshotUnchanged || forceRefreshNeeded else { return }
+        guard !snapshotUnchanged || thresholdsChanged || forceRefreshNeeded else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             LogManager.shared.log(category: .general, message: "[LA] refresh: LA update skipped — areActivitiesEnabled=false reason=\(reason)")
             return
