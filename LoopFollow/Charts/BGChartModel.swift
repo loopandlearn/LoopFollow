@@ -17,6 +17,10 @@ final class BGChartInteraction: ObservableObject {
     /// when the user pans back into history, re-armed when they return to the edge.
     @Published var followLatest: Bool = true
 
+    /// Set once the main chart has done its initial scroll-to-now; kept out of
+    /// view @State so a chart remount (see BGChartView) keeps the user's place.
+    var hasInitializedViewport = false
+
     init() {
         let seconds = Self.visibleSeconds(forScale: Storage.shared.chartScaleX.value)
         visibleSeconds = seconds
@@ -50,17 +54,19 @@ final class BGChartModel: ObservableObject {
         let sgv: Double
         let label: String
         let pillText: String
+        let treatment: CarbTreatment?
         /// Where the symbol is drawn. Equals `date` unless `spread` nudged it
         /// left to keep a crowded run of treatments from stacking up.
         var drawnDate: Date
         var id: Double { date.timeIntervalSince1970 }
 
-        init(date: Date, value: Double, sgv: Double, label: String, pillText: String) {
+        init(date: Date, value: Double, sgv: Double, label: String, pillText: String, treatment: CarbTreatment? = nil) {
             self.date = date
             self.value = value
             self.sgv = sgv
             self.label = label
             self.pillText = pillText
+            self.treatment = treatment
             drawnDate = date
         }
     }
@@ -107,6 +113,8 @@ final class BGChartModel: ObservableObject {
     }
 
     @Published var bg: [BGPoint] = []
+    /// Scrub timeline on the BG cadence; rebuilt together with `bg`.
+    private(set) var scrubSlots = BGChartScrubSlots(readingDates: [])
     @Published var bgRuns: [BGRun] = []
     @Published var yesterday: [BGPoint] = []
     @Published var prediction: [BGPoint] = []
@@ -135,6 +143,12 @@ final class BGChartModel: ObservableObject {
     @Published var sensorStarts: [TreatmentPoint] = []
     @Published var notes: [TreatmentPoint] = []
 
+    /// Device status history panes under the main chart, in display order.
+    @Published var historyPanes: [BGChartHistory.Pane] = []
+    @Published var smoothedBG: [BGChartHistory.Point] = []
+    /// History curves in the main chart's bottom band, when placed there.
+    @Published var historyOverlay: BGChartHistory.Overlay?
+
     @Published var overrides: [BandRect] = []
     @Published var tempTargets: [BandRect] = []
 
@@ -153,6 +167,7 @@ final class BGChartModel: ObservableObject {
     @Published var now: Date = .init()
     @Published var diaMarkers: [Date] = []
     @Published var midnightMarkers: [Date] = []
+    @Published var priorDayTimeMarkers: [Date] = []
     @Published var thirtyMinMark: Date? = nil
     @Published var ninetyMinMark: Date? = nil
 
@@ -175,6 +190,7 @@ final class BGChartModel: ObservableObject {
     @Published var show90Min: Bool = false
     @Published var showMidnight: Bool = false
     @Published var smallGraphTreatments: Bool = true
+    @Published var showPriorDayTime: Bool = false
 
     private static let doseFormatter: NumberFormatter = {
         let nf = NumberFormatter()
@@ -407,6 +423,15 @@ final class BGChartModel: ObservableObject {
         show90Min = Storage.shared.show90MinLine.value
         showMidnight = Storage.shared.showMidnightLines.value
         smallGraphTreatments = Storage.shared.smallGraphTreatments.value
+        showPriorDayTime = Storage.shared.showPriorDayTimeLines.value
+
+        // Advanced-settings visibility toggles. The Nightscout controllers
+        // collect the data regardless (it also feeds the info rows), so hidden
+        // kinds are dropped here at render time.
+        let showBasal = Storage.shared.graphBasal.value
+        let showBolus = Storage.shared.graphBolus.value
+        let showCarbs = Storage.shared.graphCarbs.value
+        let showOtherTreatments = Storage.shared.graphOtherTreatments.value
 
         let isLoop = Storage.shared.device.value == "Loop"
         overrideColor = isLoop ? .green : .purple
@@ -418,6 +443,7 @@ final class BGChartModel: ObservableObject {
         let maxDisplay = globalVariables.maxDisplayGlucose
         func clampSgv(_ sgv: Int) -> Double { Double(min(max(sgv, minDisplay), maxDisplay)) }
 
+        scrubSlots = BGChartScrubSlots(readingDates: vc.bgData.map { Date(timeIntervalSince1970: $0.date) })
         bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
 
@@ -436,7 +462,7 @@ final class BGChartModel: ObservableObject {
         cobPrediction = vc.cobPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
         uamPrediction = vc.uamPredictionData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), color: .purple) }
 
-        let bolusPoints = vc.bolusData.map {
+        let bolusPoints = (showBolus ? vc.bolusData : []).map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -446,7 +472,7 @@ final class BGChartModel: ObservableObject {
                 pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
-        carbs = Self.spread(vc.carbData.map {
+        carbs = Self.spread((showCarbs ? vc.carbData : []).map {
             let grams = Int($0.value)
             var label = "\(grams)"
             if $0.absorptionTime > 0, Storage.shared.showAbsorption.value {
@@ -457,10 +483,11 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
-                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                treatment: $0.treatment
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
-        let smbPoints = vc.smbData.map {
+        let smbPoints = (showBolus ? vc.smbData : []).map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
@@ -471,7 +498,7 @@ final class BGChartModel: ObservableObject {
             )
         }
         (boluses, smbs) = Self.spreadTogether(bolusPoints, smbPoints, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
-        bgChecks = vc.bgCheckData.map {
+        bgChecks = (showOtherTreatments ? vc.bgCheckData : []).map {
             TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
                 value: Double($0.sgv),
@@ -480,16 +507,16 @@ final class BGChartModel: ObservableObject {
                 pillText: "BG Check\n\(Localizer.toDisplayUnits(String($0.sgv)))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
-        suspends = vc.suspendGraphData.map {
+        suspends = (showOtherTreatments ? vc.suspendGraphData : []).map {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Suspend\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
-        resumes = vc.resumeGraphData.map {
+        resumes = (showOtherTreatments ? vc.resumeGraphData : []).map {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Resume\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
-        sensorStarts = vc.sensorStartGraphData.map {
+        sensorStarts = (showOtherTreatments ? vc.sensorStartGraphData : []).map {
             TreatmentPoint(date: Date(timeIntervalSince1970: $0.date), value: Double($0.sgv), sgv: Double($0.sgv), label: "", pillText: "Sensor Start\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))")
         }
-        notes = vc.noteGraphData.map {
+        notes = (showOtherTreatments ? vc.noteGraphData : []).map {
             TreatmentPoint(
                 date: Date(timeIntervalSince1970: $0.date),
                 value: Double($0.sgv),
@@ -499,12 +526,12 @@ final class BGChartModel: ObservableObject {
             )
         }
 
-        basalScheduled = vc.basalScheduleData.map {
+        basalScheduled = (showBasal ? vc.basalScheduleData : []).map {
             ScheduledBasalPoint(date: Date(timeIntervalSince1970: $0.date), rate: $0.basalRate)
         }
 
         var steps: [BasalStep] = []
-        let sortedBasal = vc.basalData.sorted { $0.date < $1.date }
+        let sortedBasal = (showBasal ? vc.basalData : []).sorted { $0.date < $1.date }
         for i in 0 ..< sortedBasal.count {
             let start = sortedBasal[i].date
             let end = i + 1 < sortedBasal.count
@@ -523,7 +550,7 @@ final class BGChartModel: ObservableObject {
 
         let yTop = maxBG - 5
         let yBottom = maxBG - 25
-        overrides = vc.overrideGraphData.map {
+        overrides = (showOtherTreatments ? vc.overrideGraphData : []).map {
             let overrideName = $0.reason.trimmingCharacters(in: .whitespacesAndNewlines)
             let displayName = overrideName.isEmpty ? "Override" : overrideName
             return BandRect(
@@ -535,7 +562,7 @@ final class BGChartModel: ObservableObject {
                 pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
             )
         }
-        tempTargets = vc.tempTargetGraphData.map {
+        tempTargets = (showOtherTreatments ? vc.tempTargetGraphData : []).map {
             let target = $0.correctionRange.first.map { String($0) } ?? ""
             // Temp targets render at the BG level they target (±5 mg/dL);
             // only overrides live in the top strip.
@@ -584,6 +611,17 @@ final class BGChartModel: ObservableObject {
             }
             return cal
         }()
+
+        // Mark the current local time on each prior day. Calendar arithmetic
+        // preserves the displayed time of day across daylight-saving changes.
+        var priorDayTimes: [Date] = []
+        var priorDayTime = calendar.date(byAdding: .day, value: -1, to: currentNow)
+        while let marker = priorDayTime, marker > domainStart {
+            priorDayTimes.append(marker)
+            priorDayTime = calendar.date(byAdding: .day, value: -1, to: marker)
+        }
+        priorDayTimeMarkers = priorDayTimes
+
         var cursor = calendar.startOfDay(for: domainStart)
         while cursor <= domainEnd {
             if cursor >= domainStart {
@@ -594,6 +632,27 @@ final class BGChartModel: ObservableObject {
         }
         midnightMarkers = midnights
 
+        rebuildHistory(from: currentNow.addingTimeInterval(-hoursBack - BGChartHistory.maxJoinGap))
+
         generation &+= 1
+    }
+
+    private func rebuildHistory(from start: Date) {
+        let enabledKinds = BGChartHistory.PaneKind.allCases.filter(\.isEnabled)
+        let showSmoothed = Storage.shared.showSmoothedBG.value && Storage.shared.device.value != "Loop"
+        let startTime = start.timeIntervalSince1970
+        let samples = enabledKinds.isEmpty && !showSmoothed
+            ? []
+            : DeviceStatusHistory.shared.state.samples.filter { $0.date >= startTime }
+
+        if Storage.shared.historyCurvePlacement.value == .mainGraph {
+            historyPanes = []
+            // The band stays below the low line so it does not cover in-range readings.
+            historyOverlay = BGChartHistory.overlay(kinds: enabledKinds, samples: samples, bandTop: min(maxBG * 0.22, lowLine * 0.9))
+        } else {
+            historyPanes = enabledKinds.compactMap { BGChartHistory.pane(kind: $0, samples: samples) }
+            historyOverlay = nil
+        }
+        smoothedBG = showSmoothed ? BGChartHistory.points(from: samples) { $0.smoothedBG } : []
     }
 }

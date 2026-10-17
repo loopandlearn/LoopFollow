@@ -235,17 +235,6 @@ struct RemoteSettingsView: View {
                     .buttonStyle(.borderedProminent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-
-                    HStack {
-                        Text("Environment")
-                        Spacer()
-                        Toggle("Production", isOn: $viewModel.productionEnvironment)
-                            .toggleStyle(SwitchToggleStyle())
-                    }
-
-                    Text("Production is used for browser builders and should be switched off for Xcode builders")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
 
                 if let errorMessage = viewModel.loopAPNSErrorMessage, !errorMessage.isEmpty {
@@ -258,6 +247,7 @@ struct RemoteSettingsView: View {
 
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
+                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
 
                     if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {

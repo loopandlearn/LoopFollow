@@ -215,10 +215,11 @@ struct OverrideActivationModal: View {
 
         // Initialize state based on preset duration
         if preset.duration == 0 {
-            // Indefinite override - allow user to choose
+            // Indefinite override defaults to indefinite.
             _enableIndefinitely = State(initialValue: true)
+            _durationHours = State(initialValue: 1.0)
         } else {
-            // Override with predefined duration - use preset duration
+            // Predefined-duration override defaults to the preset duration, but remains editable.
             _enableIndefinitely = State(initialValue: false)
             _durationHours = State(initialValue: preset.duration / 3600)
         }
@@ -251,69 +252,57 @@ struct OverrideActivationModal: View {
                             .foregroundColor(.secondary)
                     }
 
-                    // Only show duration for overrides with predefined duration
-                    if preset.duration != 0 {
-                        Text("Duration: \(preset.durationDescription)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
+                    Text("Preset: \(preset.durationDescription)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
                 .padding(.top)
 
                 Spacer()
 
-                // Duration Settings (only show for overrides without predefined duration)
-                if preset.duration == 0 {
-                    VStack(spacing: 16) {
-                        // Duration Input (only show when not indefinite)
-                        if !enableIndefinitely {
-                            VStack(spacing: 8) {
-                                HStack {
-                                    Text("Duration")
-                                        .font(.headline)
-                                    Spacer()
-                                    Text(formatDuration(durationHours))
-                                        .font(.headline)
-                                        .foregroundColor(.blue)
-                                }
-
-                                Slider(value: $durationHours, in: 0.25 ... 24.0, step: 0.25)
-                                    .accentColor(.blue)
-                                HStack {
-                                    Text("15m")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 80, alignment: .leading)
-                                    Spacer()
-                                    Text("24h")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 80, alignment: .trailing)
-                                }
+                // Duration Settings (available for all overrides)
+                VStack(spacing: 16) {
+                    // Duration Input (only show when not indefinite)
+                    if !enableIndefinitely {
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("Duration")
+                                    .font(.headline)
+                                Spacer()
+                                Text(formatDuration(durationHours))
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
                             }
-                            .padding(.horizontal)
-                        }
 
-                        // Indefinitely Toggle
-                        HStack {
-                            Toggle("Enable indefinitely", isOn: $enableIndefinitely)
-                            Spacer()
+                            Slider(value: $durationHours, in: 0.25 ... 24.0, step: 0.25)
+                                .accentColor(.blue)
+                            HStack {
+                                Text("15m")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 80, alignment: .leading)
+                                Spacer()
+                                Text("24h")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 80, alignment: .trailing)
+                            }
                         }
                         .padding(.horizontal)
                     }
+
+                    // Indefinitely Toggle
+                    HStack {
+                        Toggle("Enable indefinitely", isOn: $enableIndefinitely)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
                 }
 
                 // Action Buttons
                 VStack(spacing: 12) {
                     Button(action: {
-                        let duration: TimeInterval?
-                        if preset.duration == 0 {
-                            // For indefinite overrides, use user selection
-                            duration = enableIndefinitely ? nil : (durationHours * 3600)
-                        } else {
-                            // For overrides with predefined duration, use preset duration
-                            duration = preset.duration
-                        }
+                        let duration: TimeInterval? = enableIndefinitely ? 0 : (durationHours * 3600)
                         onActivate(duration)
                     }) {
                         Text("Activate Override")

@@ -22,6 +22,15 @@ extension MainViewController {
 
     func updateBGGraphSettings() {
         chartModel.rebuild()
+
+        // Re-route the stored predBGs in case the prediction style
+        // (cone/lines) changed; rebuild() alone only redraws what was
+        // already routed.
+        updateOpenAPSPredictionDisplay()
+
+        // The yesterday overlay is built during the BG fetch and needs an
+        // extra day of history, so reload the BG window when it's toggled.
+        TaskScheduler.shared.rescheduleTask(id: .fetchBG, to: Date())
     }
 
     private func recomputeTopBG() {
@@ -87,9 +96,13 @@ extension MainViewController {
     }
 
     // Removes the Trio/OpenAPS forecast (ZT/IOB/COB/UAM lines and the cone). Used when the active system switches away from Trio/OpenAPS.
+    // Also drops the stored predBGs: the device observer calls updateOpenAPSPredictionDisplay after this runs,
+    // and would otherwise redraw the cleared forecast from them.
     func clearOpenAPSPredictionGraph() {
         let hasLineData = !ztPredictionData.isEmpty || !iobPredictionData.isEmpty || !cobPredictionData.isEmpty || !uamPredictionData.isEmpty
-        guard hasLineData || !chartModel.cone.isEmpty else { return }
+        guard hasLineData || !chartModel.cone.isEmpty || openAPSPredBGs != nil else { return }
+        openAPSPredBGs = nil
+        openAPSPredUpdatedTime = nil
         ztPredictionData = []
         iobPredictionData = []
         cobPredictionData = []

@@ -34,6 +34,7 @@ class AlarmManager {
             BatteryCondition.self,
             BatteryDropCondition.self,
             FutureCarbsCondition.self,
+            MissedBolusCondition.self,
             DBSizeCondition.self,
         ]
     ) {

@@ -22,6 +22,10 @@ class Storage {
     var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
+    /// Remote command types the AID app advertises in its Nightscout profile.
+    var remoteCommands = StorageValue<[String]>(key: "remoteCommands", defaultValue: [])
+    /// Remote command types the Loop build advertises in its devicestatus.
+    var loopRemoteCommands = StorageValue<[String]>(key: "loopRemoteCommands", defaultValue: [])
 
     var maxBolus = SecureStorageValue<HKQuantity>(key: "maxBolus", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 1.0))
     var maxCarbs = SecureStorageValue<HKQuantity>(key: "maxCarbs", defaultValue: HKQuantity(unit: .gram(), doubleValue: 30.0))
@@ -101,6 +105,7 @@ class Storage {
     // Live Activity extended InfoType data
     var lastBasal = StorageValue<String>(key: "lastBasal", defaultValue: "")
     var lastPumpReservoirU = StorageValue<Double?>(key: "lastPumpReservoirU", defaultValue: nil)
+    var pumpReservoirCache = StorageValue<PumpReservoirCache?>(key: "pumpReservoirCache", defaultValue: nil)
     var lastAutosens = StorageValue<Double?>(key: "lastAutosens", defaultValue: nil)
     var lastTdd = StorageValue<Double?>(key: "lastTdd", defaultValue: nil)
     var lastTargetLowMgdl = StorageValue<Double?>(key: "lastTargetLowMgdl", defaultValue: nil)
@@ -130,8 +135,14 @@ class Storage {
     var show30MinLine = StorageValue<Bool>(key: "show30MinLine", defaultValue: false)
     var show90MinLine = StorageValue<Bool>(key: "show90MinLine", defaultValue: false)
     var showMidnightLines = StorageValue<Bool>(key: "showMidnightMarkers", defaultValue: false)
+    var showPriorDayTimeLines = StorageValue<Bool>(key: "showPriorDayTimeMarkers", defaultValue: false)
     var showYesterdayLine = StorageValue<Bool>(key: "showYesterdayLine", defaultValue: false)
     var smallGraphTreatments = StorageValue<Bool>(key: "smallGraphTreatments", defaultValue: true)
+    var showIOBGraph = StorageValue<Bool>(key: "showIOBGraph", defaultValue: false)
+    var showCOBGraph = StorageValue<Bool>(key: "showCOBGraph", defaultValue: false)
+    var showSensitivityRatioGraph = StorageValue<Bool>(key: "showSensitivityRatioGraph", defaultValue: false)
+    var showSmoothedBG = StorageValue<Bool>(key: "showSmoothedBG", defaultValue: false)
+    var historyCurvePlacement = StorageValue<HistoryCurvePlacement>(key: "historyCurvePlacement", defaultValue: .separate)
 
     var smallGraphHeight = StorageValue<Int>(key: "smallGraphHeight", defaultValue: 40)
     var predictionToLoad = StorageValue<Double>(key: "predictionToLoad", defaultValue: 1.0)

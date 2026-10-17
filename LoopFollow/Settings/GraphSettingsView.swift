@@ -12,8 +12,15 @@ struct GraphSettingsView: View {
     @ObservedObject private var show30MinLine = Storage.shared.show30MinLine
     @ObservedObject private var show90MinLine = Storage.shared.show90MinLine
     @ObservedObject private var showMidnightLines = Storage.shared.showMidnightLines
+    @ObservedObject private var showPriorDayTimeLines = Storage.shared.showPriorDayTimeLines
     @ObservedObject private var showYesterdayLine = Storage.shared.showYesterdayLine
     @ObservedObject private var smallGraphTreatments = Storage.shared.smallGraphTreatments
+    @ObservedObject private var showIOBGraph = Storage.shared.showIOBGraph
+    @ObservedObject private var showCOBGraph = Storage.shared.showCOBGraph
+    @ObservedObject private var showSensitivityRatioGraph = Storage.shared.showSensitivityRatioGraph
+    @ObservedObject private var showSmoothedBG = Storage.shared.showSmoothedBG
+    @ObservedObject private var device = Storage.shared.device
+    @ObservedObject private var historyCurvePlacement = Storage.shared.historyCurvePlacement
 
     @ObservedObject private var smallGraphHeight = Storage.shared.smallGraphHeight
     @ObservedObject private var predictionToLoad = Storage.shared.predictionToLoad
@@ -50,6 +57,9 @@ struct GraphSettingsView: View {
 
                 Toggle("Show Midnight Lines", isOn: $showMidnightLines.value)
                     .onChange(of: showMidnightLines.value) { _ in markDirty() }
+
+                Toggle("Show Prior Day Time Lines", isOn: $showPriorDayTimeLines.value)
+                    .onChange(of: showPriorDayTimeLines.value) { _ in markDirty() }
             }
 
             // ── Treatments ───────────────────────────────────────────────
@@ -62,6 +72,27 @@ struct GraphSettingsView: View {
                     Toggle("Treatments on Small Graph",
                            isOn: $smallGraphTreatments.value)
                         .onChange(of: smallGraphTreatments.value) { _ in markDirty() }
+                }
+            }
+
+            // ── History Graphs ───────────────────────────────────────────
+            if nightscoutEnabled {
+                Section {
+                    Toggle("Show IOB Graph", isOn: $showIOBGraph.value)
+                    Toggle("Show COB Graph", isOn: $showCOBGraph.value)
+                    if device.value != "Loop" {
+                        Toggle("Show Smoothed BG", isOn: $showSmoothedBG.value)
+                        Toggle("Show Sensitivity Ratio Graph", isOn: $showSensitivityRatioGraph.value)
+                    }
+                    if showIOBGraph.value || showCOBGraph.value || showSensitivityRatioGraph.value {
+                        Picker("Curve Placement", selection: $historyCurvePlacement.value) {
+                            ForEach(HistoryCurvePlacement.allCases, id: \.self) { placement in
+                                Text(placement.displayName).tag(placement)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("History Graphs")
                 }
             }
 

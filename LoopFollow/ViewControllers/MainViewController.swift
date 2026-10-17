@@ -103,7 +103,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
-    var latestPumpVolume: Double = 50.0
+    var latestPumpVolume: Double?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
@@ -219,6 +219,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // (this controller is built only after storage is ready, so it never fires
         // while we're alive); retained one release as a safety net.
         notificationCenter.addObserver(self, selector: #selector(handleBFUReloadCompleted), name: .bfuReloadCompleted, object: nil)
+        // A remote meal edit/delete changes the carb marks on the chart, whichever screen sent it.
+        notificationCenter.addObserver(self, selector: #selector(handleRemoteMealCommandDidComplete), name: .remoteMealCommandDidComplete, object: nil)
 
         #if !targetEnvironment(macCatalyst)
             notificationCenter.addObserver(self, selector: #selector(navigateOnLAForeground), name: .liveActivityDidForeground, object: nil)
@@ -232,6 +234,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         // setup display for NS vs Dex
         showHideNSDetails()
+
+        DeviceStatusHistory.shared.onChange = { [weak self] in
+            self?.chartModel.rebuild()
+        }
+        DeviceStatusHistory.shared.start()
 
         scheduleAllTasks()
         setupNightscoutSocket()
@@ -282,6 +289,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .sink { [weak self] _ in
                 self?.updateBGGraphSettings()
                 self?.updateBGGraph()
+                LiveActivityManager.shared.refreshFromCurrentState(reason: "range mode changed")
             }
             .store(in: &cancellables)
 
@@ -579,6 +587,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     }
 
     @objc func appMovedToBackground() {
+        LogManager.shared.log(
+            category: .general,
+            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)))"
+        )
+
         // Allow screen to turn off
         UIApplication.shared.isIdleTimerDisabled = false
 
@@ -676,6 +689,10 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         runMigrationsIfNeeded()
     }
 
+    @objc func handleRemoteMealCommandDidComplete() {
+        TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+    }
+
     @objc func handleBFUReloadCompleted() {
         // Show the loading overlay so the user sees feedback during the 2-5s
         // while tasks re-run with the now-correct credentials. Tasks scheduled
@@ -688,7 +705,18 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         scheduleAllTasks()
     }
 
+    private static func describe(_ status: UIBackgroundRefreshStatus) -> String {
+        switch status {
+        case .available: "available"
+        case .denied: "denied"
+        case .restricted: "restricted"
+        @unknown default: "unknown"
+        }
+    }
+
     @objc func appCameToForeground() {
+        LogManager.shared.log(category: .general, message: "App came to foreground")
+
         // BFU recovery (StorageReadiness.recover) is driven by AppDelegate before this
         // controller exists (the readiness gate), so handleBFUReloadCompleted() above
         // is a vestigial no-op in the gated flow.

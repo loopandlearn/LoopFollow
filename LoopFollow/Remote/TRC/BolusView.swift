@@ -180,7 +180,7 @@ struct BolusView: View {
                     )
                 case .statusSuccess:
                     return Alert(
-                        title: Text("Status"),
+                        title: Text("Command Sent"),
                         message: Text(statusMessage ?? ""),
                         dismissButton: .default(Text("OK"), action: {
                             presentationMode.wrappedValue.dismiss()
@@ -322,7 +322,7 @@ struct BolusView: View {
                     if sentUnits > 0 {
                         QuickPickBolusesManager.shared.recordBolus(units: sentUnits)
                     }
-                    statusMessage = "Bolus command sent successfully."
+                    statusMessage = RemoteCommandMessage.sent
                     LogManager.shared.log(
                         category: .apns,
                         message: "sendBolusPushNotification succeeded - Bolus: \(InsulinFormatter.shared.string(bolusAmount)) U"

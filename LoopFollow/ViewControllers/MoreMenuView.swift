@@ -287,19 +287,31 @@ struct MoreMenuView: View {
     }
 
     private func presentLogShareSheet(noticeText: String, logFiles: [URL]) {
-        var items: [Any] = logFiles
-        if let noticeURL = writeShareNoticeFile(text: noticeText) {
-            items.insert(noticeURL, at: 0)
-        }
-        let avc = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        UIApplication.shared.topMost?.present(avc, animated: true)
-    }
-
-    private func writeShareNoticeFile(text: String) -> URL? {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd_HHmm"
         let timestamp = formatter.string(from: Date())
 
+        var files = logFiles
+        if let noticeURL = writeShareNoticeFile(text: noticeText, timestamp: timestamp) {
+            files.insert(noticeURL, at: 0)
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let items: [Any]
+            do {
+                items = try [LogArchiver.zip(files: files, archiveName: "LoopFollow Logs \(timestamp)")]
+            } catch {
+                LogManager.shared.log(category: .general, message: "Failed to zip log files, sharing them uncompressed: \(error)")
+                items = files
+            }
+            DispatchQueue.main.async {
+                let avc = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                UIApplication.shared.topMost?.present(avc, animated: true)
+            }
+        }
+    }
+
+    private func writeShareNoticeFile(text: String, timestamp: String) -> URL? {
         let version = AppVersionManager().version()
         let branchAndSha = BuildDetails.default.branchAndSha
 

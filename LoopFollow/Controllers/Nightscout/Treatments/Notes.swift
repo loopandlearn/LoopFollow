@@ -13,16 +13,7 @@ extension MainViewController {
         for currentEntry in entries.reversed() {
             guard let currentEntry = currentEntry as? [String: AnyObject] else { continue }
 
-            var date: String
-            if currentEntry["timestamp"] != nil {
-                date = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                date = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
-            if let parsedDate = NightscoutUtils.parseDate(date) {
+            if let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry) {
                 let dateTimeStamp = parsedDate.timeIntervalSince1970
                 let sgv = findNearestBGbyTime(needle: dateTimeStamp, haystack: bgData, startingIndex: lastFoundIndex)
                 lastFoundIndex = sgv.foundIndex
