@@ -274,6 +274,32 @@ class NightscoutUtils {
         task.resume()
     }
 
+    /// Effective time of a Nightscout treatment: `timestamp` when present, otherwise `created_at`.
+    /// Uploaders disagree on the value's type (ISO 8601 string, epoch milliseconds, or JSON `null`),
+    /// so never force-cast it; an unreadable value yields `nil` and the entry is skipped.
+    static func treatmentDate(from entry: [String: AnyObject]) -> Date? {
+        for key in ["timestamp", "created_at"] {
+            guard let value = entry[key], !(value is NSNull) else { continue }
+            return parseDateValue(value)
+        }
+        return nil
+    }
+
+    static func parseDateValue(_ value: Any) -> Date? {
+        switch value {
+        case let string as String:
+            return parseDate(string)
+        case let number as NSNumber:
+            // Booleans are NSNumbers too; they are never a date.
+            if CFGetTypeID(number) == CFBooleanGetTypeID() { return nil }
+            let raw = number.doubleValue
+            // Epoch milliseconds are ~1e12; epoch seconds are ~1e9.
+            return Date(timeIntervalSince1970: raw > 1e11 ? raw / 1000 : raw)
+        default:
+            return nil
+        }
+    }
+
     static func parseDate(_ rawString: String) -> Date? {
         var mutableDate = rawString
 

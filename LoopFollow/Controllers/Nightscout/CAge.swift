@@ -39,7 +39,11 @@ extension MainViewController {
                                    .withTime,
                                    .withDashSeparatorInDate,
                                    .withColonSeparatorInTime]
-        Storage.shared.cageInsertTime.value = formatter.date(from: lastCageString)?.timeIntervalSince1970 as! TimeInterval
+        guard let cageInsertTime = formatter.date(from: lastCageString)?.timeIntervalSince1970 else {
+            LogManager.shared.log(category: .nightscout, message: "updateCage: unparseable created_at '\(lastCageString)'")
+            return
+        }
+        Storage.shared.cageInsertTime.value = cageInsertTime
         if let cageTime = formatter.date(from: lastCageString)?.timeIntervalSince1970 {
             let now = dateTimeUtils.getNowTimeIntervalUTC()
             let secondsAgo = now - cageTime

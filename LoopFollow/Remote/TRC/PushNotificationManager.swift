@@ -164,6 +164,57 @@ class PushNotificationManager {
         sendEncryptedCommand(payload: payload, completion: completion)
     }
 
+    /// Trio confirms edit/delete through a return notification, so LoopFollow's own APNs credentials are required.
+    func sendDeleteMealPushNotification(mealID: String, commandID: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let returnNotification = createReturnNotificationInfo() else {
+            completion(false, Self.returnNotificationRequiredMessage)
+            return
+        }
+        let payload = CommandPayload(
+            user: user,
+            commandType: .deleteMeal,
+            timestamp: Date().timeIntervalSince1970,
+            commandID: commandID,
+            mealID: mealID,
+            returnNotification: returnNotification
+        )
+        sendEncryptedCommand(payload: payload, completion: completion)
+    }
+
+    func sendEditMealPushNotification(
+        mealID: String,
+        commandID: String,
+        carbs: Int,
+        fat: Int,
+        protein: Int,
+        scheduledTime: Date,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        guard carbs >= 0, fat >= 0, protein >= 0, carbs > 0 || fat > 0 || protein > 0 else {
+            completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
+            return
+        }
+        guard let returnNotification = createReturnNotificationInfo() else {
+            completion(false, Self.returnNotificationRequiredMessage)
+            return
+        }
+        let payload = CommandPayload(
+            user: user,
+            commandType: .editMeal,
+            timestamp: Date().timeIntervalSince1970,
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            scheduledTime: scheduledTime.timeIntervalSince1970,
+            commandID: commandID,
+            mealID: mealID,
+            returnNotification: returnNotification
+        )
+        sendEncryptedCommand(payload: payload, completion: completion)
+    }
+
+    private static let returnNotificationRequiredMessage = "Editing or deleting a meal needs LoopFollow's own APNS credentials so Trio can confirm the result. Configure them in App Settings → APN."
+
     private func validateCredentials() -> [String]? {
         var errors = [String]()
         let keyIdPattern = "^[A-Z0-9]{10}$"
@@ -263,7 +314,7 @@ class PushNotificationManager {
             request.setValue("600", forHTTPHeaderField: "apns-expiration")
             request.setValue(bundleId, forHTTPHeaderField: "apns-topic")
             request.setValue("alert", forHTTPHeaderField: "apns-push-type")
-            request.setValue(payload.commandType.rawValue, forHTTPHeaderField: "apns-collapse-id")
+            request.setValue(payload.apnsCollapseID, forHTTPHeaderField: "apns-collapse-id")
 
             request.httpBody = try JSONEncoder().encode(finalMessage)
 
@@ -327,8 +378,6 @@ class PushNotificationManager {
     }
 
     private func constructAPNsURL() -> URL? {
-        let host = productionEnvironment ? "api.push.apple.com" : "api.sandbox.push.apple.com"
-        let urlString = "https://\(host)/3/device/\(deviceToken)"
-        return URL(string: urlString)
+        URL(string: "\(APNSEnvironment.baseURL(production: productionEnvironment))/3/device/\(deviceToken)")
     }
 }
