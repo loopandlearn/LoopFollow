@@ -105,6 +105,11 @@ extension MainViewController {
                 }
             }
 
+            // Smoothed BG: the glucose the algorithm ran on (smoothed in Trio)
+            if let smoothedBG = enactedOrSuggested["bg"] as? Double, smoothedBG > 0 {
+                infoManager.updateInfoData(type: .smoothedBG, value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: smoothedBG))
+            }
+
             // Autosens
             if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
@@ -220,7 +225,9 @@ extension MainViewController {
             }
 
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
-                if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+                if let tempBasalString = loopStatus["timestamp"] as? String,
+                   let tempBasalTime = formatter.date(from: tempBasalString)?.timeIntervalSince1970
+                {
                     var lastBGTime = updatedTime ?? Date().timeIntervalSince1970
                     if bgData.count > 0 {
                         lastBGTime = bgData[bgData.count - 1].date
