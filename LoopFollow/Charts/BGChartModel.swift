@@ -54,19 +54,20 @@ final class BGChartModel: ObservableObject {
         let sgv: Double
         let label: String
         let pillText: String
-        let treatment: CarbTreatment?
+        /// The Treatments list entry the pill links to; nil for marks the list doesn't show.
+        let detail: Treatment?
         /// Where the symbol is drawn. Equals `date` unless `spread` nudged it
         /// left to keep a crowded run of treatments from stacking up.
         var drawnDate: Date
         var id: Double { date.timeIntervalSince1970 }
 
-        init(date: Date, value: Double, sgv: Double, label: String, pillText: String, treatment: CarbTreatment? = nil) {
+        init(date: Date, value: Double, sgv: Double, label: String, pillText: String, detail: Treatment? = nil) {
             self.date = date
             self.value = value
             self.sgv = sgv
             self.label = label
             self.pillText = pillText
-            self.treatment = treatment
+            self.detail = detail
             drawnDate = date
         }
     }
@@ -91,6 +92,8 @@ final class BGChartModel: ObservableObject {
         let yTop: Double
         let label: String
         let pillText: String
+        /// The Treatments list entry the pill links to.
+        var detail: Treatment? = nil
         var id: String { "\(start.timeIntervalSince1970)-\(end.timeIntervalSince1970)" }
     }
 
@@ -469,7 +472,8 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         carbs = Self.spread((showCarbs ? vc.carbData : []).map {
@@ -484,7 +488,7 @@ final class BGChartModel: ObservableObject {
                 sgv: Double($0.sgv),
                 label: label,
                 pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
-                treatment: $0.treatment
+                detail: $0.detail
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
         let smbPoints = (showBolus ? vc.smbData : []).map {
@@ -494,7 +498,8 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         (boluses, smbs) = Self.spreadTogether(bolusPoints, smbPoints, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
@@ -559,7 +564,8 @@ final class BGChartModel: ObservableObject {
                 yBottom: yBottom,
                 yTop: yTop,
                 label: displayName,
-                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         tempTargets = (showOtherTreatments ? vc.tempTargetGraphData : []).map {
@@ -573,7 +579,8 @@ final class BGChartModel: ObservableObject {
                 yBottom: yCenter - 5,
                 yTop: yCenter + 5,
                 label: "Temp Target",
-                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
 

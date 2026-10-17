@@ -31,19 +31,22 @@ extension MainViewController {
     }
 
     // NS Bolus Data  Struct
-    struct bolusGraphStruct: Codable {
+    struct bolusGraphStruct {
         var value: Double
         var date: TimeInterval
         var sgv: Int
+        /// The Treatments list entry this dot opens.
+        var detail: Treatment? = nil
     }
 
     // NS Bolus Data  Struct
-    struct carbGraphStruct: Codable {
+    struct carbGraphStruct {
         var value: Double
         var date: TimeInterval
         var sgv: Int
         var absorptionTime: Int
-        var treatment: CarbTreatment? = nil
+        /// The Treatments list entry this dot opens.
+        var detail: Treatment? = nil
     }
 
     func clearOldTempBasal() {
