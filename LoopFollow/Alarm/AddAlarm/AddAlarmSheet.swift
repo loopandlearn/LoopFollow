@@ -16,7 +16,8 @@ struct AddAlarmSheet: View {
     private func matches(_ type: AlarmType) -> Bool {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return true }
-        return type.rawValue.localizedCaseInsensitiveContains(query)
+        return type.displayName.localizedCaseInsensitiveContains(query)
+            || type.rawValue.localizedCaseInsensitiveContains(query)
             || type.blurb.localizedCaseInsensitiveContains(query)
             || type.group.rawValue.localizedCaseInsensitiveContains(query)
     }

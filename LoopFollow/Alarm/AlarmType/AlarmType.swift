@@ -50,3 +50,36 @@ extension AlarmType {
         }
     }
 }
+
+extension AlarmType {
+    /// User-facing, localized name. `rawValue` is persisted in Storage and must never be
+    /// shown to the user or translated; every display site goes through this property.
+    var displayName: String {
+        switch self {
+        case .temporary: String(localized: "Temporary Alert", comment: "Alarm type name")
+        case .iob: String(localized: "IOB Alert", comment: "Alarm type name")
+        case .cob: String(localized: "COB Alert", comment: "Alarm type name")
+        case .low: String(localized: "Low BG Alert", comment: "Alarm type name")
+        case .high: String(localized: "High BG Alert", comment: "Alarm type name")
+        case .fastDrop: String(localized: "Fast Drop Alert", comment: "Alarm type name")
+        case .fastRise: String(localized: "Fast Rise Alert", comment: "Alarm type name")
+        case .missedReading: String(localized: "Missed Reading Alert", comment: "Alarm type name")
+        case .notLooping: String(localized: "Not Looping Alert", comment: "Alarm type name")
+        case .missedBolus: String(localized: "Missed Bolus Alert", comment: "Alarm type name")
+        case .futureCarbs: String(localized: "Future Carbs Alert", comment: "Alarm type name")
+        case .sensorChange: String(localized: "Sensor Change Alert", comment: "Alarm type name")
+        case .pumpChange: String(localized: "Pump Change Alert", comment: "Alarm type name")
+        case .pump: String(localized: "Pump Insulin Alert", comment: "Alarm type name")
+        case .pumpBattery: String(localized: "Pump Battery Alert", comment: "Alarm type name")
+        case .battery: String(localized: "Low Battery", comment: "Alarm type name")
+        case .batteryDrop: String(localized: "Battery Drop", comment: "Alarm type name")
+        case .recBolus: String(localized: "Rec. Bolus", comment: "Alarm type name: recommended bolus")
+        case .overrideStart: String(localized: "Override Started", comment: "Alarm type name")
+        case .overrideEnd: String(localized: "Override Ended", comment: "Alarm type name")
+        case .tempTargetStart: String(localized: "Temp Target Started", comment: "Alarm type name")
+        case .tempTargetEnd: String(localized: "Temp Target Ended", comment: "Alarm type name")
+        case .buildExpire: String(localized: "Looping app expiration", comment: "Alarm type name")
+        case .dbSize: String(localized: "Nightscout Database Size", comment: "Alarm type name")
+        }
+    }
+}

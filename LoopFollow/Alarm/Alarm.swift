@@ -11,7 +11,13 @@ protocol DayNightDisplayable {
 
 extension DayNightDisplayable where Self: RawRepresentable, Self.RawValue == String {
     var displayName: String {
-        rawValue == "always" ? "Day & Night" : rawValue.capitalized
+        switch rawValue {
+        case "always": String(localized: "Day & Night", comment: "Alarm schedule option: at any time of day")
+        case "day": String(localized: "Day", comment: "Alarm schedule option: daytime only")
+        case "night": String(localized: "Night", comment: "Alarm schedule option: nighttime only")
+        case "never": String(localized: "Never", comment: "Alarm schedule option: never")
+        default: rawValue.capitalized
+        }
     }
 }
 
@@ -277,7 +283,7 @@ struct Alarm: Identifiable, Codable, Equatable {
             }
         }()
 
-        AlarmManager.shared.sendNotification(title: type.rawValue, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
+        AlarmManager.shared.sendNotification(title: type.displayName, actionTitle: snoozeDuration == 0 ? "Acknowledge" : "Snooze")
 
         if playSound {
             AlarmSound.setSoundFile(soundFile)
@@ -289,7 +295,7 @@ struct Alarm: Identifiable, Codable, Equatable {
 
     init(type: AlarmType) {
         self.type = type
-        name = type.rawValue
+        name = type.displayName
 
         switch type {
         case .buildExpire:

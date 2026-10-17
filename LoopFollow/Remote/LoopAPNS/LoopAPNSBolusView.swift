@@ -57,7 +57,7 @@ struct LoopAPNSBolusView: View {
                                             Text("\(String(format: "%.2f", recommendedBolus))U")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
-                                            Text("Calculated \(minutesSinceCalculation) minute\(minutesSinceCalculation == 1 ? "" : "s") ago")
+                                            Text("Calculated \(minutesSinceCalculation) minutes ago")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
