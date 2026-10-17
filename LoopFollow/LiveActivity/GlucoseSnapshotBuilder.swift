@@ -101,6 +101,9 @@ protocol CurrentGlucoseStateProviding {
     /// True when LoopFollow detects the loop has not reported in 15+ minutes.
     var isNotLooping: Bool { get }
 
+    /// CGM state reported after the newest reading, as display text.
+    var cgmSensorState: String? { get }
+
     // MARK: - Renewal
 
     /// True when the Live Activity is within renewalWarning seconds of its deadline.
@@ -173,6 +176,7 @@ enum GlucoseSnapshotBuilder {
             maxBgMgdl: provider.maxBgMgdl,
             unit: preferredUnit,
             isNotLooping: provider.isNotLooping,
+            cgmSensorState: provider.cgmSensorState,
             showRenewalOverlay: provider.showRenewalOverlay,
         )
     }

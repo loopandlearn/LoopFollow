@@ -105,6 +105,8 @@ extension MainViewController {
 
     func clearOldNotes() {
         noteGraphData.removeAll()
+        cgmSensorStates.removeAll()
         updateNotes()
+        updateCGMSensorState()
     }
 }

@@ -145,6 +145,7 @@ final class BGChartModel: ObservableObject {
     @Published var resumes: [TreatmentPoint] = []
     @Published var sensorStarts: [TreatmentPoint] = []
     @Published var notes: [TreatmentPoint] = []
+    @Published var sensorStates: [TreatmentPoint] = []
 
     /// Device status history panes under the main chart, in display order.
     @Published var historyPanes: [BGChartHistory.Pane] = []
@@ -528,6 +529,17 @@ final class BGChartModel: ObservableObject {
                 sgv: Double($0.sgv),
                 label: $0.note,
                 pillText: "\(Self.extractMessage(from: $0.note) ?? $0.note)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+            )
+        }
+
+        sensorStates = (showOtherTreatments ? vc.cgmSensorStates : []).compactMap { state in
+            guard let sgv = CGMSensorState.anchorSGV(at: state.date.timeIntervalSince1970, readings: vc.bgData) else { return nil }
+            return TreatmentPoint(
+                date: state.date,
+                value: Double(sgv),
+                sgv: Double(sgv),
+                label: state.name,
+                pillText: "CGM: \(state.displayName)\n\(pillTimeString(for: state.date))"
             )
         }
 
