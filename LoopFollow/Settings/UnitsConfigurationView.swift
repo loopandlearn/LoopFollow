@@ -60,6 +60,7 @@ struct UnitsConfigurationView: View {
             .pickerStyle(.segmented)
             .onChange(of: glucoseUnit) { newValue in
                 UnitSettingsStore.shared.glucoseUnit = newValue
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
@@ -89,6 +90,7 @@ struct UnitsConfigurationView: View {
                     .onChange(of: lowValue) { newValue in
                         Storage.shared.lowLine.value = newValue
                         Observable.shared.chartSettingsChanged.value = true
+                        PhoneSessionManager.shared.sendConfig()
                     }
                     BGPicker(
                         title: "High",
@@ -99,6 +101,7 @@ struct UnitsConfigurationView: View {
                     .onChange(of: highValue) { newValue in
                         Storage.shared.highLine.value = newValue
                         Observable.shared.chartSettingsChanged.value = true
+                        PhoneSessionManager.shared.sendConfig()
                     }
                 }
             } header: {
