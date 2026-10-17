@@ -146,6 +146,11 @@ extension MainViewController {
             {
                 infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%", numericValue: pumpBatteryPercent)
                 Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
+                Storage.shared.lastPumpBatteryTime.value = Date().timeIntervalSince1970
+            } else if let lastKnown = Observable.shared.pumpBatteryLevel.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastPumpBatteryTime.value)
+            {
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", lastKnown) + "%")
             }
 
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
@@ -161,6 +166,7 @@ extension MainViewController {
                 infoManager.updateInfoData(type: .battery, value: batteryText, numericValue: upbat)
                 Observable.shared.deviceBatteryLevel.value = upbat
                 Observable.shared.deviceBatteryIsCharging.value = isCharging
+                Storage.shared.lastUploaderRecordTime.value = Date().timeIntervalSince1970
 
                 let timestamp = uploader["timestamp"] as? Date ?? Date()
                 let currentBattery = DataStructs.batteryStruct(batteryLevel: upbat, timestamp: timestamp)
@@ -170,6 +176,10 @@ extension MainViewController {
                 if deviceBatteryData.count > 30 {
                     deviceBatteryData.removeFirst()
                 }
+            } else if let lastKnown = Observable.shared.deviceBatteryLevel.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastUploaderRecordTime.value)
+            {
+                infoManager.updateInfoData(type: .battery, value: String(format: "%.0f", lastKnown) + "%")
             }
         }
 

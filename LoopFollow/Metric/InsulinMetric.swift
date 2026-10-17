@@ -18,6 +18,10 @@ class InsulinMetric: Metric {
         super.init(value: value, maxFractionDigits: 2, minFractionDigits: 0)
     }
 
+    init(value: Double) {
+        super.init(value: value, maxFractionDigits: 2, minFractionDigits: 0)
+    }
+
     override func formattedValue() -> String {
         let decimals = abs(value) >= 10 ? 0 : 1
         return Localizer.formatToLocalizedString(value, maxFractionDigits: decimals, minFractionDigits: 0)

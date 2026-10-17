@@ -75,13 +75,20 @@ extension MainViewController {
             if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
+                Storage.shared.lastIOBTime.value = Date().timeIntervalSince1970
                 Observable.shared.iobText.value = iobMetric.formattedValue()
+            } else if let lastKnown = Storage.shared.lastIOB.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastIOBTime.value)
+            {
+                infoManager.updateInfoData(type: .iob, value: InsulinMetric(value: lastKnown))
             }
 
             // COB
+            var cobSet = false
             if let cobMetric = CarbMetric(from: enactedOrSuggested, key: "COB") {
                 infoManager.updateInfoData(type: .cob, value: cobMetric)
                 latestCOB = cobMetric
+                cobSet = true
             } else if let reasonString = enactedOrSuggested["reason"] as? String {
                 // Fallback: Extract COB from reason string
                 let cobPattern = "COB: (\\d+(?:\\.\\d+)?)"
@@ -94,6 +101,7 @@ extension MainViewController {
                         if let fallbackCobMetric = CarbMetric(from: tempDict, key: "COB") {
                             infoManager.updateInfoData(type: .cob, value: fallbackCobMetric)
                             latestCOB = fallbackCobMetric
+                            cobSet = true
                         } else {
                             print("Failed to create CarbMetric from extracted COB value: \(cobValue)")
                         }
@@ -103,6 +111,13 @@ extension MainViewController {
                 } else {
                     print("COB pattern not found in reason string.")
                 }
+            }
+            if cobSet {
+                Storage.shared.lastCOBTime.value = Date().timeIntervalSince1970
+            } else if let lastKnown = Storage.shared.lastCOB.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastCOBTime.value)
+            {
+                infoManager.updateInfoData(type: .cob, value: CarbMetric(value: lastKnown))
             }
 
             // Smoothed BG: the glucose the algorithm ran on (smoothed in Trio)
@@ -115,6 +130,11 @@ extension MainViewController {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
                 infoManager.updateInfoData(type: .autosens, value: formattedSens)
                 Storage.shared.lastAutosens.value = sens
+                Storage.shared.lastAutosensTime.value = Date().timeIntervalSince1970
+            } else if let lastKnown = Storage.shared.lastAutosens.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastAutosensTime.value)
+            {
+                infoManager.updateInfoData(type: .autosens, value: String(format: "%.0f", lastKnown * 100.0) + "%")
             }
 
             // Recommended Bolus
@@ -172,6 +192,11 @@ extension MainViewController {
             {
                 infoManager.updateInfoData(type: .tdd, value: tddMetric)
                 Storage.shared.lastTdd.value = tddMetric.value
+                Storage.shared.lastTddTime.value = Date().timeIntervalSince1970
+            } else if let lastKnown = Storage.shared.lastTdd.value,
+                      DeviceStatusGrace.isFresh(Storage.shared.lastTddTime.value)
+            {
+                infoManager.updateInfoData(type: .tdd, value: InsulinMetric(value: lastKnown))
             }
 
             let predBGsData: [String: AnyObject]? = {
