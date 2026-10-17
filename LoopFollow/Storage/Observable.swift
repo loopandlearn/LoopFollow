@@ -36,6 +36,9 @@ class Observable {
     var predictionColor = ObservableValue<Color>(default: .purple)
 
     var currentAlarm = ObservableValue<UUID?>(default: nil)
+    /// Replaces the current alarm's name on screen when the firing needs its
+    /// own wording (e.g. an end alarm's early warning); nil shows the name.
+    var currentAlarmTitleOverride = ObservableValue<String?>(default: nil)
     var alarmSoundPlaying = ObservableValue<Bool>(default: false)
 
     var debug = ObservableValue<Bool>(default: false)
