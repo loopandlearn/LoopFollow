@@ -19,7 +19,8 @@ extension MainViewController {
 
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
-                let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20))
+                let detail = Treatment.historyEntries(from: currentEntry, date: dateTimeStamp) { Int(sgv.sgv) }.bolus
+                let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20), detail: detail)
                 smbData.append(dot)
             }
         }
