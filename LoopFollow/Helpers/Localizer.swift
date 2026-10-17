@@ -74,6 +74,25 @@ final class UnitSettingsStore {
         }
     }
 
+    /// Returns the very low, low, high and very high thresholds (in mg/dL) for
+    /// the current range mode. Very low is 54 and very high 250, or the range's
+    /// own bounds when a custom range extends past them.
+    func effectiveBandThresholds() -> (veryLow: Double, low: Double, high: Double, veryHigh: Double) {
+        let range = effectiveThresholds()
+        return (min(54.0, range.low), range.low, range.high, max(250.0, range.high))
+    }
+
+    var timeInRangeTitle: String {
+        switch timeInRangeMode {
+        case .tir:
+            return "Time in Range"
+        case .titr:
+            return "Time in Tight Range"
+        case .custom:
+            return "Custom Range"
+        }
+    }
+
     var glycemicMetricMode: GlycemicMetricMode {
         get {
             Storage.shared.showGMI.value ? .gmi : .ehba1c

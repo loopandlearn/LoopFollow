@@ -13,7 +13,7 @@ struct TIRView: View {
             ZStack(alignment: .topTrailing) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text(tirTitle)
+                        Text(UnitSettingsStore.shared.timeInRangeTitle)
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
@@ -42,21 +42,25 @@ struct TIRView: View {
                                     label: "Very High (\(veryHighCutoffText))",
                                     percentage: average.veryHigh
                                 )
-                                TIRLegendItem(
-                                    color: .yellow,
-                                    label: "High (\(highCutoffText))",
-                                    percentage: average.high
-                                )
+                                if hasHighBand {
+                                    TIRLegendItem(
+                                        color: .yellow,
+                                        label: "High (\(highCutoffText))",
+                                        percentage: average.high
+                                    )
+                                }
                                 TIRLegendItem(
                                     color: .green,
                                     label: "In Range (\(inRangeCutoffText))",
                                     percentage: average.inRange
                                 )
-                                TIRLegendItem(
-                                    color: .red.opacity(0.5),
-                                    label: "Low (\(lowCutoffText))",
-                                    percentage: average.low
-                                )
+                                if hasLowBand {
+                                    TIRLegendItem(
+                                        color: .red.opacity(0.5),
+                                        label: "Low (\(lowCutoffText))",
+                                        percentage: average.low
+                                    )
+                                }
                                 TIRLegendItem(
                                     color: .red.opacity(0.8),
                                     label: "Very Low (\(veryLowCutoffText))",
@@ -86,17 +90,6 @@ struct TIRView: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private var tirTitle: String {
-        switch UnitSettingsStore.shared.timeInRangeMode {
-        case .tir:
-            return "Time in Range"
-        case .titr:
-            return "Time in Tight Range"
-        case .custom:
-            return "Custom Range"
-        }
-    }
-
     private func formatRange(_: Double) -> String {
         let thresholds = UnitSettingsStore.shared.effectiveThresholds()
         let glucoseUnit = UnitSettingsStore.shared.glucoseUnit
@@ -108,19 +101,31 @@ struct TIRView: View {
     }
 
     private var lowThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveThresholds().low)
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveBandThresholds().low)
     }
 
     private var highThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveThresholds().high)
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveBandThresholds().high)
     }
 
     private var veryLowThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(54.0)
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveBandThresholds().veryLow)
     }
 
     private var veryHighThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(250.0)
+        UnitSettingsStore.shared.convertMgdlToDisplay(UnitSettingsStore.shared.effectiveBandThresholds().veryHigh)
+    }
+
+    /// A custom range that reaches past the very low cutoff leaves no low band.
+    private var hasLowBand: Bool {
+        let thresholds = UnitSettingsStore.shared.effectiveBandThresholds()
+        return thresholds.veryLow < thresholds.low
+    }
+
+    /// A custom range that reaches past the very high cutoff leaves no high band.
+    private var hasHighBand: Bool {
+        let thresholds = UnitSettingsStore.shared.effectiveBandThresholds()
+        return thresholds.high < thresholds.veryHigh
     }
 
     private var veryLowCutoffText: String {
