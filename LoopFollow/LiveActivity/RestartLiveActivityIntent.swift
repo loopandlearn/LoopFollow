@@ -31,27 +31,4 @@
             return .result(dialog: "Live Activity restarted.")
         }
     }
-
-    struct LoopFollowAppShortcuts: AppShortcutsProvider {
-        static var appShortcuts: [AppShortcut] {
-            AppShortcut(
-                intent: RestartLiveActivityIntent(),
-                phrases: ["Restart Live Activity in \(.applicationName)"],
-                shortTitle: "Restart Live Activity",
-                systemImageName: "dot.radiowaves.left.and.right"
-            )
-            AppShortcut(
-                intent: EnableSpeakBGIntent(),
-                phrases: ["Turn on Speak BG in \(.applicationName)"],
-                shortTitle: "Turn On Speak BG",
-                systemImageName: "speaker.wave.2"
-            )
-            AppShortcut(
-                intent: DisableSpeakBGIntent(),
-                phrases: ["Turn off Speak BG in \(.applicationName)"],
-                shortTitle: "Turn Off Speak BG",
-                systemImageName: "speaker.slash"
-            )
-        }
-    }
 #endif
