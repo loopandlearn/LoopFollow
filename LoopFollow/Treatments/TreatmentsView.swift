@@ -1121,6 +1121,18 @@ enum TreatmentFilter: Hashable {
     }
 }
 
+/// What the Treatments list shows for one Nightscout treatment.
+struct TreatmentHistoryEntries {
+    var entries: [Treatment] = []
+    /// The entry is an SMB, which picks the list's automatic filter label.
+    var sawSMB = false
+    /// The entry is flagged automatic, which picks the list's automatic filter label.
+    var sawAutomatic = false
+
+    var carb: Treatment? { entries.first { $0.type == .carb } }
+    var bolus: Treatment? { entries.first { [.bolusManual, .bolusAutomatic, .smb].contains($0.type) } }
+}
+
 struct Treatment: Identifiable {
     let id: String
     let type: TreatmentType
@@ -1180,6 +1192,187 @@ extension Treatment {
             trioMeal.protein > 0 ? "\(trioMeal.protein) g protein" : nil,
         ]
         return parts.compactMap { $0 }.joined(separator: " • ")
+    }
+
+    /// The Treatments list entries for one Nightscout treatment. A Meal Bolus yields a carb entry and a bolus entry.
+    static func historyEntries(from entry: [String: AnyObject], date: TimeInterval, nearestBG: () -> Int) -> TreatmentHistoryEntries {
+        var result = TreatmentHistoryEntries()
+        guard let eventType = entry["eventType"] as? String else { return result }
+        let nsId = entry["_id"] as? String ?? "unknown-\(date)"
+
+        switch eventType {
+        case "Carb Correction", "Meal Bolus":
+            let trioMeal = eventType == "Carb Correction" ? TrioMealTreatment(nightscoutEntry: entry, date: date) : nil
+            let loopCarb = trioMeal == nil ? LoopCarbTreatment(nightscoutEntry: entry, date: date) : nil
+            let carbs = entry["carbs"] as? Double ?? 0
+            if carbs > 0 || trioMeal != nil {
+                let actualBG = nearestBG()
+                let treatment = Treatment.carb(
+                    nightscoutID: nsId,
+                    date: date,
+                    carbs: carbs,
+                    bgValue: actualBG,
+                    trioMeal: trioMeal,
+                    loopCarb: loopCarb
+                )
+                result.entries.append(treatment)
+            }
+
+            // Also process bolus from Meal Bolus
+            if eventType == "Meal Bolus",
+               let insulin = entry["insulin"] as? Double, insulin > 0
+            {
+                let actualBG = nearestBG()
+                let treatment = Treatment(
+                    id: "\(nsId)-bolus",
+                    type: .bolusManual,
+                    date: date,
+                    title: String(format: "%.2f U", insulin),
+                    subtitle: "Bolus",
+                    icon: "circle.fill",
+                    color: .blue,
+                    bgValue: actualBG
+                )
+                result.entries.append(treatment)
+            }
+
+        case "Correction Bolus", "Bolus", "External Insulin":
+            if let insulin = entry["insulin"] as? Double, insulin > 0 {
+                let isAutomatic = entry["automatic"] as? Bool ?? false
+                let isSMB = entry["isSMB"] as? Bool ?? false
+                let typeString = (entry["type"] as? String)?.lowercased()
+                let isTrioSMBType = typeString == "smb"
+                let treatAsAutomatic = isAutomatic || isSMB || isTrioSMBType
+                let actualBG = nearestBG()
+
+                if treatAsAutomatic {
+                    result.sawSMB = isSMB || isTrioSMBType
+                    result.sawAutomatic = isAutomatic
+                    let treatment = Treatment(
+                        id: "\(nsId)-smb",
+                        type: .bolusAutomatic,
+                        date: date,
+                        title: String(format: "%.2f U", insulin),
+                        subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
+                        icon: "arrowtriangle.down.fill",
+                        color: .blue,
+                        bgValue: actualBG
+                    )
+                    result.entries.append(treatment)
+                } else {
+                    let treatment = Treatment(
+                        id: "\(nsId)-bolus",
+                        type: .bolusManual,
+                        date: date,
+                        title: String(format: "%.2f U", insulin),
+                        subtitle: "Bolus",
+                        icon: "circle.fill",
+                        color: .blue,
+                        bgValue: actualBG
+                    )
+                    result.entries.append(treatment)
+                }
+            }
+
+        case "SMB":
+            if let insulin = entry["insulin"] as? Double, insulin > 0 {
+                result.sawSMB = true
+                let actualBG = nearestBG()
+                let treatment = Treatment(
+                    id: "\(nsId)-smb",
+                    type: .smb,
+                    date: date,
+                    title: String(format: "%.2f U", insulin),
+                    subtitle: "SMB",
+                    icon: "arrowtriangle.down.fill",
+                    color: .blue,
+                    bgValue: actualBG
+                )
+                result.entries.append(treatment)
+            }
+
+        case "Temp Basal":
+            if let rate = entry["rate"] as? Double {
+                let treatment = Treatment(
+                    id: "\(nsId)-basal",
+                    type: .tempBasal,
+                    date: date,
+                    title: String(format: "%.2f U/hr", rate),
+                    subtitle: "Temp Basal",
+                    icon: "chart.xyaxis.line",
+                    color: .blue,
+                    bgValue: 0
+                )
+                result.entries.append(treatment)
+            }
+
+        case "Temporary Override", "Exercise":
+            let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
+            if durationMinutes == 0 {
+                return result
+            }
+
+            let reason = (entry["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                ?? (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                ?? ""
+
+            let subtitleParts = ["Override", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil].compactMap { $0 }
+            let subtitle = subtitleParts.joined(separator: " • ")
+            let title = reason.isEmpty ? "Temporary Override" : reason
+
+            let treatment = Treatment(
+                id: "\(nsId)-override",
+                type: .override,
+                date: date,
+                title: title,
+                subtitle: subtitle,
+                icon: "slider.horizontal.3",
+                color: .purple,
+                bgValue: 0
+            )
+            result.entries.append(treatment)
+
+        case "Temporary Target":
+            let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
+            if durationMinutes == 0 {
+                return result
+            }
+
+            let targetBottom = (entry["targetBottom"] as? Double) ?? Double(entry["targetBottom"] as? Int ?? 0)
+            let targetTop = (entry["targetTop"] as? Double) ?? Double(entry["targetTop"] as? Int ?? 0)
+            let targetValue = targetBottom > 0 ? targetBottom : targetTop
+
+            guard targetValue > 0 else {
+                return result
+            }
+
+            let title: String
+            if targetBottom > 0, targetTop > 0, abs(targetTop - targetBottom) >= 0.1 {
+                title = "\(formatBG(targetBottom)) - \(formatBG(targetTop))"
+            } else {
+                title = formatBG(targetValue)
+            }
+
+            let reason = (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let subtitleParts = ["Temp Target", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil, reason?.isEmpty == false ? reason : nil].compactMap { $0 }
+            let subtitle = subtitleParts.joined(separator: " • ")
+
+            let treatment = Treatment(
+                id: "\(nsId)-temp-target",
+                type: .tempTarget,
+                date: date,
+                title: title,
+                subtitle: subtitle,
+                icon: "scope",
+                color: .green,
+                bgValue: 0
+            )
+            result.entries.append(treatment)
+
+        default:
+            break
+        }
+        return result
     }
 
     /// Trio root meals keyed by the `fpuID` their FPU children carry.
@@ -1391,7 +1584,7 @@ class TreatmentsViewModel: ObservableObject {
         guard let mainVC = getMainViewController() else { return ([], false, false) }
 
         for entry in entries {
-            guard let eventType = entry["eventType"] as? String,
+            guard entry["eventType"] is String,
                   let createdAt = entry["created_at"] as? String,
                   let date = NightscoutUtils.parseDate(createdAt)
             else {
@@ -1409,182 +1602,10 @@ class TreatmentsViewModel: ObservableObject {
             // Mark this entry as processed
             processedNightscoutIds.insert(nsId)
 
-            switch eventType {
-            case "Carb Correction", "Meal Bolus":
-                let trioMeal = eventType == "Carb Correction" ? TrioMealTreatment(nightscoutEntry: entry, date: timestamp) : nil
-                let loopCarb = trioMeal == nil ? LoopCarbTreatment(nightscoutEntry: entry, date: timestamp) : nil
-                let carbs = entry["carbs"] as? Double ?? 0
-                if carbs > 0 || trioMeal != nil {
-                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let treatment = Treatment.carb(
-                        nightscoutID: nsId,
-                        date: timestamp,
-                        carbs: carbs,
-                        bgValue: actualBG,
-                        trioMeal: trioMeal,
-                        loopCarb: loopCarb
-                    )
-                    treatments.append(treatment)
-                }
-
-                // Also process bolus from Meal Bolus
-                if eventType == "Meal Bolus",
-                   let insulin = entry["insulin"] as? Double, insulin > 0
-                {
-                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let treatment = Treatment(
-                        id: "\(nsId)-bolus",
-                        type: .bolusManual,
-                        date: timestamp,
-                        title: String(format: "%.2f U", insulin),
-                        subtitle: "Bolus",
-                        icon: "circle.fill",
-                        color: .blue,
-                        bgValue: actualBG
-                    )
-                    treatments.append(treatment)
-                }
-
-            case "Correction Bolus", "Bolus", "External Insulin":
-                if let insulin = entry["insulin"] as? Double, insulin > 0 {
-                    let isAutomatic = entry["automatic"] as? Bool ?? false
-                    let isSMB = entry["isSMB"] as? Bool ?? false
-                    let typeString = (entry["type"] as? String)?.lowercased()
-                    let isTrioSMBType = typeString == "smb"
-                    let treatAsAutomatic = isAutomatic || isSMB || isTrioSMBType
-                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-
-                    if treatAsAutomatic {
-                        if isSMB || isTrioSMBType {
-                            detectedSMB = true
-                        }
-                        if isAutomatic {
-                            detectedAutomatic = true
-                        }
-                        let treatment = Treatment(
-                            id: "\(nsId)-smb",
-                            type: .bolusAutomatic,
-                            date: timestamp,
-                            title: String(format: "%.2f U", insulin),
-                            subtitle: isSMB || isTrioSMBType ? "SMB" : "Automatic Bolus",
-                            icon: "arrowtriangle.down.fill",
-                            color: .blue,
-                            bgValue: actualBG
-                        )
-                        treatments.append(treatment)
-                    } else {
-                        let treatment = Treatment(
-                            id: "\(nsId)-bolus",
-                            type: .bolusManual,
-                            date: timestamp,
-                            title: String(format: "%.2f U", insulin),
-                            subtitle: "Bolus",
-                            icon: "circle.fill",
-                            color: .blue,
-                            bgValue: actualBG
-                        )
-                        treatments.append(treatment)
-                    }
-                }
-
-            case "SMB":
-                if let insulin = entry["insulin"] as? Double, insulin > 0 {
-                    detectedSMB = true
-                    let actualBG = findNearestBG(at: timestamp, in: mainVC.bgData)
-                    let treatment = Treatment(
-                        id: "\(nsId)-smb",
-                        type: .smb,
-                        date: timestamp,
-                        title: String(format: "%.2f U", insulin),
-                        subtitle: "SMB",
-                        icon: "arrowtriangle.down.fill",
-                        color: .blue,
-                        bgValue: actualBG
-                    )
-                    treatments.append(treatment)
-                }
-
-            case "Temp Basal":
-                if let rate = entry["rate"] as? Double {
-                    let treatment = Treatment(
-                        id: "\(nsId)-basal",
-                        type: .tempBasal,
-                        date: timestamp,
-                        title: String(format: "%.2f U/hr", rate),
-                        subtitle: "Temp Basal",
-                        icon: "chart.xyaxis.line",
-                        color: .blue,
-                        bgValue: 0
-                    )
-                    treatments.append(treatment)
-                }
-
-            case "Temporary Override", "Exercise":
-                let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
-                if durationMinutes == 0 {
-                    continue
-                }
-
-                let reason = (entry["notes"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                    ?? (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                    ?? ""
-
-                let subtitleParts = ["Override", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil].compactMap { $0 }
-                let subtitle = subtitleParts.joined(separator: " • ")
-                let title = reason.isEmpty ? "Temporary Override" : reason
-
-                let treatment = Treatment(
-                    id: "\(nsId)-override",
-                    type: .override,
-                    date: timestamp,
-                    title: title,
-                    subtitle: subtitle,
-                    icon: "slider.horizontal.3",
-                    color: .purple,
-                    bgValue: 0
-                )
-                treatments.append(treatment)
-
-            case "Temporary Target":
-                let durationMinutes = (entry["duration"] as? Double) ?? Double(entry["duration"] as? Int ?? 0)
-                if durationMinutes == 0 {
-                    continue
-                }
-
-                let targetBottom = (entry["targetBottom"] as? Double) ?? Double(entry["targetBottom"] as? Int ?? 0)
-                let targetTop = (entry["targetTop"] as? Double) ?? Double(entry["targetTop"] as? Int ?? 0)
-                let targetValue = targetBottom > 0 ? targetBottom : targetTop
-
-                guard targetValue > 0 else {
-                    continue
-                }
-
-                let title: String
-                if targetBottom > 0, targetTop > 0, abs(targetTop - targetBottom) >= 0.1 {
-                    title = "\(formatBG(targetBottom)) - \(formatBG(targetTop))"
-                } else {
-                    title = formatBG(targetValue)
-                }
-
-                let reason = (entry["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                let subtitleParts = ["Temp Target", durationMinutes > 0 ? "\(Int(durationMinutes))m" : nil, reason?.isEmpty == false ? reason : nil].compactMap { $0 }
-                let subtitle = subtitleParts.joined(separator: " • ")
-
-                let treatment = Treatment(
-                    id: "\(nsId)-temp-target",
-                    type: .tempTarget,
-                    date: timestamp,
-                    title: title,
-                    subtitle: subtitle,
-                    icon: "scope",
-                    color: .green,
-                    bgValue: 0
-                )
-                treatments.append(treatment)
-
-            default:
-                break
-            }
+            let history = Treatment.historyEntries(from: entry, date: timestamp) { findNearestBG(at: timestamp, in: mainVC.bgData) }
+            treatments.append(contentsOf: history.entries)
+            detectedSMB = detectedSMB || history.sawSMB
+            detectedAutomatic = detectedAutomatic || history.sawAutomatic
         }
 
         // Sort by date descending (most recent first)

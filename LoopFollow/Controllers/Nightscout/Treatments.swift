@@ -214,7 +214,7 @@ extension MainViewController {
         if note.count > 0 {
             processNotes(entries: note)
         } else {
-            if noteGraphData.count > 0 {
+            if noteGraphData.count > 0 || cgmSensorStates.count > 0 {
                 clearOldNotes()
             }
         }

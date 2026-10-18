@@ -15,6 +15,10 @@ extension MainViewController {
     func treatmentsTaskAction() {
         // If Nightscout not enabled, wait 60s and try again
         guard IsNightscoutEnabled(), Storage.shared.downloadTreatments.value else {
+            if !cgmSensorStates.isEmpty {
+                cgmSensorStates.removeAll()
+                updateCGMSensorState()
+            }
             TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date().addingTimeInterval(60))
             return
         }

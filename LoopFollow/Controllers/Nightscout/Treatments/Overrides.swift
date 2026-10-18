@@ -86,7 +86,8 @@ extension MainViewController {
                     ?? (e["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                     ?? "",
                 sgv: -20,
-                scheduledEndDate: trueEnd
+                scheduledEndDate: trueEnd,
+                detail: Treatment.historyEntries(from: e, date: startDate.timeIntervalSince1970) { 0 }.entries.first
             )
             overrideGraphData.append(dot)
 

@@ -40,7 +40,7 @@ extension MainViewController {
                     date: Double(dateTimeStamp),
                     sgv: Int(sgv.sgv + Double(offset)),
                     absorptionTime: absorptionTime,
-                    treatment: CarbTreatment(nightscoutEntry: currentEntry, date: dateTimeStamp)
+                    detail: Treatment.historyEntries(from: currentEntry, date: dateTimeStamp) { Int(sgv.sgv) }.carb
                 )
                 carbData.append(dot)
             }

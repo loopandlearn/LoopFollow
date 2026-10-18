@@ -98,6 +98,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
+    var cgmSensorStates: [CGMSensorState] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
@@ -812,7 +813,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
 
         #if !targetEnvironment(macCatalyst)
-            LiveActivityManager.shared.startFromCurrentState()
+            // Creation at launch belongs to didBecomeActive; this covers
+            // returning to the tab while the app is already active.
+            if UIApplication.shared.applicationState == .active {
+                LiveActivityManager.shared.startFromCurrentState()
+            }
         #endif
     }
 
