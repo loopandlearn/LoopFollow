@@ -178,8 +178,7 @@ final class LiveActivityManager {
     @objc private func handleWillResignActive() {
         guard Storage.shared.laEnabled.value, let activity = current else { return }
 
-        refreshWorkItem?.cancel()
-        refreshWorkItem = nil
+        refreshCoalescer.cancel()
 
         let provider = StorageCurrentGlucoseStateProvider()
         guard let snapshot = GlucoseSnapshotBuilder.build(from: provider) else { return }
@@ -441,7 +440,10 @@ final class LiveActivityManager {
     private var lastUpdateTime: Date?
     private var pushToken: String?
     private var tokenObservationTask: Task<Void, Never>?
-    private var refreshWorkItem: DispatchWorkItem?
+    private lazy var refreshCoalescer = RefreshCoalescer(delay: 20) { [weak self] reason in
+        self?.performRefresh(reason: reason)
+    }
+
     /// Set when the user manually swipes away the LA. Blocks auto-restart until
     /// an explicit user action (Restart button, App Intent) clears it.
     /// In-memory only — resets to false on app relaunch, so a kill + relaunch
@@ -653,12 +655,11 @@ final class LiveActivityManager {
     func refreshFromCurrentState(reason: String) {
         // No LA guard here — Watch and store must update regardless of LA state.
         // LA-specific gating (laEnabled, dismissedByUser) is applied inside performRefresh.
-        refreshWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            self?.performRefresh(reason: reason)
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.refreshFromCurrentState(reason: reason) }
+            return
         }
-        refreshWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 20.0, execute: workItem)
+        refreshCoalescer.request(reason: reason)
     }
 
     // MARK: - Renewal
