@@ -72,10 +72,18 @@ enum PumpReservoirResolver {
         let onlyWhenLow = reportsVolumeOnlyWhenLow(manufacturer: manufacturer, model: model)
         let withoutReading: PumpReservoirState = onlyWhenLow ? .aboveReportingLimit : .unknown
 
+        let pumpID = pumpID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        // Loop reports an Omnipod as "Unknown" while no pod is paired, so a volume in the
+        // record is the previous pod's. Medtrum is always "Unknown" on Loop.
+        if pumpID == "Unknown", onlyWhenLow {
+            return Resolution(state: withoutReading, cache: storedCache)
+        }
+
         // A reading is carried between records only when the uploader names the pump it
-        // came from, so that a pod change discards it. Loop names no pump while a pod is
-        // being paired, and the stored pump is kept so the next one reads as a change.
-        guard let pumpID = identifiedPump(pumpID) else {
+        // came from, so that a pod change discards it. The stored pump is kept across
+        // records that name none, so the next one reads as a change.
+        guard !pumpID.isEmpty, pumpID != "Unknown" else {
             guard let reservoir else { return Resolution(state: withoutReading, cache: storedCache) }
             return Resolution(state: .units(reservoir), cache: storedCache)
         }
@@ -110,13 +118,6 @@ enum PumpReservoirResolver {
         }
 
         return Resolution(state: withoutReading, cache: cache)
-    }
-
-    private static func identifiedPump(_ pumpID: String?) -> String? {
-        let trimmed = pumpID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        // Loop reports "Unknown" while no pod is paired.
-        guard !trimmed.isEmpty, trimmed != "Unknown" else { return nil }
-        return trimmed
     }
 
     private static func reportsVolumeOnlyWhenLow(manufacturer: String?, model: String?) -> Bool {

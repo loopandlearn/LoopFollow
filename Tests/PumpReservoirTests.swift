@@ -161,12 +161,27 @@ struct PumpReservoirTests {
         #expect(withoutVolume.cache == nil)
     }
 
-    @Test("a pump with no pod paired resolves from the record alone and keeps the stored pump")
+    @Test("an Omnipod with no pod paired reads as 50+ and keeps the stored pump")
     func unknownPumpID() {
         let stored = cache(units: 9.9, readingAge: 5 * 60)
         let result = resolve(pumpID: "Unknown", cache: stored)
         #expect(result.state == .aboveReportingLimit)
         #expect(result.cache == stored)
+    }
+
+    @Test("a volume uploaded while no pod is paired is the previous pod's")
+    func unknownPumpIDWithVolume() {
+        let stored = cache(units: 12.6, readingAge: 5 * 60)
+        let result = resolve(reservoir: 12.5, pumpID: "Unknown", cache: stored)
+        #expect(result.state == .aboveReportingLimit)
+        #expect(result.cache == stored)
+    }
+
+    @Test("a pump Loop names Unknown that reports its volume in every record shows it")
+    func unknownPumpIDOtherPump() {
+        let result = resolve(reservoir: 185.6, pumpID: "Unknown", manufacturer: "Medtrum", model: "MD8201")
+        #expect(result.state == .units(185.6))
+        #expect(result.cache == nil)
     }
 
     @Test("a settled pump stays unknown for as long as it reports nothing")
