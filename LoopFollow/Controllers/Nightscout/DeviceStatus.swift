@@ -118,7 +118,7 @@ extension MainViewController {
                     manufacturer: lastPumpRecord["manufacturer"] as? String,
                     model: lastPumpRecord["model"] as? String,
                     cache: Storage.shared.pumpReservoirCache.value,
-                    now: Date()
+                    date: Date(timeIntervalSince1970: lastPumpTime)
                 )
                 Storage.shared.pumpReservoirCache.value = reservoir.cache
 

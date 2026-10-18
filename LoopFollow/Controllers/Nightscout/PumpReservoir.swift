@@ -14,6 +14,24 @@ struct PumpReservoirCache: Codable, Equatable {
     /// When this pump first appeared in a device status record LoopFollow fetched.
     let pumpSince: Date
     var reading: Reading?
+    /// Whether a volume in a record is this pump's own. Right after a pod change Loop
+    /// still uploads the previous pod's final volume.
+    var isSettled: Bool
+
+    init(pumpID: String, pumpSince: Date, reading: Reading? = nil, isSettled: Bool = true) {
+        self.pumpID = pumpID
+        self.pumpSince = pumpSince
+        self.reading = reading
+        self.isSettled = isSettled
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        pumpID = try container.decode(String.self, forKey: .pumpID)
+        pumpSince = try container.decode(Date.self, forKey: .pumpSince)
+        reading = try container.decodeIfPresent(Reading.self, forKey: .reading)
+        isSettled = try container.decodeIfPresent(Bool.self, forKey: .isSettled) ?? true
+    }
 }
 
 /// What a device status record says about the reservoir.
@@ -31,8 +49,9 @@ enum PumpReservoirResolver {
     /// while the pod is below 50U. A reading carries across those gaps for this long.
     static let maxReadingAge: TimeInterval = 30 * 60
 
-    /// A volume reported within this long of a pump first appearing can still be the
-    /// previous pod's final reading, so it says nothing about the pump now on.
+    /// Loop uploads its last reservoir reading until it is 15 minutes old, whichever pod it
+    /// came from, so the previous pod's final volume can appear for up to this long after a
+    /// pod change. A new pod reports no volume of its own until it drops below 50U.
     static let pumpSettleTime: TimeInterval = 15 * 60
 
     struct Resolution: Equatable {
@@ -41,47 +60,53 @@ enum PumpReservoirResolver {
         let cache: PumpReservoirCache?
     }
 
+    /// - Parameter date: When the record was made, from the pump clock it carries.
     static func resolve(
         reservoir: Double?,
         pumpID: String?,
         manufacturer: String?,
         model: String?,
         cache storedCache: PumpReservoirCache?,
-        now: Date
+        date: Date
     ) -> Resolution {
-        let withoutReading: PumpReservoirState = reportsVolumeOnlyWhenLow(manufacturer: manufacturer, model: model)
-            ? .aboveReportingLimit
-            : .unknown
+        let onlyWhenLow = reportsVolumeOnlyWhenLow(manufacturer: manufacturer, model: model)
+        let withoutReading: PumpReservoirState = onlyWhenLow ? .aboveReportingLimit : .unknown
 
         // A reading is carried between records only when the uploader names the pump it
-        // came from, so that a pod change discards it.
+        // came from, so that a pod change discards it. Loop names no pump while a pod is
+        // being paired, and the stored pump is kept so the next one reads as a change.
         guard let pumpID = identifiedPump(pumpID) else {
-            guard let reservoir else { return Resolution(state: withoutReading, cache: nil) }
-            return Resolution(state: .units(reservoir), cache: nil)
+            guard let reservoir else { return Resolution(state: withoutReading, cache: storedCache) }
+            return Resolution(state: .units(reservoir), cache: storedCache)
         }
 
-        var cache = storedCache?.pumpID == pumpID
-            ? storedCache!
-            : PumpReservoirCache(pumpID: pumpID, pumpSince: now, reading: nil)
+        var cache: PumpReservoirCache
+        if let storedCache, storedCache.pumpID == pumpID {
+            cache = storedCache
+        } else {
+            // With no pump stored there is no change to have seen, so the pump is taken
+            // as one already in use.
+            cache = PumpReservoirCache(pumpID: pumpID, pumpSince: date, isSettled: storedCache == nil || !onlyWhenLow)
+        }
+
+        if !cache.isSettled, reservoir == nil || date.timeIntervalSince(cache.pumpSince) >= pumpSettleTime {
+            cache.isSettled = true
+        }
 
         if let reservoir {
-            cache.reading = PumpReservoirCache.Reading(units: reservoir, date: now)
+            guard cache.isSettled else { return Resolution(state: withoutReading, cache: cache) }
+            cache.reading = PumpReservoirCache.Reading(units: reservoir, date: date)
             return Resolution(state: .units(reservoir), cache: cache)
         }
 
         if let reading = cache.reading {
-            let age = now.timeIntervalSince(reading.date)
+            let age = date.timeIntervalSince(reading.date)
             if age >= 0, age <= maxReadingAge {
                 return Resolution(state: .units(reading.units), cache: cache)
             }
-            if reading.date.timeIntervalSince(cache.pumpSince) >= pumpSettleTime {
-                // The pump has reported a volume long enough after coming online for that
-                // to be its own, so it is below its reporting limit and the only thing
-                // missing is a fresh number. A pump first seen mid-pod has no such gap,
-                // so its first reading is treated as a pod change's and dropped below.
-                return Resolution(state: .unknown, cache: cache)
-            }
-            cache.reading = nil
+            // The pump has reported a volume of its own, so it is below its reporting limit
+            // and the only thing missing is a fresh number.
+            return Resolution(state: .unknown, cache: cache)
         }
 
         return Resolution(state: withoutReading, cache: cache)
