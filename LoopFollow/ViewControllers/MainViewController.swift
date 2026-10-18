@@ -105,6 +105,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var latestCOB: CarbMetric?
     var latestBasal = ""
     var latestPumpVolume: Double?
+    var latestPumpBatteryDate: Date?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
