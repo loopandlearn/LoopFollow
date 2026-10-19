@@ -43,6 +43,8 @@ struct RemotePage: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .disabled(!session.isReachable)
+                .opacity(session.isReachable ? 1 : 0.4)
             }
         }
         .navigationTitle(remote.kind == .trio ? "Trio Remote" : "Loop Remote")

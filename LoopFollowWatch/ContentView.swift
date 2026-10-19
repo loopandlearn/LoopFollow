@@ -11,10 +11,11 @@ struct ContentView: View {
             if let state = session.state {
                 TabView {
                     GlucosePage(state: state)
-                    InfoPage(state: state)
                     if let remote = state.remote {
                         RemotePage(state: state, remote: remote)
                     }
+                    // Last, so its length never stands between the other pages.
+                    InfoPage(state: state)
                 }
                 .tabViewStyle(.verticalPage)
             } else {

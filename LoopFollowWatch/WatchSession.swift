@@ -70,14 +70,23 @@ final class WatchSession: NSObject, ObservableObject {
         }
     }
 
+    private static func complicationKey(_ state: WatchState) -> String {
+        let s = state.snapshot
+        return "\(s?.updatedAt.timeIntervalSince1970 ?? 0)|\(s?.unit.rawValue ?? "")|\(state.lowMgdl)|\(state.highMgdl)|\(state.colorBGText)"
+    }
+
     private func apply(_ data: Data) {
         guard let incoming = WatchState.decode(data) else { return }
         if let current = state, current.builtAt > incoming.builtAt { return }
 
         let newAlarm = incoming.alarm != nil && incoming.alarm?.id != state?.alarm?.id
+        let complicationChanged = Self.complicationKey(incoming) != state.map(Self.complicationKey)
         state = incoming
         WatchStateStore.save(data)
-        WidgetCenter.shared.reloadAllTimelines()
+        // Widget reloads are budgeted, so only reload when something the complication shows has changed.
+        if complicationChanged {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
 
         if newAlarm, WKApplication.shared().applicationState == .active {
             WKInterfaceDevice.current().play(.notification)
