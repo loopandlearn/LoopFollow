@@ -12,6 +12,8 @@ struct InfoPage: View {
             VStack(spacing: 0) {
                 rows
             }
+            // Keeps the values clear of the page indicator.
+            .padding(.trailing, 10)
         }
         .navigationTitle("Info")
     }

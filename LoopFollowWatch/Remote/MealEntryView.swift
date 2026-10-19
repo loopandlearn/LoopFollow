@@ -55,7 +55,9 @@ struct MealEntryView: View {
                     } label: {
                         Label(moreTitle, systemImage: "ellipsis.circle")
                             .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .frame(maxWidth: .infinity)
                 }
 
                 Button {
@@ -88,6 +90,7 @@ struct MealEntryView: View {
                     Text(pickTitle(carbs: pick.carbs, fat: fat, protein: protein, bolus: bolus))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .frame(maxWidth: .infinity)
             }
         }
     }
