@@ -219,6 +219,13 @@
 			path = WatchShared;
 			sourceTree = "<group>";
 		};
+		DD57A7C02F70000000000101 /* RemoteShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = RemoteShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -314,6 +321,7 @@
 				DD57A7C02F7000000000000F /* LoopFollowWatch */,
 				DD57A7C02F70000000000010 /* LoopFollowWatchWidgets */,
 				DD57A7C02F70000000000011 /* WatchShared */,
+				DD57A7C02F70000000000101 /* RemoteShared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -398,6 +406,7 @@
 				9555FE45F7FAEFA6142D04CA /* LoopFollow */,
 				BC0FBFD3754955D028EF6631 /* Shared */,
 				DD57A7C02F70000000000011 /* WatchShared */,
+				DD57A7C02F70000000000101 /* RemoteShared */,
 			);
 			name = LoopFollow;
 			packageProductDependencies = (
@@ -425,6 +434,7 @@
 				DD57A7C02F7000000000000F /* LoopFollowWatch */,
 				DD57A7C02F70000000000011 /* WatchShared */,
 				BC0FBFD3754955D028EF6631 /* Shared */,
+				DD57A7C02F70000000000101 /* RemoteShared */,
 			);
 			name = LoopFollowWatch;
 			productName = LoopFollowWatch;

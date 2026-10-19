@@ -281,20 +281,6 @@ class PushNotificationManager {
             return
         }
 
-        guard let url = constructAPNsURL() else {
-            let errorMessage = "Failed to construct APNs URL"
-            LogManager.shared.log(category: .apns, message: errorMessage)
-            completion(false, errorMessage)
-            return
-        }
-
-        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
-            let errorMessage = "Failed to generate JWT, please check that the token is correct."
-            LogManager.shared.log(category: .apns, message: errorMessage)
-            completion(false, errorMessage)
-            return
-        }
-
         do {
             guard let messenger = SecureMessenger(sharedSecret: sharedSecret) else {
                 let errorMessage = "Failed to initialize security module. Check shared secret."
@@ -306,78 +292,22 @@ class PushNotificationManager {
             let encryptedDataString = try messenger.encrypt(payload)
             let finalMessage = EncryptedPushMessage(encryptedData: encryptedDataString, commandType: payload.commandType)
 
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
-            request.setValue("application/json", forHTTPHeaderField: "content-type")
-            request.setValue("10", forHTTPHeaderField: "apns-priority")
-            request.setValue("600", forHTTPHeaderField: "apns-expiration")
-            request.setValue(bundleId, forHTTPHeaderField: "apns-topic")
-            request.setValue("alert", forHTTPHeaderField: "apns-push-type")
-            request.setValue(payload.apnsCollapseID, forHTTPHeaderField: "apns-collapse-id")
-
-            request.httpBody = try JSONEncoder().encode(finalMessage)
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
-                    LogManager.shared.log(category: .apns, message: errorMessage)
-                    completion(false, errorMessage)
-                    return
-                }
-
-                if let httpResponse = response as? HTTPURLResponse {
-                    LogManager.shared.log(category: .apns, message: "Push notification sent. Status code: \(httpResponse.statusCode)", isDebug: true)
-
-                    var responseBodyMessage = ""
-                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
-                        LogManager.shared.log(category: .apns, message: "Response body: \(responseBody)", isDebug: true)
-                        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                           let reason = json["reason"] as? String
-                        {
-                            responseBodyMessage = reason
-                        }
-                    }
-
-                    switch httpResponse.statusCode {
-                    case 200:
-                        completion(true, nil)
-                    case 400:
-                        completion(false, "Bad request. The request was invalid or malformed. \(responseBodyMessage)")
-                    case 403:
-                        JWTManager.shared.invalidateCache()
-                        completion(false, "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)")
-                    case 404:
-                        completion(false, "Invalid request: The :path value was incorrect. \(responseBodyMessage)")
-                    case 405:
-                        completion(false, "Invalid request: Only POST requests are supported. \(responseBodyMessage)")
-                    case 410:
-                        completion(false, "The device token is no longer active for the topic. \(responseBodyMessage)")
-                    case 413:
-                        completion(false, "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)")
-                    case 429:
-                        completion(false, "Too many requests. \(responseBodyMessage)")
-                    case 500:
-                        completion(false, "Internal server error at APNs. \(responseBodyMessage)")
-                    case 503:
-                        completion(false, "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)")
-                    default:
-                        completion(false, "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)")
-                    }
-                } else {
-                    completion(false, "Failed to get a valid HTTP response.")
-                }
-            }
-            task.resume()
-
+            APNSDelivery.send(
+                body: try JSONEncoder().encode(finalMessage),
+                deviceToken: deviceToken,
+                topic: bundleId,
+                production: productionEnvironment,
+                keyId: keyId,
+                teamId: teamId,
+                apnsKey: apnsKey,
+                expiration: "600",
+                collapseID: payload.apnsCollapseID,
+                completion: completion
+            )
         } catch {
             let errorMessage = "Failed to encode or encrypt push message: \(error.localizedDescription)"
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
         }
-    }
-
-    private func constructAPNsURL() -> URL? {
-        URL(string: "\(APNSEnvironment.baseURL(production: productionEnvironment))/3/device/\(deviceToken)")
     }
 }
