@@ -10,7 +10,6 @@ struct LoopFollowWatchApp: App {
 
     init() {
         WatchSession.shared.activate()
-        WatchSession.shared.scheduleBackgroundRefresh()
     }
 
     var body: some Scene {
@@ -20,6 +19,7 @@ struct LoopFollowWatchApp: App {
                 .task(id: scenePhase) {
                     guard scenePhase == .active else { return }
                     session.requestState()
+                    session.scheduleBackgroundRefresh()
                     // While open, check every minute whether the watch has to fetch on its own.
                     while !Task.isCancelled {
                         await session.refreshIfNeeded()
