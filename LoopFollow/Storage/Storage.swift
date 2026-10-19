@@ -34,6 +34,8 @@ class Storage {
 
     var mealWithBolus = StorageValue<Bool>(key: "mealWithBolus", defaultValue: false)
     var mealWithFatProtein = StorageValue<Bool>(key: "mealWithFatProtein", defaultValue: false)
+    /// Lets the Apple Watch app send remote commands through this phone.
+    var watchRemoteCommands = StorageValue<Bool>(key: "watchRemoteCommands", defaultValue: false)
 
     // TODO: This flag can be deleted in March 2027. Check the commit for other places to cleanup.
     var hasSeenFatProteinOrderChange = StorageValue<Bool>(key: "hasSeenFatProteinOrderChange", defaultValue: true)
