@@ -6,13 +6,14 @@ import SwiftUI
 
 /// BG chart in the phone's colors: readings colored by range, dashed low/high
 /// lines, prediction lines or cone in their phone colors, boluses and carbs as markers.
-/// Tap to change the time span.
 struct WatchChartView: View {
     let state: WatchState
     let now: Date
+    let spanHours: Double
+    /// How far back the chart is scrolled; nil when not scrubbing.
+    var scrubOffset: TimeInterval?
 
-    private static let spans: [Double] = [1, 3, 6, 12, 24]
-    @AppStorage("chartSpanHours") private var spanHours: Double = 3
+    static let spans: [Double] = [1, 3, 6, 12, 24]
 
     private var unit: GlucoseSnapshot.Unit { state.snapshot?.unit ?? .mgdl }
 
@@ -43,6 +44,12 @@ struct WatchChartView: View {
                     yEnd: .value("High", min(point.high, top))
                 )
                 .foregroundStyle(Color.blue.opacity(0.4))
+            }
+
+            if let marker = markerDate {
+                RuleMark(x: .value("Marker", marker))
+                    .foregroundStyle(Color.white.opacity(0.8))
+                    .lineStyle(StrokeStyle(lineWidth: 1))
             }
 
             ForEach(predictions, id: \.0) { kind, points in
@@ -103,24 +110,30 @@ struct WatchChartView: View {
                 }
             }
         }
-        .overlay(alignment: .topLeading) {
-            Text("\(Int(spanHours)) h")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            let index = Self.spans.firstIndex(of: spanHours) ?? 1
-            spanHours = Self.spans[(index + 1) % Self.spans.count]
-        }
-        .accessibilityLabel("BG chart, last \(Int(spanHours)) hours. Tap to change the time span.")
+        .accessibilityLabel("BG chart, last \(Int(spanHours)) hours.")
     }
 
-    /// The visible span ends a little after now so the prediction stays visible.
     private var visibleWindow: ClosedRange<Date> {
+        Self.window(state: state, now: now, spanHours: spanHours, scrubOffset: scrubOffset ?? 0)
+    }
+
+    private var markerDate: Date? {
+        scrubOffset.map { Self.markerDate(state: state, now: now, spanHours: spanHours, scrubOffset: $0) }
+    }
+
+    /// The visible span ends a little after now so the prediction stays visible;
+    /// while scrubbing it moves back by the scroll offset.
+    static func window(state: WatchState, now: Date, spanHours: Double, scrubOffset: TimeInterval) -> ClosedRange<Date> {
         let span = spanHours * 3600
         let lookAhead = state.predictions.isEmpty && state.cone.isEmpty ? span * 0.05 : span * 0.25
-        return now.addingTimeInterval(-span + lookAhead) ... now.addingTimeInterval(lookAhead)
+        let end = now.addingTimeInterval(lookAhead - scrubOffset)
+        return end.addingTimeInterval(-span) ... end
+    }
+
+    /// While scrubbing, the time the marker points at: three quarters across the chart.
+    static func markerDate(state: WatchState, now: Date, spanHours: Double, scrubOffset: TimeInterval) -> Date {
+        window(state: state, now: now, spanHours: spanHours, scrubOffset: scrubOffset).upperBound
+            .addingTimeInterval(-spanHours * 3600 * 0.25)
     }
 
     private func yTop(readings: [WatchReading], predictions: [WatchReading]) -> Double {
