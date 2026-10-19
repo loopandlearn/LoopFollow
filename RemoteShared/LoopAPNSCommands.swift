@@ -73,6 +73,50 @@ enum LoopAPNSCommands {
     /// Creates a properly formatted ISO8601 date string with milliseconds (matching Nightscout's format)
     /// - Parameter date: The date to format
     /// - Returns: Formatted date string like "2022-12-24T21:34:02.090Z"
+    /// Override commands need no one-time code, so the return block travels unencrypted.
+    static func overridePayload(presetName: String, duration: TimeInterval?, returnInfo: ReturnNotificationInfo?, now: Date = Date()) -> [String: Any] {
+        // Alert text matches Nightscout's format.
+        var alertText = "\(presetName) Temporary Override"
+        if let duration, duration > 0 {
+            let hours = Int(duration / 3600)
+            let minutes = Int(duration.truncatingRemainder(dividingBy: 3600) / 60)
+            alertText += hours > 0 ? " (\(hours)h \(minutes)m)" : " (\(minutes)m)"
+        }
+        var payload = overrideHeader(alert: alertText, now: now, returnInfo: returnInfo)
+        payload["override-name"] = presetName
+        if let duration {
+            payload["override-duration-minutes"] = Int(duration / 60)
+        }
+        return payload
+    }
+
+    static func cancelOverridePayload(returnInfo: ReturnNotificationInfo?, now: Date = Date()) -> [String: Any] {
+        var payload = overrideHeader(alert: "Cancel Temporary Override", now: now, returnInfo: returnInfo)
+        payload["cancel-temporary-override"] = "true"
+        return payload
+    }
+
+    private static func overrideHeader(alert: String, now: Date, returnInfo: ReturnNotificationInfo?) -> [String: Any] {
+        var payload: [String: Any] = [
+            "remote-address": "LoopFollow",
+            "entered-by": "LoopFollow",
+            "sent-at": formatDateForAPNS(now),
+            "expiration": formatDateForAPNS(now.addingTimeInterval(5 * 60)),
+            "alert": alert,
+        ]
+        if let returnInfo {
+            payload["return_notification"] = [
+                "production_environment": returnInfo.productionEnvironment,
+                "device_token": returnInfo.deviceToken,
+                "bundle_id": returnInfo.bundleId,
+                "team_id": returnInfo.teamId,
+                "key_id": returnInfo.keyId,
+                "apns_key": returnInfo.apnsKey,
+            ]
+        }
+        return payload
+    }
+
     /// Wraps command fields in the push payload Loop expects (matching @parse/node-apn).
     static func apnsBody(_ payload: [String: Any]) throws -> Data {
         var body: [String: Any] = [

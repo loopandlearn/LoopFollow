@@ -49,6 +49,8 @@ enum WatchStateBuilder {
 
         return WatchState(
             builtAt: now,
+            source: .phone,
+            phoneBuiltAt: now,
             snapshot: GlucoseSnapshotBuilder.build(from: StorageCurrentGlucoseStateProvider()),
             readings: readings,
             predictions: predictions,
@@ -164,7 +166,12 @@ enum WatchStateBuilder {
             }
             parts.append(durationText(seconds: TimeInterval(override.duration ?? 0)))
             let symbol = override.symbol.isEmpty ? "" : "\(override.symbol) "
-            return WatchPreset(id: override.name, name: symbol + override.name, detail: parts.joined(separator: ", "))
+            return WatchPreset(
+                id: override.name,
+                name: symbol + override.name,
+                detail: parts.joined(separator: ", "),
+                durationSeconds: TimeInterval(override.duration ?? 0)
+            )
         }
     }
 
@@ -178,7 +185,12 @@ enum WatchStateBuilder {
                 parts.append(Localizer.formatQuantity(target))
             }
             parts.append(durationText(seconds: (override.duration ?? 0) * 60))
-            return WatchPreset(id: override.name, name: override.name, detail: parts.joined(separator: ", "))
+            return WatchPreset(
+                id: override.name,
+                name: override.name,
+                detail: parts.joined(separator: ", "),
+                durationSeconds: (override.duration ?? 0) * 60
+            )
         }
     }
 
@@ -186,7 +198,13 @@ enum WatchStateBuilder {
         TempTargetPresetManager.shared.presets.map { preset in
             let target = Localizer.formatQuantity(preset.target)
             let duration = durationText(seconds: preset.duration.doubleValue(for: .second()))
-            return WatchPreset(id: preset.id.uuidString, name: preset.name, detail: "\(target), \(duration)")
+            return WatchPreset(
+                id: preset.id.uuidString,
+                name: preset.name,
+                detail: "\(target), \(duration)",
+                durationSeconds: preset.duration.doubleValue(for: .second()),
+                targetMgdl: preset.target.doubleValue(for: .milligramsPerDeciliter)
+            )
         }
     }
 

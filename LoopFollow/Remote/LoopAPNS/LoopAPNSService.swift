@@ -462,47 +462,7 @@ class LoopAPNSService {
             return
         }
 
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        // Create alert text (matching Nightscout's format)
-        var alertText = "\(presetName) Temporary Override"
-        if let duration = duration, duration > 0 {
-            let hours = Int(duration / 3600)
-            let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
-            if hours > 0 {
-                alertText += " (\(hours)h \(minutes)m)"
-            } else {
-                alertText += " (\(minutes)m)"
-            }
-        }
-
-        var payload: [String: Any] = [
-            "override-name": presetName,
-            "remote-address": "LoopFollow",
-            "entered-by": "LoopFollow",
-            "sent-at": LoopAPNSCommands.formatDateForAPNS(now),
-            "expiration": LoopAPNSCommands.formatDateForAPNS(expiration),
-            "alert": alertText,
-        ]
-
-        if let duration = duration {
-            payload["override-duration-minutes"] = Int(duration / 60)
-        }
-
-        // For override commands, we can include return notification info unencrypted
-        // since override commands don't require OTP validation in Loop
-        if let returnInfo = ReturnNotificationInfo.loopFollow() {
-            payload["return_notification"] = [
-                "production_environment": returnInfo.productionEnvironment,
-                "device_token": returnInfo.deviceToken,
-                "bundle_id": returnInfo.bundleId,
-                "team_id": returnInfo.teamId,
-                "key_id": returnInfo.keyId,
-                "apns_key": returnInfo.apnsKey,
-            ]
-        }
+        let payload = LoopAPNSCommands.overridePayload(presetName: presetName, duration: duration, returnInfo: ReturnNotificationInfo.loopFollow())
 
         // Send the notification using the existing APNS infrastructure
         let creds = effectiveCredentials()
@@ -534,31 +494,7 @@ class LoopAPNSService {
             return
         }
 
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        var payload: [String: Any] = [
-            "cancel-temporary-override": "true",
-            "remote-address": "LoopFollow",
-            "entered-by": "LoopFollow",
-            "sent-at": LoopAPNSCommands.formatDateForAPNS(now),
-            "expiration": LoopAPNSCommands.formatDateForAPNS(expiration),
-            "alert": "Cancel Temporary Override",
-        ]
-
-        // For override commands, we can include return notification info unencrypted
-        // since override commands don't require OTP validation in Loop
-        if let returnInfo = ReturnNotificationInfo.loopFollow() {
-            payload["return_notification"] = [
-                "production_environment": returnInfo.productionEnvironment,
-                "device_token": returnInfo.deviceToken,
-                "bundle_id": returnInfo.bundleId,
-                "team_id": returnInfo.teamId,
-                "key_id": returnInfo.keyId,
-                "apns_key": returnInfo.apnsKey,
-            ]
-        }
+        let payload = LoopAPNSCommands.cancelOverridePayload(returnInfo: ReturnNotificationInfo.loopFollow())
 
         // Send the notification using the existing APNS infrastructure
         let creds = effectiveCredentials()

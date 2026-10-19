@@ -117,3 +117,18 @@ extension WatchCommand {
         abs(consumedAt.timeIntervalSince(now)) < 60 ? nil : consumedAt.dateUsingCurrentSeconds()
     }
 }
+
+extension WatchRemoteConfig {
+    /// The phone's guardrails as last sent to the watch.
+    var limits: WatchCommandValidator.Limits {
+        WatchCommandValidator.Limits(
+            maxBolus: maxBolus,
+            bolusIncrement: bolusIncrement,
+            maxCarbs: maxCarbs,
+            maxFat: maxFat,
+            maxProtein: maxProtein,
+            mealWithBolus: mealWithBolus,
+            mealWithFatProtein: mealWithFatProtein
+        )
+    }
+}

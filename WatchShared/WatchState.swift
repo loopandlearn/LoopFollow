@@ -9,8 +9,11 @@ import Foundation
 struct WatchState: Codable, Equatable {
     static let contextKey = "watchState"
 
-    /// When the phone built this state.
+    /// When this state was built, by the phone or by the watch itself.
     var builtAt: Date
+    var source: WatchDataSource
+    /// When the phone last built a state; info rows, presets and guardrails date from then.
+    var phoneBuiltAt: Date
     /// Latest glucose state, shared with the Live Activity.
     var snapshot: GlucoseSnapshot?
     /// BG readings for the last 24 hours, oldest first.
@@ -44,6 +47,13 @@ struct WatchState: Codable, Equatable {
     static func decode(_ data: Data) -> WatchState? {
         try? JSONDecoder().decode(WatchState.self, from: data)
     }
+}
+
+enum WatchDataSource: String, Codable {
+    /// Built and sent by the phone.
+    case phone
+    /// Fetched by the watch from Nightscout or Dexcom while the phone was out of reach.
+    case watch
 }
 
 struct WatchReading: Codable, Equatable {
@@ -101,6 +111,10 @@ struct WatchPreset: Codable, Equatable, Identifiable {
     let name: String
     /// Preformatted on the phone in the user's units, e.g. "120 %, 1 h".
     let detail: String
+    /// Raw values the watch needs to send the preset without the phone: the
+    /// duration (0 = indefinite) and, for temp targets, the target in mg/dL.
+    var durationSeconds: Double = 0
+    var targetMgdl: Double?
 }
 
 struct WatchRemoteConfig: Codable, Equatable {
@@ -120,8 +134,8 @@ struct WatchRemoteConfig: Codable, Equatable {
     /// Trio only: a meal may carry fat and protein.
     let mealWithFatProtein: Bool
     /// The AID's own recommendation, as shown in the phone's bolus screen.
-    let recommendedBolus: Double?
-    let recommendedBolusAt: Date?
+    var recommendedBolus: Double?
+    var recommendedBolusAt: Date?
     let overridePresets: [WatchPreset]
     /// Trio only.
     let tempTargetPresets: [WatchPreset]
