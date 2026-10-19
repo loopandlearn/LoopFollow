@@ -115,23 +115,27 @@ final class WatchSession: NSObject, ObservableObject {
         guard let data = try? JSONEncoder().encode(WatchCommand(action: action)) else {
             return .replied(WatchCommandReply(success: false, message: "Could not encode the command."))
         }
+        let noReply = WatchCommandReply(
+            success: false,
+            message: "No reply from the iPhone. The command may still have been sent: check Loop or Trio before trying again."
+        )
         return await withCheckedContinuation { continuation in
+            let once = ResumeOnce(continuation)
             session.sendMessage([WatchCommand.messageKey: data], replyHandler: { reply in
                 let result = (reply[WatchCommandReply.messageKey] as? Data)
                     .flatMap { try? JSONDecoder().decode(WatchCommandReply.self, from: $0) }
-                continuation.resume(returning: .replied(result ?? WatchCommandReply(success: false, message: "Unexpected reply from the iPhone.")))
+                once.resume(.replied(result ?? WatchCommandReply(success: false, message: "Unexpected reply from the iPhone.")))
             }, errorHandler: { error in
-                if (error as? WCError)?.code == .notReachable {
-                    continuation.resume(returning: .notDelivered)
-                    return
-                }
-                continuation.resume(returning: .replied(WatchCommandReply(
-                    success: false,
-                    message: "No reply from the iPhone (\(error.localizedDescription)). Check LoopFollow on the iPhone before trying again."
-                )))
+                once.resume((error as? WCError)?.code == .notReachable ? .notDelivered : .replied(noReply))
             })
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.phoneReplyTimeout) {
+                once.resume(.replied(noReply))
+            }
         }
     }
+
+    /// Longest wait for the phone's verdict before telling the user it is unknown.
+    private static let phoneReplyTimeout: TimeInterval = 30
 
     /// Lets a WatchConnectivity background task finish once queued data has been delivered.
     func waitForPendingContent() async {
@@ -243,5 +247,23 @@ extension WatchSession: WCSessionDelegate {
             if let state { self.applyFromPhone(state) }
             if let credentials { self.receiveCredentials(credentials) }
         }
+    }
+}
+
+/// Resumes a continuation at most once, from whichever callback comes first.
+private final class ResumeOnce<T>: @unchecked Sendable {
+    private var continuation: CheckedContinuation<T, Never>?
+    private let lock = NSLock()
+
+    init(_ continuation: CheckedContinuation<T, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume(_ value: T) {
+        lock.lock()
+        let pending = continuation
+        continuation = nil
+        lock.unlock()
+        pending?.resume(returning: value)
     }
 }

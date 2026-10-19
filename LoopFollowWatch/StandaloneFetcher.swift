@@ -46,8 +46,10 @@ enum StandaloneFetcher {
             "count": "500",
         ])
 
+        // Nightscout dates are milliseconds; the rest of the app works in seconds, as on the phone.
         let glucose = try JSONDecoder().decode([ShareGlucoseData].self, from: await entries)
             .filter { $0.sgv > 0 }
+            .map { ShareGlucoseData(sgv: $0.sgv, date: $0.date / 1000, direction: $0.direction) }
             .sorted { $0.date < $1.date }
         let status = (try? JSONSerialization.jsonObject(with: await deviceStatus) as? [[String: Any]])?.first
         let treatmentList = (try? JSONSerialization.jsonObject(with: await treatments) as? [[String: Any]]) ?? []
