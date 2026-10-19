@@ -52,10 +52,19 @@ final class WatchSessionManager: NSObject {
             Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.mealWithBolus.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.mealWithFatProtein.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.infoDisplayItems.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.graphTimeZoneEnabled.$value.map { _ in () }.eraseToAnyPublisher(),
         ]
         Publishers.MergeMany(triggers)
             .dropFirst(triggers.count)
             .sink { [weak self] in self?.requestUpdate(reason: "settings") }
+            .store(in: &cancellables)
+    }
+
+    /// Sends the info table to the watch whenever one of its rows changes.
+    func observe(_ infoManager: InfoManager) {
+        infoManager.objectWillChange
+            .sink { [weak self] in self?.requestUpdate(reason: "info") }
             .store(in: &cancellables)
     }
 

@@ -26,6 +26,8 @@ struct WatchState: Codable, Equatable {
     var highMgdl: Double
     /// Mirrors the phone's "Color BG Text" setting.
     var colorBGText: Bool
+    /// The phone's visible info table rows, in its order and with its coloring.
+    var infoRows: [WatchInfoRow]
     /// When the loop last reported, nil when unknown.
     var lastLoopAt: Date?
     /// "Loop", "Trio" or another uploader name; empty for CGM-only setups.
@@ -51,6 +53,20 @@ struct WatchReading: Codable, Equatable {
     let v: Double
 
     var date: Date { Date(timeIntervalSince1970: t) }
+}
+
+struct WatchInfoRow: Codable, Equatable {
+    let name: String
+    let value: String
+    /// Threshold coloring from the phone's Info Display settings; nil uses the default text color.
+    let level: InfoColorLevel?
+}
+
+/// Threshold band of an info table value, shared by the phone and the watch.
+enum InfoColorLevel: String, Codable {
+    case normal
+    case warning
+    case urgent
 }
 
 struct WatchPredictionLine: Codable, Equatable {

@@ -20,6 +20,7 @@ struct WatchProtocolTests {
             lowMgdl: 70,
             highMgdl: 180,
             colorBGText: true,
+            infoRows: [WatchInfoRow(name: "IOB", value: "1,2", level: nil), WatchInfoRow(name: "SAGE", value: "9d 2h", level: .warning)],
             lastLoopAt: t0,
             device: "Trio",
             alarm: alarm,

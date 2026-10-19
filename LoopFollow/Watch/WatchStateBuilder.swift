@@ -58,11 +58,35 @@ enum WatchStateBuilder {
             lowMgdl: thresholds.low,
             highMgdl: thresholds.high,
             colorBGText: Storage.shared.colorBGText.value,
+            infoRows: infoRows(vc),
             lastLoopAt: lastLoop,
             device: Storage.shared.device.value,
             alarm: currentAlarm(),
             remote: remoteConfig()
         )
+    }
+
+    /// Same rows, order and coloring as the phone's info table (InfoTableView).
+    private static func infoRows(_ vc: MainViewController?) -> [WatchInfoRow] {
+        var rows: [WatchInfoRow] = []
+        if Storage.shared.graphTimeZoneEnabled.value,
+           let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
+        {
+            rows.append(WatchInfoRow(name: "Time Zone", value: tz.identifier, level: nil))
+        }
+        guard let infoManager = vc?.infoManager else { return rows }
+        let items = Storage.shared.infoDisplayItems.value
+        for row in infoManager.visibleRows {
+            var level: InfoColorLevel?
+            if let numeric = row.numericValue,
+               let type = InfoType(rawValue: row.id),
+               let config = type.colorConfig
+            {
+                level = items.item(for: type)?.coloring.level(for: numeric, direction: config.direction)
+            }
+            rows.append(WatchInfoRow(name: row.name, value: row.value.isEmpty ? "—" : row.value, level: level))
+        }
+        return rows
     }
 
     private static func currentAlarm() -> WatchAlarm? {
