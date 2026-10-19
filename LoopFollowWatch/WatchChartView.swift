@@ -95,7 +95,7 @@ struct WatchChartView: View {
         .chartXScale(domain: window.lowerBound ... window.upperBound)
         .chartYScale(domain: 39 ... top)
         .chartXAxis {
-            AxisMarks(values: .stride(by: .hour, count: spanHours > 6 ? 6 : (spanHours > 3 ? 2 : 1))) { _ in
+            AxisMarks(values: hourTicks(in: window)) { _ in
                 AxisGridLine().foregroundStyle(Color.gray.opacity(0.3))
                 AxisValueLabel(format: .dateTime.hour())
             }
@@ -134,6 +134,26 @@ struct WatchChartView: View {
     static func markerDate(state: WatchState, now: Date, spanHours: Double, scrubOffset: TimeInterval) -> Date {
         window(state: state, now: now, spanHours: spanHours, scrubOffset: scrubOffset).upperBound
             .addingTimeInterval(-spanHours * 3600 * 0.25)
+    }
+
+    /// Whole hours in the window, leaving out those too close to an edge for their label to fit.
+    private func hourTicks(in window: ClosedRange<Date>) -> [Date] {
+        let step = spanHours > 6 ? 6 : (spanHours > 3 ? 2 : 1)
+        let margin = (window.upperBound.timeIntervalSince(window.lowerBound)) * 0.06
+        let calendar = Calendar.current
+        guard var tick = calendar.dateInterval(of: .hour, for: window.lowerBound)?.end else { return [] }
+        var ticks: [Date] = []
+        while tick < window.upperBound {
+            let hour = calendar.component(.hour, from: tick)
+            if hour % step == 0,
+               tick.timeIntervalSince(window.lowerBound) > margin,
+               window.upperBound.timeIntervalSince(tick) > margin
+            {
+                ticks.append(tick)
+            }
+            tick = tick.addingTimeInterval(3600)
+        }
+        return ticks
     }
 
     private func yTop(readings: [WatchReading], predictions: [WatchReading]) -> Double {
