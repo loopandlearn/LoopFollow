@@ -88,23 +88,42 @@ enum WatchStateBuilder {
     private static func remoteConfig() -> WatchRemoteConfig? {
         guard Storage.shared.watchRemoteCommands.value, let kind = remoteKind() else { return nil }
 
+        let maxBolus = Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
+        let bolusIncrement = max(0.001, Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()))
+        let maxCarbs = Storage.shared.maxCarbs.value.doubleValue(for: .gram())
+        let mealWithFatProtein = kind == .trio && Storage.shared.mealWithFatProtein.value
+        let now = Date()
+
         let recommendedAt: TimeInterval? = kind == .trio
             ? Observable.shared.enactedOrSuggested.value
             : Observable.shared.alertLastLoopTime.value
 
         return WatchRemoteConfig(
             kind: kind,
-            maxBolus: Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit()),
-            bolusIncrement: max(0.001, Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit())),
-            maxCarbs: Storage.shared.maxCarbs.value.doubleValue(for: .gram()),
+            maxBolus: maxBolus,
+            bolusIncrement: bolusIncrement,
+            maxCarbs: maxCarbs,
             maxFat: Storage.shared.maxFat.value.doubleValue(for: .gram()),
             maxProtein: Storage.shared.maxProtein.value.doubleValue(for: .gram()),
             mealWithBolus: kind == .trio && Storage.shared.mealWithBolus.value,
-            mealWithFatProtein: kind == .trio && Storage.shared.mealWithFatProtein.value,
+            mealWithFatProtein: mealWithFatProtein,
             recommendedBolus: Observable.shared.deviceRecBolus.value,
             recommendedBolusAt: recommendedAt.map { Date(timeIntervalSince1970: $0) },
             overridePresets: kind == .trio ? trioOverridePresets() : loopOverridePresets(),
-            tempTargetPresets: kind == .trio ? tempTargetPresets() : []
+            tempTargetPresets: kind == .trio ? tempTargetPresets() : [],
+            quickPickBoluses: QuickPickBolusesManager.computeQuickPickBoluses(
+                from: Storage.shared.remoteBolusHistory.value,
+                now: now,
+                stepIncrement: bolusIncrement,
+                maxBolus: maxBolus
+            ).map(\.units),
+            quickPickMeals: QuickPickMealsManager.computeQuickPickMeals(
+                from: Storage.shared.remoteMealHistory.value,
+                now: now,
+                carbStep: 1,
+                maxCarbs: maxCarbs,
+                includeFatProtein: mealWithFatProtein
+            ).map { WatchMealPick(carbs: $0.carbs, fat: $0.fat, protein: $0.protein, bolus: $0.bolus) }
         )
     }
 

@@ -7,17 +7,17 @@ import WatchKit
 
 /// Final step for every command: shows what will be sent, asks for confirmation
 /// and shows the phone's reply. Insulin needs a full turn of the Digital Crown
-/// and an unlocked watch on the wrist.
+/// and an unlocked watch on the wrist. A sent command is not yet delivered:
+/// Loop or Trio confirms it later with a notification.
 struct CommandConfirmView: View {
-    let title: String
-    let lines: [String]
-    let action: WatchCommand.Action
-    let deliversInsulin: Bool
-    /// Called when the user closes the result of a successful send.
-    var onSuccess: () -> Void = {}
+    let request: CommandRequest
 
     @EnvironmentObject private var session: WatchSession
+    @EnvironmentObject private var navigator: WatchNavigator
     @Environment(\.dismiss) private var dismiss
+
+    /// How long the "sent" screen stays before returning to the glucose page.
+    private let sentDisplayTime: TimeInterval = 3
 
     @State private var phase: Phase = .confirm
     @State private var crownProgress = 0.0
@@ -36,7 +36,7 @@ struct CommandConfirmView: View {
                 switch phase {
                 case .confirm:
                     summary
-                    if deliversInsulin {
+                    if request.deliversInsulin {
                         crownConfirm
                     } else {
                         Button("Send") { Task { await send() } }
@@ -48,27 +48,36 @@ struct CommandConfirmView: View {
                     Text("Sending…")
                         .foregroundStyle(.secondary)
                 case let .done(success, message):
-                    Image(systemName: success ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(success ? .green : .red)
-                    Text(message)
-                        .font(.footnote)
-                        .multilineTextAlignment(.center)
-                    Button("Done") {
-                        dismiss()
-                        if success { onSuccess() }
+                    if success {
+                        Image(systemName: "paperplane.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.blue)
+                        Text("Sent")
+                            .font(.headline)
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Image(systemName: "xmark.octagon.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                        Text(message)
+                            .font(.footnote)
+                            .multilineTextAlignment(.center)
+                        Button("OK") { dismiss() }
                     }
                 }
             }
             .frame(maxWidth: .infinity)
         }
-        .navigationTitle(title)
-        .navigationBarBackButtonHidden(phase == .sending)
+        .navigationTitle(request.title)
+        .navigationBarBackButtonHidden(phase != .confirm)
     }
 
     private var summary: some View {
         VStack(spacing: 2) {
-            ForEach(lines, id: \.self) { line in
+            ForEach(request.lines, id: \.self) { line in
                 Text(line)
                     .font(.headline)
                     .multilineTextAlignment(.center)
@@ -132,9 +141,13 @@ struct CommandConfirmView: View {
 
     private func send() async {
         phase = .sending
-        let reply = await session.send(action)
+        let reply = await session.send(request.action)
         phase = .done(success: reply.success, message: reply.message)
         WKInterfaceDevice.current().play(reply.success ? .success : .failure)
+        if reply.success {
+            try? await Task.sleep(nanoseconds: UInt64(sentDisplayTime * 1_000_000_000))
+            navigator.popToRoot()
+        }
     }
 
     private enum AuthOutcome {

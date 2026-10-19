@@ -3,56 +3,43 @@
 
 import SwiftUI
 
-struct BolusEntryView: View {
-    let state: WatchState
+/// Pick an amount: the AID's recommendation, the phone's Quick-Pick boluses, or
+/// any amount with the Digital Crown. Every choice still needs the crown confirmation.
+struct BolusPickerView: View {
     let remote: WatchRemoteConfig
 
-    @Environment(\.dismiss) private var dismiss
-    @State private var units = 0.0
+    @EnvironmentObject private var navigator: WatchNavigator
     @State private var staleRecommendation: Double?
-    @FocusState private var amountFocused: Bool
 
     /// Same cut-offs as the phone's bolus screens.
     private let recommendationMaxAge: TimeInterval = 12 * 60
     private let recommendationWarnAge: TimeInterval = 5 * 60
 
-    private var step: Double { max(remote.bolusIncrement, 0.025) }
+    private var step: Double { BolusAmountView.step(remote) }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                AmountField(value: $units, unit: "U", step: step, maximum: remote.maxBolus, isHighlighted: amountFocused, format: WatchFormat.insulin)
-                    .focused($amountFocused)
-                Text("Max \(WatchFormat.insulin(remote.maxBolus)) U")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                recommendation
-
-                NavigationLink {
-                    CommandConfirmView(
-                        title: "Bolus",
-                        lines: ["\(WatchFormat.insulin(units)) U"],
-                        action: .bolus(units: units),
-                        deliversInsulin: true,
-                        onSuccess: { dismiss() }
-                    )
+        List {
+            recommendation
+            ForEach(remote.quickPickBoluses.filter { $0 > 0 && $0 <= remote.maxBolus }, id: \.self) { units in
+                Button {
+                    confirm(units)
                 } label: {
-                    Text("Continue")
+                    Text("\(WatchFormat.insulin(units)) U")
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-                .disabled(units <= 0)
+            }
+            Button {
+                navigator.push(.bolusAmount)
+            } label: {
+                Label("Other Amount", systemImage: "digitalcrown.horizontal.arrow.clockwise")
             }
         }
         .navigationTitle("Bolus")
-        .onAppear { amountFocused = true }
         .alert(
             "Old Calculation Warning",
             isPresented: Binding(get: { staleRecommendation != nil }, set: { if !$0 { staleRecommendation = nil } })
         ) {
             Button("Use Anyway") {
-                if let staleRecommendation { units = staleRecommendation }
+                if let staleRecommendation { confirm(staleRecommendation) }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -65,27 +52,67 @@ struct BolusEntryView: View {
         if let rec = remote.recommendedBolus, rec > 0, let at = remote.recommendedBolusAt {
             let age = Date().timeIntervalSince(at)
             if age < recommendationMaxAge {
-                let stepped = Self.roundedDown(min(rec, remote.maxBolus), step: step)
-                Button {
-                    if age >= recommendationWarnAge {
-                        staleRecommendation = stepped
-                    } else {
-                        units = stepped
+                let stepped = BolusAmountView.roundedDown(min(rec, remote.maxBolus), step: step)
+                Section {
+                    Button {
+                        if age >= recommendationWarnAge {
+                            staleRecommendation = stepped
+                        } else {
+                            confirm(stepped)
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Recommended \(WatchFormat.insulin(stepped)) U")
+                            Text("Calculated \(Int(age / 60)) min ago")
+                                .font(.caption2)
+                                .foregroundStyle(age >= recommendationWarnAge ? .red : .secondary)
+                        }
                     }
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Recommended \(WatchFormat.insulin(stepped)) U")
-                        Text("Calculated \(Int(age / 60)) min ago")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .disabled(stepped <= 0)
                 }
-                Text("New treatments may have occurred since the recommended bolus was calculated.")
-                    .font(.caption2)
-                    .foregroundStyle(age >= recommendationWarnAge ? .red : .yellow)
             }
         }
+    }
+
+    private func confirm(_ units: Double) {
+        navigator.push(.confirm(BolusAmountView.request(units)))
+    }
+}
+
+/// Any amount, set with the Digital Crown.
+struct BolusAmountView: View {
+    let remote: WatchRemoteConfig
+
+    @EnvironmentObject private var navigator: WatchNavigator
+    @State private var units = 0.0
+    @FocusState private var amountFocused: Bool
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, format: WatchFormat.insulin)
+                    .focused($amountFocused)
+                Text("Max \(WatchFormat.insulin(remote.maxBolus)) U")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Button("Continue") {
+                    navigator.push(.confirm(Self.request(units)))
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+                .disabled(units <= 0)
+            }
+        }
+        .navigationTitle("Bolus")
+        .onAppear { amountFocused = true }
+    }
+
+    static func step(_ remote: WatchRemoteConfig) -> Double {
+        max(remote.bolusIncrement, 0.025)
+    }
+
+    static func request(_ units: Double) -> CommandRequest {
+        CommandRequest(title: "Bolus", lines: ["\(WatchFormat.insulin(units)) U"], action: .bolus(units: units), deliversInsulin: true)
     }
 
     static func roundedDown(_ value: Double, step: Double) -> Double {

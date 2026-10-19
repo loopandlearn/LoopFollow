@@ -1,11 +1,16 @@
 // LoopFollow
 // GlucosePage.swift
 
+import Charts
 import SwiftUI
 
-/// Main page: BG, trend and delta as on the phone's home screen, with the chart below.
+/// Main page: one large BG value with trend and delta, a two-hour sparkline,
+/// and the remote commands in the bottom toolbar.
 struct GlucosePage: View {
     let state: WatchState
+
+    @EnvironmentObject private var session: WatchSession
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -13,46 +18,56 @@ struct GlucosePage: View {
                 if let alarm = state.alarm {
                     AlarmBanner(alarm: alarm)
                 }
-                header(now: context.date)
-                WatchChartView(state: state, now: context.date)
-                footer
+                glucose(now: context.date)
+                if !isLuminanceReduced {
+                    details
+                    Sparkline(state: state, now: context.date)
+                        .frame(minHeight: 36)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if !isLuminanceReduced, let iob = state.snapshot?.iob {
+                        Text("IOB \(WatchFormat.iob(iob))")
+                            .font(.footnote)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    age(now: context.date)
+                }
+                if !isLuminanceReduced, let remote = state.remote {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        RemoteToolbar(state: state, remote: remote)
+                    }
+                }
             }
         }
-        .navigationTitle {
-            if let snapshot = state.snapshot {
-                Text(WatchFormat.minutesAgo(snapshot.updatedAt))
-                    .foregroundStyle(snapshot.age >= WatchFormat.staleAfter ? .red : .secondary)
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder
-    private func header(now: Date) -> some View {
+    private func glucose(now: Date) -> some View {
         if let snapshot = state.snapshot {
             let isStale = now.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter
-            HStack(alignment: .center, spacing: 6) {
-                Text(WatchFormat.glucose(snapshot.glucose, unit: snapshot.unit))
-                    .font(.system(size: 40, weight: .black))
-                    .foregroundStyle(WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, colored: state.colorBGText))
-                    .strikethrough(isStale, pattern: .solid, color: .red)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                VStack(alignment: .leading, spacing: 0) {
+            VStack(spacing: -4) {
+                HStack(alignment: .center, spacing: 4) {
+                    Text(WatchFormat.glucose(snapshot.glucose, unit: snapshot.unit))
+                        .font(.system(size: 56, weight: .black))
+                        .foregroundStyle(WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, colored: state.colorBGText))
+                        .strikethrough(isStale, pattern: .solid, color: .red)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     Text(WatchFormat.trendArrow(snapshot.trend))
-                        .font(.system(size: 22, weight: .black))
-                    Text(WatchFormat.delta(snapshot.delta, unit: snapshot.unit))
-                        .font(.system(size: 15))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 28, weight: .black))
                 }
-                .lineLimit(1)
-                Spacer(minLength: 0)
+                Text(WatchFormat.delta(snapshot.delta, unit: snapshot.unit))
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
             }
-            if snapshot.isNotLooping {
-                Label("Not looping", systemImage: "exclamationmark.triangle.fill")
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-            }
+            .frame(maxWidth: .infinity)
+            .layoutPriority(1)
+            .accessibilityElement(children: .combine)
         } else {
             Text("No BG data")
                 .font(.headline)
@@ -61,17 +76,116 @@ struct GlucosePage: View {
     }
 
     @ViewBuilder
-    private var footer: some View {
-        if let snapshot = state.snapshot, snapshot.iob != nil || snapshot.cob != nil {
-            HStack {
-                Text("IOB \(WatchFormat.iob(snapshot.iob))")
-                Spacer()
-                Text("COB \(WatchFormat.cob(snapshot.cob))")
-            }
-            .font(.footnote)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
+    private func age(now: Date) -> some View {
+        if !session.isReachable {
+            Image(systemName: "iphone.slash")
+                .foregroundStyle(.orange)
+                .accessibilityLabel("iPhone not reachable")
+        } else if let snapshot = state.snapshot {
+            Text(WatchFormat.minutesAgo(snapshot.updatedAt, now: now))
+                .font(.footnote)
+                .foregroundStyle(now.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter ? .red : .secondary)
         }
+    }
+
+    @ViewBuilder
+    private var details: some View {
+        if let snapshot = state.snapshot {
+            if snapshot.isNotLooping {
+                Label("Not looping", systemImage: "exclamationmark.triangle.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            } else if snapshot.cob != nil || state.lastLoopAt != nil {
+                HStack {
+                    if let cob = snapshot.cob {
+                        Text("COB \(WatchFormat.cob(cob))")
+                    }
+                    Spacer(minLength: 4)
+                    if let lastLoop = state.lastLoopAt {
+                        Text("Loop \(WatchFormat.minutesAgo(lastLoop))")
+                    }
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            }
+        }
+    }
+}
+
+/// Override, treatments and temp target, as in Apple's bottom-toolbar pattern.
+private struct RemoteToolbar: View {
+    let state: WatchState
+    let remote: WatchRemoteConfig
+    @EnvironmentObject private var session: WatchSession
+    @EnvironmentObject private var navigator: WatchNavigator
+
+    var body: some View {
+        Button {
+            navigator.push(.overrides)
+        } label: {
+            Image(systemName: "slider.horizontal.3")
+        }
+        .tint(state.snapshot?.override != nil ? .green : nil)
+        .accessibilityLabel("Overrides")
+        .disabled(!session.isReachable)
+
+        Button {
+            navigator.push(.treatments)
+        } label: {
+            Image(systemName: "plus")
+        }
+        .controlSize(.large)
+        .buttonStyle(.borderedProminent)
+        .tint(.blue)
+        .accessibilityLabel("Meal or bolus")
+        .disabled(!session.isReachable)
+
+        if remote.kind == .trio {
+            Button {
+                navigator.push(.tempTargets)
+            } label: {
+                Image(systemName: "scope")
+            }
+            .tint(state.snapshot?.tempTargetMgdl != nil ? .green : nil)
+            .accessibilityLabel("Temp Target")
+            .disabled(!session.isReachable)
+        } else {
+            Spacer()
+        }
+    }
+}
+
+/// The last two hours in range colors, without axes, scaled to the readings and the range lines.
+struct Sparkline: View {
+    let state: WatchState
+    let now: Date
+
+    var body: some View {
+        let start = now.addingTimeInterval(-2 * 3600)
+        let readings = state.readings.filter { $0.date >= start }
+        let values = readings.map(\.v)
+        let bottom = min(values.min() ?? state.lowMgdl, state.lowMgdl) - 10
+        let top = max(values.max() ?? state.highMgdl, state.highMgdl) + 10
+        Chart {
+            RuleMark(y: .value("High", state.highMgdl))
+                .foregroundStyle(Color.yellow.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            RuleMark(y: .value("Low", state.lowMgdl))
+                .foregroundStyle(Color.red.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            ForEach(readings, id: \.t) { reading in
+                PointMark(x: .value("Time", reading.date), y: .value("BG", reading.v))
+                    .symbolSize(12)
+                    .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+            }
+        }
+        .chartXScale(domain: start ... now)
+        .chartYScale(domain: bottom ... top)
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .accessibilityHidden(true)
     }
 }
 

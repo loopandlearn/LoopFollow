@@ -35,7 +35,9 @@ struct WatchProtocolTests {
                 recommendedBolus: 0.4,
                 recommendedBolusAt: t0,
                 overridePresets: [WatchPreset(id: "Exercise", name: "Exercise", detail: "80 %, 1 h")],
-                tempTargetPresets: []
+                tempTargetPresets: [],
+                quickPickBoluses: [1, 2.5],
+                quickPickMeals: [WatchMealPick(carbs: 45, fat: 0, protein: 0, bolus: 0)]
             )
         )
     }

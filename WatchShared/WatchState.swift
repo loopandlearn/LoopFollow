@@ -109,4 +109,14 @@ struct WatchRemoteConfig: Codable, Equatable {
     let overridePresets: [WatchPreset]
     /// Trio only.
     let tempTargetPresets: [WatchPreset]
+    /// The phone's Quick-Pick suggestions for this time of day.
+    let quickPickBoluses: [Double]
+    let quickPickMeals: [WatchMealPick]
+}
+
+struct WatchMealPick: Codable, Equatable {
+    let carbs: Double
+    let fat: Double
+    let protein: Double
+    let bolus: Double
 }

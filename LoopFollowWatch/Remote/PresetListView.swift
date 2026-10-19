@@ -15,7 +15,7 @@ struct PresetListView: View {
     let state: WatchState
     let presets: [WatchPreset]
 
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var navigator: WatchNavigator
 
     private var activeText: String? {
         guard let snapshot = state.snapshot else { return nil }
@@ -33,14 +33,13 @@ struct PresetListView: View {
         List {
             if let activeText {
                 Section("Active") {
-                    NavigationLink {
-                        CommandConfirmView(
+                    Button {
+                        navigator.push(.confirm(CommandRequest(
                             title: kind == .override ? "Cancel Override" : "Cancel Temp Target",
                             lines: ["Cancel \(activeText)?"],
                             action: kind == .override ? .cancelOverride : .cancelTempTarget,
-                            deliversInsulin: false,
-                            onSuccess: { dismiss() }
-                        )
+                            deliversInsulin: false
+                        )))
                     } label: {
                         Label(activeText, systemImage: "xmark.circle")
                             .foregroundStyle(.red)
@@ -55,14 +54,13 @@ struct PresetListView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(presets) { preset in
-                    NavigationLink {
-                        CommandConfirmView(
+                    Button {
+                        navigator.push(.confirm(CommandRequest(
                             title: title,
                             lines: [preset.name, preset.detail],
                             action: kind == .override ? .startOverride(presetID: preset.id) : .startTempTarget(presetID: preset.id),
-                            deliversInsulin: false,
-                            onSuccess: { dismiss() }
-                        )
+                            deliversInsulin: false
+                        )))
                     } label: {
                         VStack(alignment: .leading) {
                             Text(preset.name)

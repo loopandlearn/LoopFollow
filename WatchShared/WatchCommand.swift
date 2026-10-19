@@ -10,7 +10,7 @@ struct WatchCommand: Codable, Equatable {
     /// The phone ignores commands older than this, so a delayed delivery is never acted on.
     static let maxAge: TimeInterval = 60
 
-    enum Action: Codable, Equatable {
+    enum Action: Codable, Hashable {
         case bolus(units: Double)
         /// Loop sends carbs only; Trio may add fat, protein and a bolus in the same command.
         case meal(carbs: Double, fat: Double, protein: Double, bolus: Double, consumedAt: Date)
