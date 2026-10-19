@@ -69,9 +69,11 @@ final class WatchSession: NSObject, ObservableObject {
             try? await Task.sleep(nanoseconds: 8_000_000_000)
             guard !isPhoneDataFresh else { return }
         }
-        guard let credentials, credentials.hasDataSource,
-              Date().timeIntervalSince(lastStandaloneAttempt) >= Self.standaloneInterval
-        else { return }
+        guard let credentials, credentials.hasDataSource else {
+            LogManager.shared.log(category: .general, message: "Phone data is stale, but the watch has no data source credentials yet")
+            return
+        }
+        guard Date().timeIntervalSince(lastStandaloneAttempt) >= Self.standaloneInterval else { return }
         lastStandaloneAttempt = Date()
         do {
             let fetched = try await StandaloneFetcher.fetch(credentials: credentials, base: state)
@@ -84,10 +86,15 @@ final class WatchSession: NSObject, ObservableObject {
     }
 
     /// Sends a command through the phone when it is reachable, otherwise directly.
-    /// Never both: a command that fails through the phone is not retried directly.
+    /// Falls back to sending directly only when the phone turned out to be out of
+    /// reach before the command was delivered; a command that may have reached
+    /// the phone is never sent a second time.
     func send(_ action: WatchCommand.Action) async -> WatchCommandReply {
         if session.activationState == .activated, session.isReachable {
-            return await sendThroughPhone(action)
+            switch await sendThroughPhone(action) {
+            case let .replied(reply): return reply
+            case .notDelivered: break
+            }
         }
         if case .snoozeAlarm = action {
             return WatchCommandReply(success: false, message: "Snoozing needs the iPhone, which is not reachable right now.")
@@ -98,20 +105,30 @@ final class WatchSession: NSObject, ObservableObject {
         return await DirectCommandSender.send(action, credentials: credentials, config: config)
     }
 
-    private func sendThroughPhone(_ action: WatchCommand.Action) async -> WatchCommandReply {
+    private enum PhoneSendResult {
+        case replied(WatchCommandReply)
+        /// WatchConnectivity reported the phone unreachable, so the command never left the watch.
+        case notDelivered
+    }
+
+    private func sendThroughPhone(_ action: WatchCommand.Action) async -> PhoneSendResult {
         guard let data = try? JSONEncoder().encode(WatchCommand(action: action)) else {
-            return WatchCommandReply(success: false, message: "Could not encode the command.")
+            return .replied(WatchCommandReply(success: false, message: "Could not encode the command."))
         }
         return await withCheckedContinuation { continuation in
             session.sendMessage([WatchCommand.messageKey: data], replyHandler: { reply in
                 let result = (reply[WatchCommandReply.messageKey] as? Data)
                     .flatMap { try? JSONDecoder().decode(WatchCommandReply.self, from: $0) }
-                continuation.resume(returning: result ?? WatchCommandReply(success: false, message: "Unexpected reply from the iPhone."))
+                continuation.resume(returning: .replied(result ?? WatchCommandReply(success: false, message: "Unexpected reply from the iPhone.")))
             }, errorHandler: { error in
-                continuation.resume(returning: WatchCommandReply(
+                if (error as? WCError)?.code == .notReachable {
+                    continuation.resume(returning: .notDelivered)
+                    return
+                }
+                continuation.resume(returning: .replied(WatchCommandReply(
                     success: false,
                     message: "No reply from the iPhone (\(error.localizedDescription)). Check LoopFollow on the iPhone before trying again."
-                ))
+                )))
             })
         }
     }
@@ -163,16 +180,23 @@ final class WatchSession: NSObject, ObservableObject {
     }
 
     private func receiveCredentials(_ data: Data) {
-        guard let received = try? JSONDecoder().decode(WatchCredentials.self, from: data) else { return }
+        guard let received = try? JSONDecoder().decode(WatchCredentials.self, from: data) else {
+            LogManager.shared.log(category: .general, message: "Could not decode credentials from the phone")
+            return
+        }
         credentials = received
         WatchKeychain.save(received)
+        LogManager.shared.log(category: .general, message: "Credentials received (remote commands: \(received.remote != nil))")
     }
 
     /// Asks the phone for credentials when the watch has none, e.g. after a reinstall.
     private func requestCredentialsIfMissing() {
         guard credentials == nil, session.activationState == .activated else { return }
         if session.isReachable {
-            session.sendMessage([WatchCredentials.requestKey: true], replyHandler: nil, errorHandler: nil)
+            session.sendMessage([WatchCredentials.requestKey: true], replyHandler: { reply in
+                guard let data = reply[WatchCredentials.userInfoKey] as? Data else { return }
+                Task { @MainActor in self.receiveCredentials(data) }
+            }, errorHandler: nil)
         } else {
             session.transferUserInfo([WatchCredentials.requestKey: true])
         }
@@ -195,13 +219,21 @@ extension WatchSession: WCSessionDelegate {
         let reachable = session.isReachable
         Task { @MainActor in
             self.isReachable = reachable
-            if reachable { self.requestState() }
+            if reachable {
+                self.requestState()
+                self.requestCredentialsIfMissing()
+            }
         }
     }
 
     nonisolated func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         guard let data = applicationContext[WatchState.contextKey] as? Data else { return }
         Task { @MainActor in self.applyFromPhone(data) }
+    }
+
+    nonisolated func session(_: WCSession, didReceiveMessage message: [String: Any]) {
+        guard let credentials = message[WatchCredentials.userInfoKey] as? Data else { return }
+        Task { @MainActor in self.receiveCredentials(credentials) }
     }
 
     nonisolated func session(_: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {

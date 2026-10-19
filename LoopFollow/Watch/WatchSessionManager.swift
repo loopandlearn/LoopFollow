@@ -99,6 +99,10 @@ final class WatchSessionManager: NSObject {
         for transfer in session.outstandingUserInfoTransfers where transfer.userInfo[WatchCredentials.userInfoKey] != nil {
             transfer.cancel()
         }
+        // Immediate when the watch app is reachable; the queued transfer covers the rest.
+        if session.isReachable {
+            session.sendMessage([WatchCredentials.userInfoKey: data], replyHandler: nil, errorHandler: nil)
+        }
         session.transferUserInfo([WatchCredentials.userInfoKey: data])
         lastSentCredentials = credentials
         LogManager.shared.log(category: .general, message: "[Watch] credentials sent")
@@ -168,8 +172,8 @@ extension WatchSessionManager: WCSessionDelegate {
     func session(_: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         DispatchQueue.main.async {
             if message[WatchCredentials.requestKey] != nil {
-                self.sendCredentialsIfChanged(force: true)
-                replyHandler([:])
+                let data = (try? JSONEncoder().encode(WatchCredentialsBuilder.build())) ?? Data()
+                replyHandler([WatchCredentials.userInfoKey: data])
                 return
             }
 

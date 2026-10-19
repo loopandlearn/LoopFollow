@@ -24,9 +24,12 @@ enum WatchKeychain {
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ]
-        let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        var status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
         if status == errSecItemNotFound {
-            SecItemAdd(query.merging(attributes) { $1 } as CFDictionary, nil)
+            status = SecItemAdd(query.merging(attributes) { $1 } as CFDictionary, nil)
+        }
+        if status != errSecSuccess {
+            LogManager.shared.log(category: .general, message: "Keychain save failed: \(status)")
         }
     }
 
