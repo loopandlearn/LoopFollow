@@ -45,6 +45,9 @@ struct ContentView: View {
                 TabView {
                     GlucosePage(state: state)
                     ChartPage(state: state)
+                    if let stats = state.stats {
+                        StatsPage(state: state, stats: stats)
+                    }
                     InfoPage(state: state)
                 }
                 .tabViewStyle(.verticalPage)

@@ -104,10 +104,13 @@ final class WatchSessionManager: NSObject {
         LogManager.shared.log(category: .general, message: "[Watch] credentials sent")
     }
 
-    /// Sends the info table to the watch whenever one of its rows changes.
-    func observe(_ infoManager: InfoManager) {
+    /// Sends the info table and statistics to the watch whenever they change.
+    func observe(_ infoManager: InfoManager, stats: StatsDisplayModel) {
         infoManager.objectWillChange
             .sink { [weak self] in self?.requestUpdate(reason: "info") }
+            .store(in: &cancellables)
+        stats.objectWillChange
+            .sink { [weak self] in self?.requestUpdate(reason: "stats") }
             .store(in: &cancellables)
     }
 

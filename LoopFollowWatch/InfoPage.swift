@@ -10,6 +10,12 @@ struct InfoPage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
+                if state.source == .watch, !state.infoRows.isEmpty {
+                    Text("From the iPhone at \(state.phoneBuiltAt.formatted(date: .omitted, time: .shortened))")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 if state.infoRows.isEmpty {
                     Text("No info rows are shown on the iPhone.")
                         .font(.footnote)

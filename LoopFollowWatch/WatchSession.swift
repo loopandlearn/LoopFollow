@@ -41,6 +41,11 @@ final class WatchSession: NSObject, ObservableObject {
         session.activate()
     }
 
+    /// Commands go through the phone, or directly when the phone sent what that needs.
+    var canSendCommands: Bool {
+        isReachable || credentials?.remote != nil
+    }
+
     /// True while the phone's latest state is recent enough to rely on.
     var isPhoneDataFresh: Bool {
         Date().timeIntervalSince(lastPhoneBuiltAt) < Self.phoneStaleAfter

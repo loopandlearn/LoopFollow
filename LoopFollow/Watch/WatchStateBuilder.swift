@@ -61,6 +61,7 @@ enum WatchStateBuilder {
             highMgdl: thresholds.high,
             colorBGText: Storage.shared.colorBGText.value,
             infoRows: infoRows(vc),
+            stats: vc.map { stats($0.statsDisplayModel) },
             lastLoopAt: lastLoop,
             device: Storage.shared.device.value,
             alarm: currentAlarm(),
@@ -89,6 +90,22 @@ enum WatchStateBuilder {
             rows.append(WatchInfoRow(name: row.name, value: row.value.isEmpty ? "—" : row.value, level: level))
         }
         return rows
+    }
+
+    private static func stats(_ model: StatsDisplayModel) -> WatchStats {
+        WatchStats(
+            lowPercent: model.lowPercent,
+            inRangePercent: model.inRangePercent,
+            highPercent: model.highPercent,
+            avgBG: model.avgBG,
+            estA1CTitle: model.estA1CTitle,
+            estA1C: model.estA1C,
+            stdDevTitle: model.stdDevTitle,
+            stdDev: model.stdDev,
+            pieLow: model.pieLow,
+            pieRange: model.pieRange,
+            pieHigh: model.pieHigh
+        )
     }
 
     private static func currentAlarm() -> WatchAlarm? {

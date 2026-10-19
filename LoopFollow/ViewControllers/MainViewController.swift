@@ -152,7 +152,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         view.backgroundColor = .systemBackground
 
         infoManager = InfoManager()
-        WatchSessionManager.shared.observe(infoManager)
+        WatchSessionManager.shared.observe(infoManager, stats: statsDisplayModel)
 
         let mainView = MainHomeView(
             chartModel: chartModel,

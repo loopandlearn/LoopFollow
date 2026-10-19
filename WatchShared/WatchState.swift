@@ -31,6 +31,8 @@ struct WatchState: Codable, Equatable {
     var colorBGText: Bool
     /// The phone's visible info table rows, in its order and with its coloring.
     var infoRows: [WatchInfoRow]
+    /// The statistics shown under the phone's chart.
+    var stats: WatchStats?
     /// When the loop last reported, nil when unknown.
     var lastLoopAt: Date?
     /// "Loop", "Trio" or another uploader name; empty for CGM-only setups.
@@ -63,6 +65,21 @@ struct WatchReading: Codable, Equatable {
     let v: Double
 
     var date: Date { Date(timeIntervalSince1970: t) }
+}
+
+/// The phone's statistics panel, formatted on the phone.
+struct WatchStats: Codable, Equatable {
+    var lowPercent: String
+    var inRangePercent: String
+    var highPercent: String
+    var avgBG: String
+    var estA1CTitle: String
+    var estA1C: String
+    var stdDevTitle: String
+    var stdDev: String
+    var pieLow: Double
+    var pieRange: Double
+    var pieHigh: Double
 }
 
 struct WatchInfoRow: Codable, Equatable {

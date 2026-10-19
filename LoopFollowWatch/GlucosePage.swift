@@ -75,17 +75,25 @@ struct GlucosePage: View {
         }
     }
 
+    /// Age of the reading, with a marker while the watch fetches on its own or cannot reach the phone.
     @ViewBuilder
     private func age(now: Date) -> some View {
-        if !session.isReachable {
-            Image(systemName: "iphone.slash")
-                .foregroundStyle(.orange)
-                .accessibilityLabel("iPhone not reachable")
-        } else if let snapshot = state.snapshot {
-            Text(WatchFormat.minutesAgo(snapshot.updatedAt, now: now))
-                .font(.footnote)
-                .foregroundStyle(now.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter ? .red : .secondary)
+        HStack(spacing: 2) {
+            if state.source == .watch {
+                Image(systemName: "applewatch.radiowaves.left.and.right")
+                    .foregroundStyle(.blue)
+                    .accessibilityLabel("Fetched by the watch")
+            } else if !session.isReachable {
+                Image(systemName: "iphone.slash")
+                    .foregroundStyle(.orange)
+                    .accessibilityLabel("iPhone not reachable")
+            }
+            if let snapshot = state.snapshot {
+                Text(WatchFormat.minutesAgo(snapshot.updatedAt, now: now))
+                    .foregroundStyle(now.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter ? .red : .secondary)
+            }
         }
+        .font(.footnote)
     }
 
     @ViewBuilder
@@ -129,7 +137,7 @@ private struct RemoteToolbar: View {
         }
         .tint(state.snapshot?.override != nil ? .green : nil)
         .accessibilityLabel("Overrides")
-        .disabled(!session.isReachable)
+        .disabled(!session.canSendCommands)
 
         Button {
             navigator.push(.treatments)
@@ -140,7 +148,7 @@ private struct RemoteToolbar: View {
         .buttonStyle(.borderedProminent)
         .tint(.blue)
         .accessibilityLabel("Meal or bolus")
-        .disabled(!session.isReachable)
+        .disabled(!session.canSendCommands)
 
         if remote.kind == .trio {
             Button {
@@ -150,7 +158,7 @@ private struct RemoteToolbar: View {
             }
             .tint(state.snapshot?.tempTargetMgdl != nil ? .green : nil)
             .accessibilityLabel("Temp Target")
-            .disabled(!session.isReachable)
+            .disabled(!session.canSendCommands)
         } else {
             Spacer()
         }
