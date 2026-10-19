@@ -32,6 +32,30 @@ struct WatchCommand: Codable, Equatable {
     }
 }
 
+extension WatchCommand.Action {
+    /// Short name for logs.
+    var name: String {
+        switch self {
+        case .bolus: "bolus"
+        case .meal: "meal"
+        case .startOverride: "startOverride"
+        case .cancelOverride: "cancelOverride"
+        case .startTempTarget: "startTempTarget"
+        case .cancelTempTarget: "cancelTempTarget"
+        case .snoozeAlarm: "snoozeAlarm"
+        }
+    }
+
+    /// Whether the command can deliver insulin.
+    var deliversInsulin: Bool {
+        switch self {
+        case .bolus: true
+        case let .meal(_, _, _, bolus, _): bolus > 0
+        default: false
+        }
+    }
+}
+
 struct WatchCommandReply: Codable, Equatable {
     static let messageKey = "watchCommandReply"
 

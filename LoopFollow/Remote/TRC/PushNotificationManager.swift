@@ -21,49 +21,15 @@ class PushNotificationManager {
         user = Storage.shared.user.value
         bundleId = Storage.shared.bundleId.value
 
-        let lfTeamId = BuildDetails.default.teamID ?? ""
-        let remoteTeamId = Storage.shared.teamId.value ?? ""
-        let sameTeam = !lfTeamId.isEmpty && !remoteTeamId.isEmpty && lfTeamId == remoteTeamId
-
-        if sameTeam || remoteTeamId.isEmpty {
-            apnsKey = Storage.shared.lfApnsKey.value
-            keyId = Storage.shared.lfKeyId.value
-            teamId = lfTeamId
-        } else {
-            apnsKey = Storage.shared.remoteApnsKey.value
-            keyId = Storage.shared.remoteKeyId.value
-            teamId = remoteTeamId
-        }
-    }
-
-    private func createReturnNotificationInfo() -> CommandPayload.ReturnNotificationInfo? {
-        let loopFollowDeviceToken = Observable.shared.loopFollowDeviceToken.value
-
-        guard !loopFollowDeviceToken.isEmpty else {
-            return nil
-        }
-
-        guard let loopFollowTeamID = BuildDetails.default.teamID, !loopFollowTeamID.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "LoopFollow Team ID not found in BuildDetails.plist. Cannot create return notification info.")
-            return nil
-        }
-
-        let lfKeyId = Storage.shared.lfKeyId.value
-        let lfApnsKey = Storage.shared.lfApnsKey.value
-
-        guard !lfKeyId.isEmpty, !lfApnsKey.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Missing LoopFollow APNS credentials. Configure them in App Settings → APN.")
-            return nil
-        }
-
-        return CommandPayload.ReturnNotificationInfo(
-            productionEnvironment: BuildDetails.default.isTestFlightBuild(),
-            deviceToken: loopFollowDeviceToken,
-            bundleId: Bundle.main.bundleIdentifier ?? "",
-            teamId: loopFollowTeamID,
-            keyId: lfKeyId,
-            apnsKey: lfApnsKey
+        let resolved = RemoteSigningKey.resolve(
+            lfTeamID: BuildDetails.default.teamID ?? "",
+            remoteTeamID: Storage.shared.teamId.value ?? "",
+            lfKey: (Storage.shared.lfApnsKey.value, Storage.shared.lfKeyId.value),
+            remoteKey: (Storage.shared.remoteApnsKey.value, Storage.shared.remoteKeyId.value)
         )
+        apnsKey = resolved.key
+        keyId = resolved.keyID
+        teamId = resolved.teamID
     }
 
     func sendOverridePushNotification(override: ProfileManager.TrioOverride, completion: @escaping (Bool, String?) -> Void) {
@@ -72,7 +38,7 @@ class PushNotificationManager {
             commandType: .startOverride,
             timestamp: Date().timeIntervalSince1970,
             overrideName: override.name,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
@@ -83,7 +49,7 @@ class PushNotificationManager {
             commandType: .cancelOverride,
             timestamp: Date().timeIntervalSince1970,
             overrideName: nil,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
@@ -95,7 +61,7 @@ class PushNotificationManager {
             commandType: .bolus,
             timestamp: Date().timeIntervalSince1970,
             bolusAmount: bolusAmountDecimal,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
@@ -109,7 +75,7 @@ class PushNotificationManager {
             timestamp: Date().timeIntervalSince1970,
             target: targetValue,
             duration: durationValue,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
@@ -119,7 +85,7 @@ class PushNotificationManager {
             user: user,
             commandType: .cancelTempTarget,
             timestamp: Date().timeIntervalSince1970,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
@@ -159,14 +125,14 @@ class PushNotificationManager {
             protein: proteinValue,
             fat: fatValue,
             scheduledTime: scheduledTimeInterval,
-            returnNotification: createReturnNotificationInfo()
+            returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: completion)
     }
 
     /// Trio confirms edit/delete through a return notification, so LoopFollow's own APNs credentials are required.
     func sendDeleteMealPushNotification(mealID: String, commandID: String, completion: @escaping (Bool, String?) -> Void) {
-        guard let returnNotification = createReturnNotificationInfo() else {
+        guard let returnNotification = ReturnNotificationInfo.loopFollow() else {
             completion(false, Self.returnNotificationRequiredMessage)
             return
         }
@@ -194,7 +160,7 @@ class PushNotificationManager {
             completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
             return
         }
-        guard let returnNotification = createReturnNotificationInfo() else {
+        guard let returnNotification = ReturnNotificationInfo.loopFollow() else {
             completion(false, Self.returnNotificationRequiredMessage)
             return
         }
@@ -292,8 +258,8 @@ class PushNotificationManager {
             let encryptedDataString = try messenger.encrypt(payload)
             let finalMessage = EncryptedPushMessage(encryptedData: encryptedDataString, commandType: payload.commandType)
 
-            APNSDelivery.send(
-                body: try JSONEncoder().encode(finalMessage),
+            try APNSDelivery.send(
+                body: JSONEncoder().encode(finalMessage),
                 deviceToken: deviceToken,
                 topic: bundleId,
                 production: productionEnvironment,

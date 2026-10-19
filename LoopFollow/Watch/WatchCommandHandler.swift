@@ -9,19 +9,26 @@ import HealthKit
 final class WatchCommandHandler {
     static let shared = WatchCommandHandler()
 
-    /// Loop rejects carb entries outside this window; same limits as LoopAPNSCarbsView.
-    private let loopMaxPastHours: Double = 12
-    private let loopMaxFutureHours: Double = 1
-    /// Loop's default absorption time for a remote carb entry, in hours.
-    private let loopAbsorptionHours = 3.0
-
     private var handledIDs: [UUID] = []
 
     private init() {}
 
+    /// The guardrails from the phone's Remote settings.
+    static func limits() -> WatchCommandValidator.Limits {
+        WatchCommandValidator.Limits(
+            maxBolus: Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit()),
+            bolusIncrement: Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()),
+            maxCarbs: Storage.shared.maxCarbs.value.doubleValue(for: .gram()),
+            maxFat: Storage.shared.maxFat.value.doubleValue(for: .gram()),
+            maxProtein: Storage.shared.maxProtein.value.doubleValue(for: .gram()),
+            mealWithBolus: Storage.shared.mealWithBolus.value,
+            mealWithFatProtein: Storage.shared.mealWithFatProtein.value
+        )
+    }
+
     func handle(_ command: WatchCommand, reply: @escaping (WatchCommandReply) -> Void) {
         let finish: (Bool, String) -> Void = { success, message in
-            LogManager.shared.log(category: .apns, message: "Watch command \(Self.name(of: command.action)) finished: success=\(success) \(message)")
+            LogManager.shared.log(category: .apns, message: "Watch command \(command.action.name) finished: success=\(success) \(message)")
             reply(WatchCommandReply(success: success, message: message))
         }
 
@@ -37,7 +44,7 @@ final class WatchCommandHandler {
             return
         }
 
-        LogManager.shared.log(category: .apns, message: "Watch command received: \(Self.name(of: command.action))")
+        LogManager.shared.log(category: .apns, message: "Watch command received: \(command.action.name)")
 
         if case .snoozeAlarm = command.action {
             guard Observable.shared.currentAlarm.value != nil else {
@@ -53,20 +60,25 @@ final class WatchCommandHandler {
             finish(false, "Commands from Apple Watch are turned off in LoopFollow's Remote settings.")
             return
         }
-
-        switch WatchStateBuilder.remoteKind() {
-        case .loop:
-            handleLoop(command.action, finish: finish)
-        case .trio:
-            handleTrio(command.action, finish: finish)
-        case nil:
+        guard let kind = WatchStateBuilder.remoteKind() else {
             finish(false, "Remote control is not set up in LoopFollow.")
+            return
+        }
+
+        switch WatchCommandValidator.validate(command.action, kind: kind, limits: Self.limits()) {
+        case let .failure(error):
+            finish(false, error.message)
+        case let .success(action):
+            switch kind {
+            case .loop: sendLoop(action, finish: finish)
+            case .trio: sendTrio(action, finish: finish)
+            }
         }
     }
 
     // MARK: - Loop
 
-    private func handleLoop(_ action: WatchCommand.Action, finish: @escaping (Bool, String) -> Void) {
+    private func sendLoop(_ action: WatchCommand.Action, finish: @escaping (Bool, String) -> Void) {
         let service = LoopAPNSService()
         let sent: (Bool, String?) -> Void = { success, error in
             DispatchQueue.main.async {
@@ -76,8 +88,6 @@ final class WatchCommandHandler {
 
         switch action {
         case let .bolus(units):
-            guard units > 0 else { return finish(false, "Enter an amount above zero.") }
-            guard units <= maxBolus else { return finish(false, exceedsMaxBolus(units)) }
             guard service.validateSetup() else { return finish(false, loopSetupIncomplete) }
             guard let otp = loopOTP(finish: finish) else { return }
             service.sendBolusViaAPNS(payload: LoopAPNSPayload(type: .bolus, bolusAmount: units, otp: otp)) { success, error in
@@ -90,23 +100,13 @@ final class WatchCommandHandler {
                 sent(success, error)
             }
 
-        case let .meal(carbs, fat, protein, bolus, consumedAt):
-            guard fat == 0, protein == 0, bolus == 0 else { return finish(false, "Loop accepts carbs only from the watch.") }
-            guard carbs > 0 else { return finish(false, "Enter an amount above zero.") }
-            guard carbs <= maxCarbs else { return finish(false, exceeds("Carbs", carbs, maxCarbs)) }
-            let now = Date()
-            guard consumedAt >= now.addingTimeInterval(-loopMaxPastHours * 3600) else {
-                return finish(false, "Time must be within the prior \(Int(loopMaxPastHours)) hours.")
-            }
-            guard consumedAt <= now.addingTimeInterval(loopMaxFutureHours * 3600) else {
-                return finish(false, "Time must be within the next \(Int(loopMaxFutureHours)) hour.")
-            }
+        case let .meal(carbs, _, _, _, consumedAt):
             guard service.validateSetup() else { return finish(false, loopSetupIncomplete) }
             guard let otp = loopOTP(finish: finish) else { return }
             let payload = LoopAPNSPayload(
                 type: .carbs,
                 carbsAmount: carbs,
-                absorptionTime: loopAbsorptionHours,
+                absorptionTime: WatchCommandValidator.loopAbsorptionHours,
                 consumedDate: consumedAt.dateUsingCurrentSeconds(),
                 otp: otp
             )
@@ -130,11 +130,8 @@ final class WatchCommandHandler {
         case .cancelOverride:
             service.sendCancelOverrideNotification(completion: sent)
 
-        case .startTempTarget, .cancelTempTarget:
-            finish(false, "Temp targets are not available for Loop.")
-
-        case .snoozeAlarm:
-            break
+        case .startTempTarget, .cancelTempTarget, .snoozeAlarm:
+            finish(false, "This command is not available for Loop.")
         }
     }
 
@@ -158,7 +155,7 @@ final class WatchCommandHandler {
 
     // MARK: - Trio
 
-    private func handleTrio(_ action: WatchCommand.Action, finish: @escaping (Bool, String) -> Void) {
+    private func sendTrio(_ action: WatchCommand.Action, finish: @escaping (Bool, String) -> Void) {
         let manager = PushNotificationManager()
         let sent: (Bool, String?) -> Void = { success, error in
             DispatchQueue.main.async {
@@ -168,46 +165,24 @@ final class WatchCommandHandler {
 
         switch action {
         case let .bolus(units):
-            let stepped = roundedToBolusStep(units)
-            guard stepped > 0 else { return finish(false, "Enter an amount above zero.") }
-            guard stepped <= maxBolus else { return finish(false, exceedsMaxBolus(stepped)) }
-            manager.sendBolusPushNotification(bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: stepped)) { success, error in
+            manager.sendBolusPushNotification(bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: units)) { success, error in
                 if success {
-                    DispatchQueue.main.async { QuickPickBolusesManager.shared.recordBolus(units: stepped) }
+                    DispatchQueue.main.async { QuickPickBolusesManager.shared.recordBolus(units: units) }
                 }
                 sent(success, error)
             }
 
         case let .meal(carbs, fat, protein, bolus, consumedAt):
-            let withFatProtein = Storage.shared.mealWithFatProtein.value
-            let withBolus = Storage.shared.mealWithBolus.value
-            guard withFatProtein || (fat == 0 && protein == 0) else { return finish(false, "Meal with Fat/Protein is turned off in LoopFollow's Remote settings.") }
-            guard withBolus || bolus == 0 else { return finish(false, "Meal with Bolus is turned off in LoopFollow's Remote settings.") }
-            guard carbs >= 0, fat >= 0, protein >= 0, carbs > 0 || fat > 0 || protein > 0 else {
-                return finish(false, "Enter carbs, fat or protein.")
-            }
-            guard carbs <= maxCarbs else { return finish(false, exceeds("Carbs", carbs, maxCarbs)) }
-            guard fat <= Storage.shared.maxFat.value.doubleValue(for: .gram()) else {
-                return finish(false, exceeds("Fat", fat, Storage.shared.maxFat.value.doubleValue(for: .gram())))
-            }
-            guard protein <= Storage.shared.maxProtein.value.doubleValue(for: .gram()) else {
-                return finish(false, exceeds("Protein", protein, Storage.shared.maxProtein.value.doubleValue(for: .gram())))
-            }
-            let steppedBolus = roundedToBolusStep(bolus)
-            guard steppedBolus <= maxBolus else { return finish(false, exceedsMaxBolus(steppedBolus)) }
-
-            // Within a minute of now counts as "now", as in the phone's meal screen.
-            let scheduledTime: Date? = abs(consumedAt.timeIntervalSinceNow) < 60 ? nil : consumedAt.dateUsingCurrentSeconds()
             manager.sendMealPushNotification(
                 carbs: HKQuantity(unit: .gram(), doubleValue: carbs),
                 protein: HKQuantity(unit: .gram(), doubleValue: protein),
                 fat: HKQuantity(unit: .gram(), doubleValue: fat),
-                bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: steppedBolus),
-                scheduledTime: scheduledTime
+                bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: bolus),
+                scheduledTime: WatchCommand.trioScheduledTime(consumedAt)
             ) { success, error in
                 if success, carbs > 0 {
                     DispatchQueue.main.async {
-                        QuickPickMealsManager.shared.recordMeal(carbs: carbs, fat: fat, protein: protein, bolus: steppedBolus)
+                        QuickPickMealsManager.shared.recordMeal(carbs: carbs, fat: fat, protein: protein, bolus: bolus)
                     }
                 }
                 sent(success, error)
@@ -232,44 +207,7 @@ final class WatchCommandHandler {
             manager.sendCancelTempTargetPushNotification(completion: sent)
 
         case .snoozeAlarm:
-            break
-        }
-    }
-
-    // MARK: - Helpers
-
-    private var maxBolus: Double {
-        Storage.shared.maxBolus.value.doubleValue(for: .internationalUnit())
-    }
-
-    private var maxCarbs: Double {
-        Storage.shared.maxCarbs.value.doubleValue(for: .gram())
-    }
-
-    /// Rounds down to the bolus increment, as the phone's Trio bolus screen does.
-    private func roundedToBolusStep(_ value: Double) -> Double {
-        let step = max(0.001, Storage.shared.bolusIncrement.value.doubleValue(for: .internationalUnit()))
-        let stepped = ((value / step) + 1e-10).rounded(.down) * step
-        return (stepped * 1000).rounded() / 1000
-    }
-
-    private func exceedsMaxBolus(_ units: Double) -> String {
-        "\(InsulinFormatter.shared.string(units)) U exceeds the maximum bolus of \(InsulinFormatter.shared.string(maxBolus)) U set in LoopFollow."
-    }
-
-    private func exceeds(_ what: String, _ grams: Double, _ max: Double) -> String {
-        "\(what) (\(Int(grams)) g) exceeds the maximum of \(Int(max)) g set in LoopFollow."
-    }
-
-    private static func name(of action: WatchCommand.Action) -> String {
-        switch action {
-        case .bolus: "bolus"
-        case .meal: "meal"
-        case .startOverride: "startOverride"
-        case .cancelOverride: "cancelOverride"
-        case .startTempTarget: "startTempTarget"
-        case .cancelTempTarget: "cancelTempTarget"
-        case .snoozeAlarm: "snoozeAlarm"
+            finish(false, "Unknown request.")
         }
     }
 }

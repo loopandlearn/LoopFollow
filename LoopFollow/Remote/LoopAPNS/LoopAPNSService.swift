@@ -10,15 +10,13 @@ class LoopAPNSService {
     /// Returns the effective APNs credentials for sending commands to the remote app.
     /// Same team → use LoopFollow's own key. Different team → use remote-specific key.
     private func effectiveCredentials() -> (apnsKey: String, keyId: String, teamId: String) {
-        let lfTeamId = BuildDetails.default.teamID ?? ""
-        let remoteTeamId = storage.teamId.value ?? ""
-        let sameTeam = !lfTeamId.isEmpty && !remoteTeamId.isEmpty && lfTeamId == remoteTeamId
-
-        if sameTeam || remoteTeamId.isEmpty {
-            return (storage.lfApnsKey.value, storage.lfKeyId.value, lfTeamId)
-        } else {
-            return (storage.remoteApnsKey.value, storage.remoteKeyId.value, remoteTeamId)
-        }
+        let resolved = RemoteSigningKey.resolve(
+            lfTeamID: BuildDetails.default.teamID ?? "",
+            remoteTeamID: storage.teamId.value ?? "",
+            lfKey: (storage.lfApnsKey.value, storage.lfKeyId.value),
+            remoteKey: (storage.remoteApnsKey.value, storage.remoteKeyId.value)
+        )
+        return (resolved.key, resolved.keyID, resolved.teamID)
     }
 
     enum LoopAPNSError: Error, LocalizedError {
@@ -57,34 +55,6 @@ class LoopAPNSService {
                 return "Too many requests - please wait a few minutes before trying again"
             }
         }
-    }
-
-    private func createReturnNotificationInfo() -> ReturnNotificationInfo? {
-        let loopFollowDeviceToken = Observable.shared.loopFollowDeviceToken.value
-        guard !loopFollowDeviceToken.isEmpty else { return nil }
-
-        // Get LoopFollow's own Team ID from BuildDetails.
-        guard let loopFollowTeamID = BuildDetails.default.teamID, !loopFollowTeamID.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "LoopFollow Team ID not found in BuildDetails.plist. Cannot create return notification info.")
-            return nil
-        }
-
-        let lfKeyId = storage.lfKeyId.value
-        let lfApnsKey = storage.lfApnsKey.value
-
-        guard !lfKeyId.isEmpty, !lfApnsKey.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Missing LoopFollow APNS credentials. Configure them in App Settings → APN.")
-            return nil
-        }
-
-        return ReturnNotificationInfo(
-            productionEnvironment: BuildDetails.default.isTestFlightBuild(),
-            deviceToken: loopFollowDeviceToken,
-            bundleId: Bundle.main.bundleIdentifier ?? "",
-            teamId: loopFollowTeamID,
-            keyId: lfKeyId,
-            apnsKey: lfApnsKey
-        )
     }
 
     /// Encrypts return notification info using OTP code
@@ -126,7 +96,7 @@ class LoopAPNSService {
 
     /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
     private func encryptedReturnNotification(otp: String) -> String? {
-        guard let returnInfo = createReturnNotificationInfo() else {
+        guard let returnInfo = ReturnNotificationInfo.loopFollow() else {
             LogManager.shared.log(category: .apns, message: "Return notification info unavailable; Loop cannot confirm this command")
             return nil
         }
@@ -523,7 +493,7 @@ class LoopAPNSService {
 
         // For override commands, we can include return notification info unencrypted
         // since override commands don't require OTP validation in Loop
-        if let returnInfo = createReturnNotificationInfo() {
+        if let returnInfo = ReturnNotificationInfo.loopFollow() {
             payload["return_notification"] = [
                 "production_environment": returnInfo.productionEnvironment,
                 "device_token": returnInfo.deviceToken,
@@ -579,7 +549,7 @@ class LoopAPNSService {
 
         // For override commands, we can include return notification info unencrypted
         // since override commands don't require OTP validation in Loop
-        if let returnInfo = createReturnNotificationInfo() {
+        if let returnInfo = ReturnNotificationInfo.loopFollow() {
             payload["return_notification"] = [
                 "production_environment": returnInfo.productionEnvironment,
                 "device_token": returnInfo.deviceToken,

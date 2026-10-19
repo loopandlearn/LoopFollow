@@ -363,5 +363,27 @@ extension GlucoseSnapshot {
             let raw = try container.decode(String.self)
             self = Trend(rawValue: raw) ?? .unknown
         }
+
+        /// Maps a Nightscout or Dexcom direction string, e.g. "FortyFiveUp".
+        init(code: String?) {
+            let raw = code?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+            if raw.contains("doubleup") || raw.contains("rapidrise") || raw == "up2" || raw == "upfast" {
+                self = .upFast
+            } else if raw.contains("fortyfiveup") {
+                self = .upSlight
+            } else if raw.contains("singleup") || raw == "up" || raw == "up1" || raw == "rising" {
+                self = .up
+            } else if raw.contains("flat") || raw == "steady" || raw == "none" {
+                self = .flat
+            } else if raw.contains("doubledown") || raw.contains("rapidfall") || raw == "down2" || raw == "downfast" {
+                self = .downFast
+            } else if raw.contains("fortyfivedown") {
+                self = .downSlight
+            } else if raw.contains("singledown") || raw == "down" || raw == "down1" || raw == "falling" {
+                self = .down
+            } else {
+                self = .unknown
+            }
+        }
     }
 }

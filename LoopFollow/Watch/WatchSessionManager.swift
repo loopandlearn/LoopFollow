@@ -16,6 +16,7 @@ final class WatchSessionManager: NSObject {
     private let complicationTransferInterval: TimeInterval = 15 * 60
 
     private var lastSentState: WatchState?
+    private var lastSentCredentials: WatchCredentials?
     private var lastComplicationTransfer: Date = .distantPast
     private var cancellables = Set<AnyCancellable>()
     private lazy var coalescer = RefreshCoalescer(delay: 2) { [weak self] reason in
@@ -59,6 +60,48 @@ final class WatchSessionManager: NSObject {
             .dropFirst(triggers.count)
             .sink { [weak self] in self?.requestUpdate(reason: "settings") }
             .store(in: &cancellables)
+
+        let credentialTriggers: [AnyPublisher<Void, Never>] = [
+            Storage.shared.url.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.token.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.shareUserName.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.sharePassword.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.shareServer.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.remoteType.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.watchRemoteCommands.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.deviceToken.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.bundleId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.productionEnvironment.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.teamId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lfKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.remoteApnsKey.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.remoteKeyId.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.user.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.sharedSecret.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.loopAPNSQrCodeURL.$value.map { _ in () }.eraseToAnyPublisher(),
+            Observable.shared.loopFollowDeviceToken.$value.map { _ in () }.eraseToAnyPublisher(),
+        ]
+        Publishers.MergeMany(credentialTriggers)
+            .debounce(for: .seconds(2), scheduler: DispatchQueue.main)
+            .sink { [weak self] in self?.sendCredentialsIfChanged(force: false) }
+            .store(in: &cancellables)
+    }
+
+    /// Sends the credentials when they differ from what was last sent, or when
+    /// the watch asks for them. They never travel with the state updates.
+    private func sendCredentialsIfChanged(force: Bool) {
+        guard let session, session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
+        let credentials = WatchCredentialsBuilder.build()
+        guard force || credentials != lastSentCredentials,
+              let data = try? JSONEncoder().encode(credentials)
+        else { return }
+        for transfer in session.outstandingUserInfoTransfers where transfer.userInfo[WatchCredentials.userInfoKey] != nil {
+            transfer.cancel()
+        }
+        session.transferUserInfo([WatchCredentials.userInfoKey: data])
+        lastSentCredentials = credentials
+        LogManager.shared.log(category: .general, message: "[Watch] credentials sent")
     }
 
     /// Sends the info table to the watch whenever one of its rows changes.
@@ -104,6 +147,7 @@ extension WatchSessionManager: WCSessionDelegate {
         }
         if state == .activated {
             requestUpdate(reason: "activated")
+            DispatchQueue.main.async { self.sendCredentialsIfChanged(force: false) }
         }
     }
 
@@ -120,6 +164,12 @@ extension WatchSessionManager: WCSessionDelegate {
 
     func session(_: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         DispatchQueue.main.async {
+            if message[WatchCredentials.requestKey] != nil {
+                self.sendCredentialsIfChanged(force: true)
+                replyHandler([:])
+                return
+            }
+
             if message[WatchMessageKey.requestState] != nil {
                 let data = WatchStateBuilder.build().encoded() ?? Data()
                 replyHandler([WatchState.contextKey: data])
@@ -137,6 +187,12 @@ extension WatchSessionManager: WCSessionDelegate {
                 Self.reply(result, to: replyHandler)
                 self.requestUpdate(reason: "command")
             }
+        }
+    }
+
+    func session(_: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        if userInfo[WatchCredentials.requestKey] != nil {
+            DispatchQueue.main.async { self.sendCredentialsIfChanged(force: true) }
         }
     }
 
