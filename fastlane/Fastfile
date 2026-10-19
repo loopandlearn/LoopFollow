@@ -48,8 +48,22 @@ WATCH_WIDGETS_IDENTIFIER = "#{WATCH_IDENTIFIER}.widgets"
 WATCH_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-for-the-apple-watch-app"
 
 # The watch app needs two identifiers with the LoopFollow App Group, which
-# existing browser builders have to add once by hand. Turns the resulting
-# signing failures into a pointer to the docs.
+# existing browser builders have to add once by hand.
+def watch_setup_error!
+  UI.user_error!(
+    "The Apple Watch app identifiers are not set up yet. Run the Add Identifiers action, " \
+    "add the LoopFollow App Group to the LoopFollow Watch App and LoopFollow Watch Complications identifiers, " \
+    "then build again. Instructions: #{WATCH_SETUP_DOCS}"
+  )
+end
+
+# Stops before match, whose read-only failure does not name the missing profile.
+def ensure_watch_identifiers_exist
+  missing = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER].reject { |id| Spaceship::ConnectAPI::BundleId.find(id) }
+  watch_setup_error! unless missing.empty?
+end
+
+# Turns a signing failure caused by a watch identifier without the App Group into a pointer to the docs.
 def explain_watch_setup_failure(error, log_dir = nil)
   text = error.message.to_s
   if log_dir
@@ -60,15 +74,8 @@ def explain_watch_setup_failure(error, log_dir = nil)
   end
 
   mentions_watch = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER, "LoopFollowWatch"].any? { |id| text.include?(id) }
-  missing_identifier = text.match?(/(couldn't|could not|unable to) find|not found|does(n't| not) exist/i)
   missing_app_group = text.match?(/App Groups capability|com\.apple\.security\.application-groups/i)
-  return unless mentions_watch && (missing_identifier || missing_app_group)
-
-  UI.user_error!(
-    "The Apple Watch app identifiers are not set up yet. Run the Add Identifiers action, " \
-    "add the LoopFollow App Group to the LoopFollow Watch App and LoopFollow Watch Complications identifiers, " \
-    "then build again. Instructions: #{WATCH_SETUP_DOCS}"
-  )
+  watch_setup_error! if mentions_watch && missing_app_group
 end
 
 platform :ios do
@@ -99,21 +106,18 @@ platform :ios do
       build_number: current_build_number
     )      
     
-    begin
-      match(
-        type: "appstore",
-        git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
-        app_identifier: [
-          APP_IDENTIFIER,
-          LA_IDENTIFIER,
-          WATCH_IDENTIFIER,
-          WATCH_WIDGETS_IDENTIFIER
-        ]
-      )
-    rescue => e
-      explain_watch_setup_failure(e)
-      raise
-    end
+    ensure_watch_identifiers_exist
+
+    match(
+      type: "appstore",
+      git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
+      app_identifier: [
+        APP_IDENTIFIER,
+        LA_IDENTIFIER,
+        WATCH_IDENTIFIER,
+        WATCH_WIDGETS_IDENTIFIER
+      ]
+    )
 
     mapping = Actions.lane_context[
       SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
