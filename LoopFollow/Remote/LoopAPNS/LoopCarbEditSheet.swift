@@ -160,6 +160,7 @@ struct LoopCarbEditSheet: View {
     }
 
     private func validateAndConfirm() {
+        guard alertType == nil else { return }
         guard carbsAmount.doubleValue(for: .gram()) > 0 else {
             alertType = .validation("Enter a carb amount, or use Delete carbs to remove the entry.")
             return
