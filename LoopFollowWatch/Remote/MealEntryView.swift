@@ -3,8 +3,8 @@
 
 import SwiftUI
 
-/// Carbs first; fat, protein, bolus (Trio, per the phone's Meal settings) and
-/// time behind "More". Everything goes to the phone as one command.
+/// Carbs, and for Trio fat, protein and a bolus per the phone's Meal settings,
+/// as on the phone; the time behind a button. Everything goes as one command.
 struct MealEntryView: View {
     let remote: WatchRemoteConfig
 
@@ -14,7 +14,7 @@ struct MealEntryView: View {
     @State private var protein = 0.0
     @State private var bolus = 0.0
     @State private var offsetMinutes = 0.0
-    @State private var showMore = false
+    @State private var showTime = false
     @FocusState private var focus: Field?
 
     private enum Field: Hashable {
@@ -32,28 +32,28 @@ struct MealEntryView: View {
                     AmountField(value: $carbs, unit: "g", step: 1, maximum: remote.maxCarbs, isHighlighted: focus == .carbs, format: grams)
                 }
 
-                if showMore {
-                    if remote.mealWithFatProtein {
-                        field("Fat", .fat) {
-                            AmountField(value: $fat, unit: "g", step: 1, maximum: remote.maxFat, isHighlighted: focus == .fat, format: grams)
-                        }
-                        field("Protein", .protein) {
-                            AmountField(value: $protein, unit: "g", step: 1, maximum: remote.maxProtein, isHighlighted: focus == .protein, format: grams)
-                        }
+                if remote.mealWithFatProtein {
+                    field("Fat", .fat) {
+                        AmountField(value: $fat, unit: "g", step: 1, maximum: remote.maxFat, isHighlighted: focus == .fat, format: grams)
                     }
-                    if remote.mealWithBolus {
-                        field("Bolus", .bolus) {
-                            AmountField(value: $bolus, unit: "U", step: bolusStep, maximum: remote.maxBolus, isHighlighted: focus == .bolus, format: WatchFormat.insulin)
-                        }
+                    field("Protein", .protein) {
+                        AmountField(value: $protein, unit: "g", step: 1, maximum: remote.maxProtein, isHighlighted: focus == .protein, format: grams)
                     }
+                }
+                if remote.mealWithBolus {
+                    field("Bolus", .bolus) {
+                        AmountField(value: $bolus, unit: "U", step: bolusStep, maximum: remote.maxBolus, isHighlighted: focus == .bolus, format: WatchFormat.insulin)
+                    }
+                }
+                if showTime {
                     field("Time", .time) {
                         AmountField(value: $offsetMinutes, unit: "min", step: 5, minimum: -120, maximum: 60, isHighlighted: focus == .time, format: timeText)
                     }
                 } else {
                     Button {
-                        showMore = true
+                        showTime = true
                     } label: {
-                        Label(moreTitle, systemImage: "ellipsis.circle")
+                        Label("Time", systemImage: "clock")
                             .font(.footnote)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -105,14 +105,6 @@ struct MealEntryView: View {
         }
     }
 
-    private var moreTitle: String {
-        var parts: [String] = []
-        if remote.mealWithFatProtein { parts.append("Fat, Protein") }
-        if remote.mealWithBolus { parts.append("Bolus") }
-        parts.append("Time")
-        return parts.joined(separator: ", ")
-    }
-
     private var logTitle: String {
         if bolus > 0 { return "Log \(Int(carbs)) g + \(WatchFormat.insulin(bolus)) U" }
         return "Log \(Int(carbs)) g"
@@ -143,6 +135,10 @@ struct MealEntryView: View {
         if bolus > 0 { lines.append("Bolus \(WatchFormat.insulin(bolus)) U") }
         let at = Date().addingTimeInterval(offsetMinutes * 60)
         lines.append(offsetMinutes == 0 ? "Now" : at.formatted(date: .omitted, time: .shortened))
+        if bolus > 0, offsetMinutes != 0 {
+            // Same note as the phone's meal screen.
+            lines.append("The meal will be scheduled, but the bolus is enacted immediately.")
+        }
         return CommandRequest(
             title: "Meal",
             lines: lines,

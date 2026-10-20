@@ -30,7 +30,7 @@ struct BolusPickerView: View {
             Button {
                 navigator.push(.bolusAmount)
             } label: {
-                Label("Other Amount", systemImage: "digitalcrown.horizontal.arrow.clockwise")
+                Label("Other Amount", systemImage: CrownSymbol.increase)
             }
         }
         .navigationTitle("Bolus")

@@ -103,20 +103,11 @@ struct GlucosePage: View {
                 Label("Not looping", systemImage: "exclamationmark.triangle.fill")
                     .font(.footnote)
                     .foregroundStyle(.red)
-            } else if snapshot.cob != nil || state.lastLoopAt != nil {
-                HStack {
-                    if let cob = snapshot.cob {
-                        Text("COB \(WatchFormat.cob(cob))")
-                    }
-                    Spacer(minLength: 4)
-                    if let lastLoop = state.lastLoopAt {
-                        Text("Loop \(WatchFormat.minutesAgo(lastLoop))")
-                    }
-                }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            } else if let cob = snapshot.cob {
+                Text("COB \(WatchFormat.cob(cob))")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
         }
     }
@@ -144,8 +135,6 @@ private struct RemoteToolbar: View {
         } label: {
             Image(systemName: "plus")
         }
-        .controlSize(.large)
-        .buttonStyle(.borderedProminent)
         .tint(.blue)
         .accessibilityLabel("Meal or bolus")
         .disabled(!session.canSendCommands)
@@ -160,7 +149,12 @@ private struct RemoteToolbar: View {
             .accessibilityLabel("Temp Target")
             .disabled(!session.canSendCommands)
         } else {
-            Spacer()
+            // Holds the trailing slot so + stays centered.
+            Button {} label: {
+                Image(systemName: "scope")
+            }
+            .hidden()
+            .accessibilityHidden(true)
         }
     }
 }

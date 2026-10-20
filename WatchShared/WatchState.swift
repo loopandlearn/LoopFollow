@@ -33,8 +33,6 @@ struct WatchState: Codable, Equatable {
     var infoRows: [WatchInfoRow]
     /// The statistics shown under the phone's chart.
     var stats: WatchStats?
-    /// When the loop last reported, nil when unknown.
-    var lastLoopAt: Date?
     /// "Loop", "Trio" or another uploader name; empty for CGM-only setups.
     var device: String
     /// The alarm currently sounding on the phone.

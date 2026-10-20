@@ -94,7 +94,7 @@ struct CommandConfirmView: View {
                     .trim(from: 0, to: crownProgress)
                     .stroke(Color.blue, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Image(systemName: "digitalcrown.arrow.clockwise")
+                Image(systemName: CrownSymbol.increase)
                     .font(.title3)
             }
             .frame(width: 56, height: 56)

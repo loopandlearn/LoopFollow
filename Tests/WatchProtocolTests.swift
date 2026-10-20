@@ -24,7 +24,6 @@ struct WatchProtocolTests {
             colorBGText: true,
             infoRows: [WatchInfoRow(name: "IOB", value: "1,2", level: nil), WatchInfoRow(name: "SAGE", value: "9d 2h", level: .warning)],
             stats: WatchStats(lowPercent: "2%", inRangePercent: "80%", highPercent: "18%", avgBG: "8,1", estA1CTitle: "GMI:", estA1C: "6,6", stdDevTitle: "Std Dev:", stdDev: "2,3", pieLow: 2, pieRange: 80, pieHigh: 18),
-            lastLoopAt: t0,
             device: "Trio",
             alarm: alarm,
             remote: WatchRemoteConfig(

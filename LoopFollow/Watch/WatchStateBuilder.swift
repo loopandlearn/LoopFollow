@@ -45,8 +45,6 @@ enum WatchStateBuilder {
             WatchConePoint(t: $0.date.timeIntervalSince1970, low: $0.yMin, high: $0.yMax)
         }
 
-        let lastLoop = Observable.shared.alertLastLoopTime.value.flatMap { $0 > 0 ? Date(timeIntervalSince1970: $0) : nil }
-
         return WatchState(
             builtAt: now,
             source: .phone,
@@ -62,7 +60,6 @@ enum WatchStateBuilder {
             colorBGText: Storage.shared.colorBGText.value,
             infoRows: infoRows(vc),
             stats: vc.map { stats($0.statsDisplayModel) },
-            lastLoopAt: lastLoop,
             device: Storage.shared.device.value,
             alarm: currentAlarm(),
             remote: remoteConfig()

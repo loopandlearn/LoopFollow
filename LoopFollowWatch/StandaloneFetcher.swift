@@ -139,7 +139,6 @@ enum StandaloneFetcher {
             colorBGText: base?.colorBGText ?? true,
             infoRows: base?.infoRows ?? [],
             stats: base?.stats,
-            lastLoopAt: status?.loopAt,
             device: base?.device ?? "",
             alarm: nil,
             remote: remote
