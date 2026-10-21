@@ -5,6 +5,7 @@ import SwiftUI
 
 /// Carbs, and for Trio fat, protein and a bolus per the phone's Meal settings,
 /// as on the phone; the time behind a button. Everything goes as one command.
+/// The crown scrolls the page until a field is tapped.
 struct MealEntryView: View {
     let remote: WatchRemoteConfig
 
@@ -52,6 +53,7 @@ struct MealEntryView: View {
                 } else {
                     Button {
                         showTime = true
+                        focus = .time
                     } label: {
                         Label("Time", systemImage: "clock")
                             .font(.footnote)
@@ -72,7 +74,6 @@ struct MealEntryView: View {
             }
         }
         .navigationTitle("Meal")
-        .onAppear { focus = .carbs }
     }
 
     /// The phone's Quick-Pick meals, limited to what the phone's Meal settings allow.
@@ -102,6 +103,7 @@ struct MealEntryView: View {
                 .foregroundStyle(.secondary)
             content()
                 .focused($focus, equals: id)
+                .onTapGesture { focus = id }
         }
     }
 
