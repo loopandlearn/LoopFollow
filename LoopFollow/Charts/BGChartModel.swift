@@ -492,6 +492,7 @@ final class BGChartModel: ObservableObject {
                 detail: $0.detail
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
+        let automaticBolusTitle = isLoop ? "Auto Bolus" : "SMB"
         let smbPoints = (showBolus ? vc.smbData : []).map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
@@ -499,7 +500,7 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                pillText: "\(automaticBolusTitle)\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
                 detail: $0.detail
             )
         }
