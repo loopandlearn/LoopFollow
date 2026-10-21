@@ -10,38 +10,39 @@ struct StatsPage: View {
     let stats: WatchStats
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                Chart(slices, id: \.0) { slice in
-                    SectorMark(angle: .value("share", slice.1))
-                        .foregroundStyle(slice.2)
-                }
-                .chartLegend(.hidden)
-                .frame(height: 70)
-                .accessibilityHidden(true)
+        VStack(spacing: 8) {
+            Chart(slices, id: \.0) { slice in
+                SectorMark(angle: .value("share", slice.1))
+                    .foregroundStyle(slice.2)
+            }
+            .chartLegend(.hidden)
+            // Shrinks so the page fits the smaller watch sizes without scrolling.
+            .frame(minHeight: 30, maxHeight: 70)
+            .accessibilityHidden(true)
 
-                Grid(horizontalSpacing: 4, verticalSpacing: 6) {
-                    GridRow {
-                        value("Low:", stats.lowPercent)
-                        value("In Range:", stats.inRangePercent)
-                        value("High:", stats.highPercent)
-                    }
-                    GridRow {
-                        value("Avg BG:", stats.avgBG)
-                        value(stats.estA1CTitle, stats.estA1C)
-                        value(stats.stdDevTitle, stats.stdDev)
-                    }
+            Grid(horizontalSpacing: 4, verticalSpacing: 6) {
+                GridRow {
+                    value("Low:", stats.lowPercent)
+                    value("In Range:", stats.inRangePercent)
+                    value("High:", stats.highPercent)
                 }
-
-                if state.source == .watch {
-                    Text("From the iPhone at \(state.phoneBuiltAt.formatted(date: .omitted, time: .shortened))")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
+                GridRow {
+                    value("Avg BG:", stats.avgBG)
+                    value(stats.estA1CTitle, stats.estA1C)
+                    value(stats.stdDevTitle, stats.stdDev)
                 }
             }
-            // Keeps the values clear of the page indicator.
-            .padding(.trailing, 10)
+            .layoutPriority(1)
+
+            if state.source == .watch {
+                Text("From the iPhone at \(state.phoneBuiltAt.formatted(date: .omitted, time: .shortened))")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .layoutPriority(1)
+            }
         }
+        // Keeps the values clear of the page indicator.
+        .padding(.trailing, 10)
         .navigationTitle("Statistics")
     }
 

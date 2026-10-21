@@ -96,6 +96,7 @@ private struct WaitingForPhoneView: View {
             Text("Waiting for LoopFollow on iPhone")
                 .font(.headline)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
             Text("Open LoopFollow on the paired iPhone.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
