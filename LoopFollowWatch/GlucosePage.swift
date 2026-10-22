@@ -4,7 +4,7 @@
 import Charts
 import SwiftUI
 
-/// Main page: one large BG value with trend and delta, a two-hour sparkline,
+/// Main page: one large BG value with trend and delta, IOB and COB, a two-hour sparkline,
 /// and the remote commands in the bottom toolbar.
 struct GlucosePage: View {
     let state: WatchState
@@ -26,14 +26,6 @@ struct GlucosePage: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if !isLuminanceReduced, let iob = state.snapshot?.iob {
-                        Text("IOB \(WatchFormat.iob(iob))")
-                            .font(.footnote)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                    }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     age(now: context.date)
                 }
@@ -51,16 +43,20 @@ struct GlucosePage: View {
         if let snapshot = state.snapshot {
             let isStale = now.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter
             VStack(spacing: -4) {
-                HStack(alignment: .center, spacing: 4) {
-                    Text(WatchFormat.glucose(snapshot.glucose, unit: snapshot.unit))
-                        .font(.system(size: 56, weight: .black))
-                        .foregroundStyle(WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, colored: state.colorBGText))
-                        .strikethrough(isStale, pattern: .solid, color: .red)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    Text(WatchFormat.trendArrow(snapshot.trend))
-                        .font(.system(size: 28, weight: .black))
-                }
+                // The arrow hangs off the number's trailing edge so the digits, and the delta under them, stay centered.
+                Text(WatchFormat.glucose(snapshot.glucose, unit: snapshot.unit))
+                    .font(.system(size: 56, weight: .black))
+                    .foregroundStyle(WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, colored: state.colorBGText))
+                    .strikethrough(isStale, pattern: .solid, color: .red)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .overlay(alignment: .trailing) {
+                        Text(WatchFormat.trendArrow(snapshot.trend))
+                            .font(.system(size: 28, weight: .black))
+                            .fixedSize()
+                            .alignmentGuide(.trailing) { $0[.leading] - 4 }
+                    }
+                    .padding(.horizontal, 34)
                 Text(WatchFormat.delta(snapshot.delta, unit: snapshot.unit))
                     .font(.title3)
                     .foregroundStyle(.secondary)
@@ -103,11 +99,21 @@ struct GlucosePage: View {
                 Label("Not looping", systemImage: "exclamationmark.triangle.fill")
                     .font(.footnote)
                     .foregroundStyle(.red)
-            } else if let cob = snapshot.cob {
-                Text("COB \(WatchFormat.cob(cob))")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            } else if snapshot.iob != nil || snapshot.cob != nil {
+                HStack(spacing: 12) {
+                    if let iob = snapshot.iob {
+                        Text("\(Image(systemName: "syringe")) \(WatchFormat.iob(iob))")
+                            .accessibilityLabel("Insulin on board \(WatchFormat.iob(iob))")
+                    }
+                    if let cob = snapshot.cob {
+                        Text("\(Image(systemName: "fork.knife")) \(WatchFormat.cob(cob))")
+                            .accessibilityLabel("Carbs on board \(WatchFormat.cob(cob))")
+                    }
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             }
         }
     }

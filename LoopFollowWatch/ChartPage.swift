@@ -4,9 +4,9 @@
 import SwiftUI
 import WatchKit
 
-/// The full chart on its own page. Tap the chart to scrub back in time with the
-/// Digital Crown; tap again to return to now. The button in the corner changes
-/// the time span.
+/// The full chart on its own page. Tap the chart or the crown button to scrub back
+/// in time with the Digital Crown; tap again to return to now. The button in the
+/// other corner changes the time span.
 struct ChartPage: View {
     let state: WatchState
 
@@ -33,17 +33,30 @@ struct ChartPage: View {
                 // Keeps the axis labels clear of the page indicator.
                 .padding(.trailing, 10)
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    isScrubbing.toggle()
-                    scrubSteps = 0
-                    crownFocused = isScrubbing
-                }
+                .onTapGesture(perform: toggleScrubbing)
             }
             .focusable(isScrubbing)
             .focused($crownFocused)
+            // Focus can only move once the page has become focusable, so it follows the toggle rather than
+            // being set in the same tap; otherwise the crown keeps paging instead of scrubbing.
+            .onChange(of: isScrubbing) { _, scrubbing in
+                crownFocused = scrubbing
+            }
+            .onChange(of: crownFocused) { _, focused in
+                if !focused {
+                    isScrubbing = false
+                }
+            }
             .digitalCrownRotation($scrubSteps, from: 0, through: maxSteps, by: 1, sensitivity: .medium, isContinuous: false, isHapticFeedbackEnabled: true)
         }
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: toggleScrubbing) {
+                    Image(systemName: CrownSymbol.increase)
+                }
+                .tint(isScrubbing ? .green : nil)
+                .accessibilityLabel(isScrubbing ? "Stop scrubbing" : "Scrub with the Digital Crown")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("\(Int(spanHours)) h") {
                     let index = WatchChartView.spans.firstIndex(of: spanHours) ?? 1
@@ -53,6 +66,11 @@ struct ChartPage: View {
                 .accessibilityLabel("Time span \(Int(spanHours)) hours")
             }
         }
+    }
+
+    private func toggleScrubbing() {
+        isScrubbing.toggle()
+        scrubSteps = 0
     }
 
     /// Time and BG at the marker.
