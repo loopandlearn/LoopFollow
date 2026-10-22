@@ -590,7 +590,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func appMovedToBackground() {
         LogManager.shared.log(
             category: .general,
-            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)))"
+            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)), \(ExitDiagnostics.memoryDescription()))"
         )
 
         // Allow screen to turn off
