@@ -21,9 +21,6 @@ struct ChartPage: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             VStack(spacing: 2) {
-                if isScrubbing {
-                    scrubHeader(now: context.date)
-                }
                 WatchChartView(
                     state: state,
                     now: context.date,
@@ -34,6 +31,10 @@ struct ChartPage: View {
                 .padding(.trailing, 10)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: toggleScrubbing)
+                // Below the chart, clear of the toolbar buttons that float over the top of the page.
+                if isScrubbing {
+                    scrubDetails(now: context.date)
+                }
             }
             .focusable(isScrubbing)
             .focused($crownFocused)
@@ -73,23 +74,46 @@ struct ChartPage: View {
         scrubSteps = 0
     }
 
-    /// Time and BG at the marker.
-    private func scrubHeader(now: Date) -> some View {
+    /// Time, BG, carbs and insulin at the marker. Carbs and boluses count when they fall within the
+    /// marker's five-minute crown step, so each entry shows at exactly one step.
+    private func scrubDetails(now: Date) -> some View {
         let marker = WatchChartView.markerDate(state: state, now: now, spanHours: spanHours, scrubOffset: scrubSteps * 300)
         let nearest = state.readings.min { abs($0.date.timeIntervalSince(marker)) < abs($1.date.timeIntervalSince(marker)) }
         let reading = nearest.flatMap { abs($0.date.timeIntervalSince(marker)) <= 450 ? $0 : nil }
-        return HStack {
+        let carbs = total(of: state.carbs, near: marker)
+        let insulin = total(of: state.boluses, near: marker)
+        return HStack(spacing: 8) {
             Text(marker.formatted(date: .omitted, time: .shortened))
                 .foregroundStyle(.secondary)
-            Spacer()
-            if let reading {
-                Text(WatchFormat.glucose(reading.v, unit: state.snapshot?.unit ?? .mgdl))
-                    .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
-            } else {
-                Text("—")
+            HStack(spacing: 3) {
+                if let reading {
+                    Circle()
+                        .fill(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+                        .frame(width: 7, height: 7)
+                    Text(WatchFormat.glucose(reading.v, unit: state.snapshot?.unit ?? .mgdl))
+                } else {
+                    Text("—")
+                }
+            }
+            if let carbs {
+                Text("\(Image(systemName: "fork.knife")) \(WatchFormat.cob(carbs))")
+                    .accessibilityLabel("Carbs \(WatchFormat.cob(carbs))")
+            }
+            if let insulin {
+                Text("\(Image(systemName: "syringe")) \(WatchFormat.insulin(insulin)) U")
+                    .accessibilityLabel("Bolus \(WatchFormat.insulin(insulin)) U")
             }
         }
-        .font(.headline)
+        .font(.footnote)
         .monospacedDigit()
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+        .padding(.trailing, 10)
+    }
+
+    /// Sum of the entries within half a crown step of the marker, or nil when there are none.
+    private func total(of entries: [WatchReading], near marker: Date) -> Double? {
+        let matching = entries.filter { abs($0.date.timeIntervalSince(marker)) < 150 }
+        return matching.isEmpty ? nil : matching.reduce(0) { $0 + $1.v }
     }
 }
