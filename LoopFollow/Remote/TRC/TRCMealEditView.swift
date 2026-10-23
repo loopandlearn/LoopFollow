@@ -90,6 +90,7 @@ struct TRCMealEditView: View {
                     fatFocused = false
                     proteinFocused = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        guard alertType == nil else { return }
                         guard carbsValue > 0 || fatValue > 0 || proteinValue > 0 else {
                             alertType = .validation("Enter at least one of carbs, fat, or protein. Use Delete meal to remove the meal.")
                             return
