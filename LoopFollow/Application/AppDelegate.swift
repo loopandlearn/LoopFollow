@@ -11,6 +11,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
+        ExitDiagnostics.shared.start()
 
         // Notification and calendar permissions are no longer requested here.
         // They're deferred to the moment the user opts into the feature that
@@ -109,6 +110,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_: UIApplication) {
+        LogManager.shared.log(category: .general, message: "App will terminate (\(ExitDiagnostics.memoryDescription()))")
         #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.endOnTerminate()
         #endif
