@@ -5,6 +5,7 @@ import SwiftUI
 
 /// Screens pushed on the main navigation stack.
 enum WatchRoute: Hashable {
+    case chartScrub
     case treatments
     case meal
     case bolus
@@ -63,8 +64,12 @@ struct ContentView: View {
 
     @ViewBuilder
     private func destination(_ route: WatchRoute, state: WatchState) -> some View {
-        if let remote = state.remote {
+        if route == .chartScrub {
+            ChartScrubView(state: state)
+        } else if let remote = state.remote {
             switch route {
+            case .chartScrub:
+                EmptyView()
             case .treatments:
                 TreatmentMenuView()
             case .meal:
