@@ -2,10 +2,9 @@
 // ChartPage.swift
 
 import SwiftUI
-import WatchKit
 
-/// The full chart on its own page. Tap the chart or the crown button to open it for scrubbing
-/// with the Digital Crown. The button in the other corner changes the time span.
+/// The full chart on its own page. Tap the chart to open it for scrubbing with the Digital Crown.
+/// The button in the corner changes the time span.
 struct ChartPage: View {
     let state: WatchState
 
@@ -27,14 +26,6 @@ struct ChartPage: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigator.push(.chartScrub)
-                } label: {
-                    Image(systemName: CrownSymbol.increase)
-                }
-                .accessibilityLabel("Scrub with the Digital Crown")
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 SpanButton(spanHours: $spanHours)
             }
