@@ -46,6 +46,10 @@ class DataStructs {
         var enteredBy: String
         var reason: String
         var sgv: Float
+        /// Scheduled end (start + duration); unlike `endDate` it is never
+        /// clamped to the graph horizon. Nil when the override runs
+        /// indefinitely, so the end is not known in advance.
+        var scheduledEndDate: TimeInterval?
         /// The Treatments list entry this band opens.
         var detail: Treatment? = nil
     }
@@ -59,5 +63,11 @@ class DataStructs {
         var reason: String
         /// The Treatments list entry this band opens.
         var detail: Treatment? = nil
+
+        /// Scheduled end; nil for an indefinite target, which Trio stores
+        /// with a duration of about 30 days.
+        var scheduledEndDate: TimeInterval? {
+            duration >= 7 * 24 * 3600 ? nil : endDate
+        }
     }
 }

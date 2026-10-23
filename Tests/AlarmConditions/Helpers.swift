@@ -52,6 +52,18 @@ extension Alarm {
         alarm.monitoringWindow = window
         return alarm
     }
+
+    static func tempTargetEnd(warnBefore: Int? = nil) -> Self {
+        var alarm = Alarm(type: .tempTargetEnd)
+        alarm.predictiveMinutes = warnBefore
+        return alarm
+    }
+
+    static func overrideEnd(warnBefore: Int? = nil) -> Self {
+        var alarm = Alarm(type: .overrideEnd)
+        alarm.predictiveMinutes = warnBefore
+        return alarm
+    }
 }
 
 // MARK: - AlarmData helpers
@@ -153,6 +165,41 @@ extension AlarmData {
             latestOverrideEnd: nil,
             latestTempTargetStart: nil,
             latestTempTargetEnd: nil,
+            recBolus: nil,
+            COB: nil,
+            sageInsertTime: nil,
+            pumpInsertTime: nil,
+            latestPumpVolume: nil,
+            IOB: nil,
+            recentBoluses: [],
+            latestBattery: nil,
+            latestBatteryIsCharging: nil,
+            latestPumpBattery: nil,
+            batteryHistory: [],
+            recentCarbs: [],
+            dbSizePercentage: nil
+        )
+    }
+
+    static func withEnds(
+        latestTempTargetStart: TimeInterval? = nil,
+        latestTempTargetEnd: TimeInterval? = nil,
+        activeTempTargetEnd: TimeInterval? = nil,
+        latestOverrideStart: TimeInterval? = nil,
+        latestOverrideEnd: TimeInterval? = nil,
+        activeOverrideEnd: TimeInterval? = nil
+    ) -> Self {
+        AlarmData(
+            bgReadings: [],
+            predictionData: [],
+            expireDate: nil,
+            lastLoopTime: nil,
+            latestOverrideStart: latestOverrideStart,
+            latestOverrideEnd: latestOverrideEnd,
+            latestTempTargetStart: latestTempTargetStart,
+            latestTempTargetEnd: latestTempTargetEnd,
+            activeOverrideEnd: activeOverrideEnd,
+            activeTempTargetEnd: activeTempTargetEnd,
             recBolus: nil,
             COB: nil,
             sageInsertTime: nil,
