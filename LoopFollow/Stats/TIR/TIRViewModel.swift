@@ -25,6 +25,8 @@ class TIRViewModel: ObservableObject {
         case .tir:
             UnitSettingsStore.shared.timeInRangeMode = .titr
         case .titr:
+            UnitSettingsStore.shared.timeInRangeMode = .ting
+        case .ting:
             UnitSettingsStore.shared.timeInRangeMode = .custom
         case .custom:
             UnitSettingsStore.shared.timeInRangeMode = .tir
