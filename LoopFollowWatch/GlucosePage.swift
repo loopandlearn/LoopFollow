@@ -119,20 +119,29 @@ struct GlucosePage: View {
         }
     }
 
-    /// The running override's name and insulin needs, in the green of the overrides button and chart band.
+    /// The running override's name and insulin needs.
     @ViewBuilder
     private func overrideLine(now: Date) -> some View {
         let active = state.activeOverride(at: now)
         // The phone's periods end on time; the watch's own fetch only has the snapshot's name.
         if let name = state.overrides == nil ? state.snapshot?.override : active?.name {
-            let percent = active?.percent.map { "  ·  \($0) %" } ?? ""
-            Text("\(Image(systemName: "slider.horizontal.3")) \(name)\(percent)")
-                .font(.footnote)
-                .foregroundStyle(.green)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .accessibilityLabel("Override \(name)\(active?.percent.map { ", insulin needs \($0) percent" } ?? "")")
+            OverrideLine(name: name, percent: active?.percent)
         }
+    }
+}
+
+/// An override's name and insulin needs, in the green of the overrides button and chart band.
+struct OverrideLine: View {
+    let name: String
+    let percent: Int?
+
+    var body: some View {
+        Text("\(Image(systemName: "slider.horizontal.3")) \(name)\(percent.map { "  ·  \($0) %" } ?? "")")
+            .font(.footnote)
+            .foregroundStyle(.green)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .accessibilityLabel("Override \(name)\(percent.map { ", insulin needs \($0) percent" } ?? "")")
     }
 }
 

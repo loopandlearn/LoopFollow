@@ -6,7 +6,7 @@ import WatchKit
 
 /// The full chart on its own page. Tap the chart or the crown button to scrub back
 /// in time with the Digital Crown; tap again to return to now. The button in the
-/// other corner changes the time span.
+/// other corner changes the time span. The override line under the chart follows the marker.
 struct ChartPage: View {
     let state: WatchState
 
@@ -34,6 +34,10 @@ struct ChartPage: View {
                 // Below the chart, clear of the toolbar buttons that float over the top of the page.
                 if isScrubbing {
                     scrubDetails(now: context.date)
+                }
+                if let override = state.activeOverride(at: isScrubbing ? markerDate(now: context.date) : context.date) {
+                    OverrideLine(name: override.name, percent: override.percent)
+                        .padding(.trailing, 10)
                 }
             }
             .focusable(isScrubbing)
@@ -77,7 +81,7 @@ struct ChartPage: View {
     /// Time, BG, carbs and insulin at the marker. Carbs and boluses count when they fall within the
     /// marker's five-minute crown step, so each entry shows at exactly one step.
     private func scrubDetails(now: Date) -> some View {
-        let marker = WatchChartView.markerDate(state: state, now: now, spanHours: spanHours, scrubOffset: scrubSteps * 300)
+        let marker = markerDate(now: now)
         let nearest = state.readings.min { abs($0.date.timeIntervalSince(marker)) < abs($1.date.timeIntervalSince(marker)) }
         let reading = nearest.flatMap { abs($0.date.timeIntervalSince(marker)) <= 450 ? $0 : nil }
         let carbs = total(of: state.carbs, near: marker)
@@ -109,6 +113,10 @@ struct ChartPage: View {
         .lineLimit(1)
         .minimumScaleFactor(0.6)
         .padding(.trailing, 10)
+    }
+
+    private func markerDate(now: Date) -> Date {
+        WatchChartView.markerDate(state: state, now: now, spanHours: spanHours, scrubOffset: scrubSteps * 300)
     }
 
     /// Sum of the entries within half a crown step of the marker, or nil when there are none.
