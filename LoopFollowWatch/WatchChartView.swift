@@ -5,7 +5,8 @@ import Charts
 import SwiftUI
 
 /// BG chart in the phone's colors: readings colored by range, dashed low/high
-/// lines, prediction lines or cone in their phone colors, boluses and carbs as markers.
+/// lines, prediction lines or cone in their phone colors, boluses and carbs as markers,
+/// and overrides as a green band along the top.
 struct WatchChartView: View {
     let state: WatchState
     let now: Date
@@ -24,6 +25,7 @@ struct WatchChartView: View {
             (line.kind, line.points.filter { window.contains($0.date) })
         }
         let cone = state.cone.filter { window.contains($0.date) }
+        let overrides = (state.overrides ?? []).filter { $0.endDate > window.lowerBound && $0.startDate < window.upperBound }
         let top = yTop(readings: readings, predictions: predictions.flatMap(\.1) + cone.map { WatchReading(t: $0.t, v: $0.high) })
 
         Chart {
@@ -44,6 +46,17 @@ struct WatchChartView: View {
                     yEnd: .value("High", min(point.high, top))
                 )
                 .foregroundStyle(Color.blue.opacity(0.4))
+            }
+
+            // A thin band along the top edge, like the override strip on the phone's chart.
+            ForEach(overrides, id: \.start) { override in
+                RectangleMark(
+                    xStart: .value("Start", max(override.startDate, window.lowerBound)),
+                    xEnd: .value("End", min(override.endDate, window.upperBound)),
+                    y: .value("Override", top),
+                    height: .fixed(4)
+                )
+                .foregroundStyle(Color.green.opacity(0.8))
             }
 
             if let marker = markerDate {

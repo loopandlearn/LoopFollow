@@ -27,6 +27,10 @@ enum WatchStateBuilder {
             .filter { $0.date >= cutoff }
             .map { WatchReading(t: $0.date, v: $0.value) }
 
+        let overrides = (vc?.overrideGraphData ?? [])
+            .filter { $0.endDate >= cutoff }
+            .map { WatchOverride(start: $0.date, end: $0.endDate, name: $0.reason.isEmpty ? "Override" : $0.reason, percent: overridePercent($0)) }
+
         var predictions: [WatchPredictionLine] = []
         if let vc {
             let lines: [(WatchPredictionLine.Kind, [ShareGlucoseData])] = [
@@ -55,6 +59,7 @@ enum WatchStateBuilder {
             cone: cone,
             boluses: boluses,
             carbs: carbs,
+            overrides: overrides,
             lowMgdl: thresholds.low,
             highMgdl: thresholds.high,
             colorBGText: Storage.shared.colorBGText.value,
@@ -165,6 +170,20 @@ enum WatchStateBuilder {
                 includeFatProtein: mealWithFatProtein
             ).map { WatchMealPick(carbs: $0.carbs, fat: $0.fat, protein: $0.protein, bolus: $0.bolus) }
         )
+    }
+
+    /// Insulin needs of an override, from its Nightscout entry or else from the preset of the same name,
+    /// since Trio does not upload the factor with the override.
+    private static func overridePercent(_ override: DataStructs.overrideStruct) -> Int? {
+        var factor = override.insulNeedsScaleFactor
+        if factor == 1 {
+            if let loop = ProfileManager.shared.loopOverrides.first(where: { $0.name == override.reason }) {
+                factor = loop.insulinNeedsScaleFactor
+            } else if let percentage = ProfileManager.shared.trioOverrides.first(where: { $0.name == override.reason })?.percentage {
+                factor = percentage / 100
+            }
+        }
+        return factor == 1 ? nil : Int(round(factor * 100))
     }
 
     private static func loopOverridePresets() -> [WatchPreset] {
