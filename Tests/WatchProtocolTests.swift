@@ -19,6 +19,10 @@ struct WatchProtocolTests {
             cone: [WatchConePoint(t: t0.timeIntervalSince1970 + 300, low: 120, high: 150)],
             boluses: [WatchReading(t: t0.timeIntervalSince1970 - 600, v: 2.5)],
             carbs: [WatchReading(t: t0.timeIntervalSince1970 - 600, v: 30)],
+            overrides: [
+                WatchOverride(start: t0.timeIntervalSince1970 - 7200, end: t0.timeIntervalSince1970 - 3600, name: "Sleep", percent: nil),
+                WatchOverride(start: t0.timeIntervalSince1970 - 1800, end: t0.timeIntervalSince1970 + 1800, name: "Exercise", percent: 80),
+            ],
             lowMgdl: 70,
             highMgdl: 180,
             colorBGText: true,
@@ -50,6 +54,15 @@ struct WatchProtocolTests {
         let original = state(alarm: WatchAlarm(id: UUID(), name: "Low"))
         let data = try #require(original.encoded())
         #expect(WatchState.decode(data) == original)
+    }
+
+    @Test("The active override is the one whose period contains the time")
+    func activeOverride() {
+        let state = state()
+        #expect(state.activeOverride(at: t0)?.name == "Exercise")
+        #expect(state.activeOverride(at: t0.addingTimeInterval(-5400))?.name == "Sleep")
+        #expect(state.activeOverride(at: t0.addingTimeInterval(-3000)) == nil)
+        #expect(state.activeOverride(at: t0.addingTimeInterval(1800)) == nil)
     }
 
     @Test("Commands keep their action, id and creation time")

@@ -24,6 +24,8 @@ struct WatchState: Codable, Equatable {
     var cone: [WatchConePoint]
     var boluses: [WatchReading]
     var carbs: [WatchReading]
+    /// Override periods in the last 24 hours, oldest first; nil from the watch's own fetch.
+    var overrides: [WatchOverride]?
     /// Range thresholds used for coloring, in mg/dL (same as the phone).
     var lowMgdl: Double
     var highMgdl: Double
@@ -63,6 +65,26 @@ struct WatchReading: Codable, Equatable {
     let v: Double
 
     var date: Date { Date(timeIntervalSince1970: t) }
+}
+
+/// One override period, as drawn in the band at the top of the phone's chart.
+struct WatchOverride: Codable, Equatable {
+    /// Unix epoch seconds.
+    let start: TimeInterval
+    let end: TimeInterval
+    let name: String
+    /// Insulin needs as a percentage of normal; nil when unchanged.
+    let percent: Int?
+
+    var startDate: Date { Date(timeIntervalSince1970: start) }
+    var endDate: Date { Date(timeIntervalSince1970: end) }
+}
+
+extension WatchState {
+    /// The override running at `date`, if any.
+    func activeOverride(at date: Date) -> WatchOverride? {
+        overrides?.last { $0.startDate <= date && date < $0.endDate }
+    }
 }
 
 /// The phone's statistics panel, formatted on the phone.

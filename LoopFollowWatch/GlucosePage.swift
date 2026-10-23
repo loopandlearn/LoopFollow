@@ -4,7 +4,7 @@
 import Charts
 import SwiftUI
 
-/// Main page: one large BG value with trend and delta, IOB and COB, a two-hour sparkline,
+/// Main page: one large BG value with trend and delta, IOB and COB, the running override, a two-hour sparkline,
 /// and the remote commands in the bottom toolbar.
 struct GlucosePage: View {
     let state: WatchState
@@ -21,6 +21,7 @@ struct GlucosePage: View {
                 glucose(now: context.date)
                 if !isLuminanceReduced {
                     details
+                    overrideLine(now: context.date)
                     Sparkline(state: state, now: context.date)
                         .frame(minHeight: 36)
                 }
@@ -115,6 +116,22 @@ struct GlucosePage: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             }
+        }
+    }
+
+    /// The running override's name and insulin needs, in the green of the overrides button and chart band.
+    @ViewBuilder
+    private func overrideLine(now: Date) -> some View {
+        let active = state.activeOverride(at: now)
+        // The phone's periods end on time; the watch's own fetch only has the snapshot's name.
+        if let name = state.overrides == nil ? state.snapshot?.override : active?.name {
+            let percent = active?.percent.map { "  ·  \($0) %" } ?? ""
+            Text("\(Image(systemName: "slider.horizontal.3")) \(name)\(percent)")
+                .font(.footnote)
+                .foregroundStyle(.green)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .accessibilityLabel("Override \(name)\(active?.percent.map { ", insulin needs \($0) percent" } ?? "")")
         }
     }
 }
