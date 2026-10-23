@@ -13,7 +13,6 @@ struct ChartPage: View {
     @AppStorage("chartSpanHours") private var spanHours: Double = 3
     @State private var isScrubbing = false
     @State private var scrubSteps = 0.0
-    @FocusState private var crownFocused: Bool
 
     /// The crown moves in five-minute steps, back to the start of the 24 hours the phone sends.
     private var maxSteps: Double { max(0, (24 - spanHours * 0.75) * 12) }
@@ -40,19 +39,9 @@ struct ChartPage: View {
                         .padding(.trailing, 10)
                 }
             }
-            .focusable(isScrubbing)
-            .focused($crownFocused)
-            // Focus can only move once the page has become focusable, so it follows the toggle rather than
-            // being set in the same tap; otherwise the crown keeps paging instead of scrubbing.
-            .onChange(of: isScrubbing) { _, scrubbing in
-                crownFocused = scrubbing
-            }
-            .onChange(of: crownFocused) { _, focused in
-                if !focused {
-                    isScrubbing = false
-                }
-            }
-            .digitalCrownRotation($scrubSteps, from: 0, through: maxSteps, by: 1, sensitivity: .medium, isContinuous: false, isHapticFeedbackEnabled: true)
+            .modifier(ScrubCrown(isActive: isScrubbing, steps: $scrubSteps, maxSteps: maxSteps) {
+                isScrubbing = false
+            })
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -123,5 +112,32 @@ struct ChartPage: View {
     private func total(of entries: [WatchReading], near marker: Date) -> Double? {
         let matching = entries.filter { abs($0.date.timeIntervalSince(marker)) < 150 }
         return matching.isEmpty ? nil : matching.reduce(0) { $0 + $1.v }
+    }
+}
+
+/// While scrubbing, the page takes the Digital Crown focus and the crown moves the marker. Otherwise the
+/// page has no focus and no crown handling at all, so the crown pages between the watch pages.
+private struct ScrubCrown: ViewModifier {
+    let isActive: Bool
+    @Binding var steps: Double
+    let maxSteps: Double
+    let onFocusLost: () -> Void
+
+    @FocusState private var focused: Bool
+
+    func body(content: Content) -> some View {
+        if isActive {
+            content
+                .focusable()
+                .focused($focused)
+                .digitalCrownRotation($steps, from: 0, through: maxSteps, by: 1, sensitivity: .medium, isContinuous: false, isHapticFeedbackEnabled: true)
+                // Focus can only move once the view is focusable, so it is requested after it appears.
+                .task { focused = true }
+                .onChange(of: focused) { _, isFocused in
+                    if !isFocused { onFocusLost() }
+                }
+        } else {
+            content
+        }
     }
 }
