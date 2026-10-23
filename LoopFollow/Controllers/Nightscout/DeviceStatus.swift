@@ -146,6 +146,14 @@ extension MainViewController {
             {
                 infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", pumpBatteryPercent) + "%", numericValue: pumpBatteryPercent)
                 Observable.shared.pumpBatteryLevel.value = pumpBatteryPercent
+                latestPumpBatteryDate = Date()
+            } else if let lastPercent = Observable.shared.pumpBatteryLevel.value,
+                      let lastDate = latestPumpBatteryDate,
+                      Date().timeIntervalSince(lastDate) <= 60 * 60
+            {
+                // Some records leave out the pump battery, and the level changes
+                // slowly, so the last reading is shown for up to an hour.
+                infoManager.updateInfoData(type: .pumpBattery, value: String(format: "%.0f", lastPercent) + "%", numericValue: lastPercent)
             }
 
             if let uploader = lastDeviceStatus?["uploader"] as? [String: AnyObject],
