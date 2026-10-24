@@ -10,15 +10,13 @@ class LoopAPNSService {
     /// Returns the effective APNs credentials for sending commands to the remote app.
     /// Same team → use LoopFollow's own key. Different team → use remote-specific key.
     private func effectiveCredentials() -> (apnsKey: String, keyId: String, teamId: String) {
-        let lfTeamId = BuildDetails.default.teamID ?? ""
-        let remoteTeamId = storage.teamId.value ?? ""
-        let sameTeam = !lfTeamId.isEmpty && !remoteTeamId.isEmpty && lfTeamId == remoteTeamId
-
-        if sameTeam || remoteTeamId.isEmpty {
-            return (storage.lfApnsKey.value, storage.lfKeyId.value, lfTeamId)
-        } else {
-            return (storage.remoteApnsKey.value, storage.remoteKeyId.value, remoteTeamId)
-        }
+        let resolved = RemoteSigningKey.resolve(
+            lfTeamID: BuildDetails.default.teamID ?? "",
+            remoteTeamID: storage.teamId.value ?? "",
+            lfKey: (storage.lfApnsKey.value, storage.lfKeyId.value),
+            remoteKey: (storage.remoteApnsKey.value, storage.remoteKeyId.value)
+        )
+        return (resolved.key, resolved.keyID, resolved.teamID)
     }
 
     enum LoopAPNSError: Error, LocalizedError {
@@ -59,34 +57,6 @@ class LoopAPNSService {
         }
     }
 
-    private func createReturnNotificationInfo() -> ReturnNotificationInfo? {
-        let loopFollowDeviceToken = Observable.shared.loopFollowDeviceToken.value
-        guard !loopFollowDeviceToken.isEmpty else { return nil }
-
-        // Get LoopFollow's own Team ID from BuildDetails.
-        guard let loopFollowTeamID = BuildDetails.default.teamID, !loopFollowTeamID.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "LoopFollow Team ID not found in BuildDetails.plist. Cannot create return notification info.")
-            return nil
-        }
-
-        let lfKeyId = storage.lfKeyId.value
-        let lfApnsKey = storage.lfApnsKey.value
-
-        guard !lfKeyId.isEmpty, !lfApnsKey.isEmpty else {
-            LogManager.shared.log(category: .apns, message: "Missing LoopFollow APNS credentials. Configure them in App Settings → APN.")
-            return nil
-        }
-
-        return ReturnNotificationInfo(
-            productionEnvironment: BuildDetails.default.isTestFlightBuild(),
-            deviceToken: loopFollowDeviceToken,
-            bundleId: Bundle.main.bundleIdentifier ?? "",
-            teamId: loopFollowTeamID,
-            keyId: lfKeyId,
-            apnsKey: lfApnsKey
-        )
-    }
-
     /// Encrypts return notification info using OTP code
     private func encryptReturnNotificationInfo(returnInfo: ReturnNotificationInfo, otpCode: String) -> String? {
         guard let messenger = OTPSecureMessenger(otpCode: otpCode) else {
@@ -124,76 +94,9 @@ class LoopAPNSService {
 
     private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
 
-    // MARK: - Command payloads (matching Nightscout's loop.js format)
-
-    /// Fields every Loop remote command carries.
-    static func commandHeader(otp: String, alert: String, now: Date) -> [String: Any] {
-        [
-            "otp": otp,
-            "remote-address": "LoopFollow",
-            "notes": "Sent via LoopFollow APNS",
-            "entered-by": "LoopFollow",
-            "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(now.addingTimeInterval(5 * 60)),
-            "alert": alert,
-        ]
-    }
-
-    static func carbsCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
-        let carbsAmount = payload.carbsAmount ?? 0.0
-        let absorptionTime = payload.absorptionTime ?? 3.0
-        var fields = commandHeader(
-            otp: payload.otp,
-            alert: "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
-            now: now
-        )
-        fields["carbs-entry"] = carbsAmount
-        fields["absorption-time"] = absorptionTime
-        fields["start-time"] = formatDateForAPNS(payload.consumedDate ?? now)
-        return fields
-    }
-
-    static func bolusCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
-        let bolusAmount = payload.bolusAmount ?? 0.0
-        var fields = commandHeader(otp: payload.otp, alert: "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U", now: now)
-        fields["bolus-entry"] = bolusAmount
-        return fields
-    }
-
-    static func carbsDeleteCommandPayload(syncIdentifier: String, otp: String, now: Date = Date()) -> [String: Any] {
-        var fields = commandHeader(otp: otp, alert: "Remote Carbs Delete", now: now)
-        fields["carbs-delete"] = syncIdentifier
-        return fields
-    }
-
-    /// Keys are prefixed so an unpatched Loop rejects the command. Amount, absorption time and start time are always sent; food type only when set.
-    static func carbsEditCommandPayload(
-        syncIdentifier: String,
-        carbsAmount: Double,
-        absorptionTimeHours: Double,
-        foodType: String?,
-        consumedDate: Date,
-        otp: String,
-        now: Date = Date()
-    ) -> [String: Any] {
-        var fields = commandHeader(
-            otp: otp,
-            alert: "Remote Carbs Edit: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTimeHours)) hours",
-            now: now
-        )
-        fields["carbs-edit"] = syncIdentifier
-        fields["carbs-edit-entry"] = carbsAmount
-        fields["carbs-edit-absorption-time"] = absorptionTimeHours
-        fields["carbs-edit-start-time"] = formatDateForAPNS(consumedDate)
-        if let foodType, !foodType.isEmpty {
-            fields["carbs-edit-food-type"] = foodType
-        }
-        return fields
-    }
-
     /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
     private func encryptedReturnNotification(otp: String) -> String? {
-        guard let returnInfo = createReturnNotificationInfo() else {
+        guard let returnInfo = ReturnNotificationInfo.loopFollow() else {
             LogManager.shared.log(category: .apns, message: "Return notification info unavailable; Loop cannot confirm this command")
             return nil
         }
@@ -233,7 +136,7 @@ class LoopAPNSService {
     /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
     func sendCarbsDelete(syncIdentifier: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
         LogManager.shared.log(category: .apns, message: "Sending carbs delete for syncIdentifier=\(LogRedactor.tail(syncIdentifier))")
-        sendConfirmedCommand(Self.carbsDeleteCommandPayload(syncIdentifier: syncIdentifier, otp: otp), otp: otp, completion: completion)
+        sendConfirmedCommand(LoopAPNSCommands.carbsDeleteCommandPayload(syncIdentifier: syncIdentifier, otp: otp), otp: otp, completion: completion)
     }
 
     /// Replaces the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
@@ -247,7 +150,7 @@ class LoopAPNSService {
         completion: @escaping (Bool, String?) -> Void
     ) {
         LogManager.shared.log(category: .apns, message: "Sending carbs edit for syncIdentifier=\(LogRedactor.tail(syncIdentifier)): \(String(format: "%.1f", carbsAmount))g, absorption \(String(format: "%.1f", absorptionTimeHours))h")
-        let payload = Self.carbsEditCommandPayload(
+        let payload = LoopAPNSCommands.carbsEditCommandPayload(
             syncIdentifier: syncIdentifier,
             carbsAmount: carbsAmount,
             absorptionTimeHours: absorptionTimeHours,
@@ -263,7 +166,7 @@ class LoopAPNSService {
     ///   - payload: The carbs payload to send
     ///   - completion: Completion handler with success status and error message
     func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
-        var finalPayload = Self.carbsCommandPayload(payload)
+        var finalPayload = LoopAPNSCommands.carbsCommandPayload(payload)
         if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
@@ -276,7 +179,7 @@ class LoopAPNSService {
     ///   - payload: The bolus payload to send
     ///   - completion: Completion handler with success status and error message
     func sendBolusViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
-        var finalPayload = Self.bolusCommandPayload(payload)
+        var finalPayload = LoopAPNSCommands.bolusCommandPayload(payload)
         if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
@@ -359,145 +262,37 @@ class LoopAPNSService {
             return
         }
 
-        // Create JWT token for APNS authentication
-        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
-            let errorMessage = "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct."
-            LogManager.shared.log(category: .apns, message: errorMessage)
-            completion(false, errorMessage)
-            return
-        }
-
-        // Determine APNS environment
-        let isProduction = storage.productionEnvironment.value
-        let apnsURL = APNSEnvironment.baseURL(production: isProduction)
-        guard let requestURL = URL(string: "\(apnsURL)/3/device/\(deviceToken)") else {
-            let errorMessage = "Failed to construct APNs URL"
-            LogManager.shared.log(category: .apns, message: errorMessage)
-            completion(false, errorMessage)
-            return
-        }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "content-type")
-        request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
-        request.setValue(bundleIdentifier, forHTTPHeaderField: "apns-topic")
-        request.setValue("alert", forHTTPHeaderField: "apns-push-type")
-        request.setValue("10", forHTTPHeaderField: "apns-priority") // High priority
-
         // Validate bundle identifier format
         if !bundleIdentifier.contains(".") {
             LogManager.shared.log(category: .apns, message: "Warning: Bundle identifier may be in wrong format: \(bundleIdentifier)")
         }
 
-        // Create the proper APNS payload structure (matching @parse/node-apn format)
-        var apnsPayload: [String: Any] = [
-            "aps": [
-                "alert": payload["alert"] as? String ?? "",
-                "content-available": 1,
-                "interruption-level": "time-sensitive",
-            ],
-        ]
-
-        // Add all the custom payload fields (excluding APNS-specific fields)
-        for (key, value) in payload {
-            if key != "alert", key != "content-available", key != "interruption-level" {
-                apnsPayload[key] = value
-            }
-        }
-
-        // Remove nil values to clean up the payload
-        let cleanPayload = apnsPayload.compactMapValues { $0 }
-
-        // Log if encrypted_return_notification is in the payload
-        if cleanPayload["encrypted_return_notification"] != nil {
+        if payload["encrypted_return_notification"] != nil {
             LogManager.shared.log(category: .apns, message: "encrypted_return_notification is present in final APNS payload")
         } else {
-            LogManager.shared.log(category: .apns, message: "WARNING: encrypted_return_notification is NOT in final APNS payload. Available keys: \(Array(cleanPayload.keys).joined(separator: ", "))")
+            LogManager.shared.log(category: .apns, message: "WARNING: encrypted_return_notification is NOT in final APNS payload. Available keys: \(Array(payload.keys).joined(separator: ", "))")
         }
 
+        let body: Data
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: cleanPayload)
-
-            request.httpBody = jsonData
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    let errorMessage = "Failed to send push notification: \(error.localizedDescription)"
-                    LogManager.shared.log(category: .apns, message: errorMessage)
-                    completion(false, errorMessage)
-                    return
-                }
-
-                if let httpResponse = response as? HTTPURLResponse {
-                    var responseBodyMessage = ""
-                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
-                        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                           let reason = json["reason"] as? String
-                        {
-                            responseBodyMessage = reason
-                        }
-                    }
-
-                    switch httpResponse.statusCode {
-                    case 200:
-                        LogManager.shared.log(category: .apns, message: "APNS notification sent successfully")
-                        completion(true, nil)
-                    case 400:
-                        let errorMessage = "Bad request. The request was invalid or malformed. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 400: \(responseBodyMessage) - Check device token and environment settings")
-                        completion(false, errorMessage)
-                    case 403:
-                        JWTManager.shared.invalidateCache()
-                        let errorMessage = "Authentication error. Check your certificate or authentication token. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 403: \(responseBodyMessage) - Check APNS key permissions for bundle ID")
-                        completion(false, errorMessage)
-                    case 404:
-                        let errorMessage = "Invalid request: The :path value was incorrect. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 404: \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    case 405:
-                        let errorMessage = "Invalid request: Only POST requests are supported. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 405: \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    case 410:
-                        let errorMessage = "The device token is no longer active for the topic. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 410: Device token is invalid or expired")
-                        completion(false, errorMessage)
-                    case 413:
-                        let errorMessage = "Payload too large. The notification payload exceeded the size limit. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 413: \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    case 429:
-                        let errorMessage = "Too many requests. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 429: Rate limited - wait before retrying")
-                        completion(false, errorMessage)
-                    case 500:
-                        let errorMessage = "Internal server error at APNs. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 500: \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    case 503:
-                        let errorMessage = "Service unavailable. The server is temporarily unavailable. Try again later. \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error 503: \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    default:
-                        let errorMessage = "Unexpected status code: \(httpResponse.statusCode). \(responseBodyMessage)"
-                        LogManager.shared.log(category: .apns, message: "APNS error \(httpResponse.statusCode): \(responseBodyMessage)")
-                        completion(false, errorMessage)
-                    }
-                } else {
-                    let errorMessage = "Failed to get a valid HTTP response."
-                    LogManager.shared.log(category: .apns, message: errorMessage)
-                    completion(false, errorMessage)
-                }
-            }
-            task.resume()
-
+            body = try LoopAPNSCommands.apnsBody(payload)
         } catch {
             let errorMessage = "Failed to serialize APNS payload: \(error.localizedDescription)"
             LogManager.shared.log(category: .apns, message: errorMessage)
             completion(false, errorMessage)
+            return
         }
+
+        APNSDelivery.send(
+            body: body,
+            deviceToken: deviceToken,
+            topic: bundleIdentifier,
+            production: storage.productionEnvironment.value,
+            keyId: keyId,
+            teamId: teamId,
+            apnsKey: apnsKey,
+            completion: completion
+        )
     }
 
     /// Validates and fixes APNS key format if needed
@@ -648,15 +443,6 @@ class LoopAPNSService {
 
     // MARK: - Date Formatting Helper
 
-    /// Creates a properly formatted ISO8601 date string with milliseconds (matching Nightscout's format)
-    /// - Parameter date: The date to format
-    /// - Returns: Formatted date string like "2022-12-24T21:34:02.090Z"
-    private static func formatDateForAPNS(_ date: Date) -> String {
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return dateFormatter.string(from: date)
-    }
-
     // MARK: - Override Methods
 
     func sendOverrideNotification(presetName: String, duration: TimeInterval? = nil, completion: @escaping (Bool, String?) -> Void) {
@@ -676,47 +462,7 @@ class LoopAPNSService {
             return
         }
 
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        // Create alert text (matching Nightscout's format)
-        var alertText = "\(presetName) Temporary Override"
-        if let duration = duration, duration > 0 {
-            let hours = Int(duration / 3600)
-            let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
-            if hours > 0 {
-                alertText += " (\(hours)h \(minutes)m)"
-            } else {
-                alertText += " (\(minutes)m)"
-            }
-        }
-
-        var payload: [String: Any] = [
-            "override-name": presetName,
-            "remote-address": "LoopFollow",
-            "entered-by": "LoopFollow",
-            "sent-at": Self.formatDateForAPNS(now),
-            "expiration": Self.formatDateForAPNS(expiration),
-            "alert": alertText,
-        ]
-
-        if let duration = duration {
-            payload["override-duration-minutes"] = Int(duration / 60)
-        }
-
-        // For override commands, we can include return notification info unencrypted
-        // since override commands don't require OTP validation in Loop
-        if let returnInfo = createReturnNotificationInfo() {
-            payload["return_notification"] = [
-                "production_environment": returnInfo.productionEnvironment,
-                "device_token": returnInfo.deviceToken,
-                "bundle_id": returnInfo.bundleId,
-                "team_id": returnInfo.teamId,
-                "key_id": returnInfo.keyId,
-                "apns_key": returnInfo.apnsKey,
-            ]
-        }
+        let payload = LoopAPNSCommands.overridePayload(presetName: presetName, duration: duration, returnInfo: ReturnNotificationInfo.loopFollow())
 
         // Send the notification using the existing APNS infrastructure
         let creds = effectiveCredentials()
@@ -748,31 +494,7 @@ class LoopAPNSService {
             return
         }
 
-        // Create APNS notification payload (matching Loop's expected format)
-        let now = Date()
-        let expiration = Date(timeIntervalSinceNow: 5 * 60) // 5 minutes from now
-
-        var payload: [String: Any] = [
-            "cancel-temporary-override": "true",
-            "remote-address": "LoopFollow",
-            "entered-by": "LoopFollow",
-            "sent-at": Self.formatDateForAPNS(now),
-            "expiration": Self.formatDateForAPNS(expiration),
-            "alert": "Cancel Temporary Override",
-        ]
-
-        // For override commands, we can include return notification info unencrypted
-        // since override commands don't require OTP validation in Loop
-        if let returnInfo = createReturnNotificationInfo() {
-            payload["return_notification"] = [
-                "production_environment": returnInfo.productionEnvironment,
-                "device_token": returnInfo.deviceToken,
-                "bundle_id": returnInfo.bundleId,
-                "team_id": returnInfo.teamId,
-                "key_id": returnInfo.keyId,
-                "apns_key": returnInfo.apnsKey,
-            ]
-        }
+        let payload = LoopAPNSCommands.cancelOverridePayload(returnInfo: ReturnNotificationInfo.loopFollow())
 
         // Send the notification using the existing APNS infrastructure
         let creds = effectiveCredentials()
