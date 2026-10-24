@@ -7,11 +7,11 @@ class TIRCalculator {
     static func calculate(bgData: [ShareGlucoseData]) -> [TIRDataPoint] {
         guard !bgData.isEmpty else { return [] }
 
-        let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-        let veryLowThreshold = 54.0
+        let thresholds = UnitSettingsStore.shared.effectiveBandThresholds()
+        let veryLowThreshold = thresholds.veryLow
         let lowThreshold = thresholds.low
         let highThreshold = thresholds.high
-        let veryHighThreshold = 250.0
+        let veryHighThreshold = thresholds.veryHigh
         var periodData: [TIRPeriod: [Double]] = [:]
         let calendar = dateTimeUtils.displayCalendar()
 
@@ -91,11 +91,11 @@ class TIRCalculator {
         return tirPoints
     }
 
-    private static func calculatePercentages(readings: [Double],
-                                             veryLowThreshold: Double,
-                                             lowThreshold: Double,
-                                             highThreshold: Double,
-                                             veryHighThreshold: Double) -> (veryLow: Double, low: Double, inRange: Double, high: Double, veryHigh: Double)
+    static func calculatePercentages(readings: [Double],
+                                     veryLowThreshold: Double,
+                                     lowThreshold: Double,
+                                     highThreshold: Double,
+                                     veryHighThreshold: Double) -> (veryLow: Double, low: Double, inRange: Double, high: Double, veryHigh: Double)
     {
         let total = Double(readings.count)
         guard total > 0 else {
