@@ -21,6 +21,7 @@ class DexcomSettingsViewModel: ObservableObject {
             if newValue != userName {
                 Storage.shared.shareUserName.value = newValue
                 scheduleVerification()
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
@@ -30,6 +31,7 @@ class DexcomSettingsViewModel: ObservableObject {
             if newValue != password {
                 Storage.shared.sharePassword.value = newValue
                 scheduleVerification()
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
@@ -39,6 +41,7 @@ class DexcomSettingsViewModel: ObservableObject {
             if newValue != server {
                 Storage.shared.shareServer.value = newValue
                 scheduleVerification()
+                PhoneSessionManager.shared.sendConfig()
             }
         }
     }
