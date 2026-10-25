@@ -122,7 +122,7 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
-    private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
+    private static let returnNotificationRequiredMessage = "This command needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
 
     // MARK: - Command payloads (matching Nightscout's loop.js format)
 
@@ -191,6 +191,14 @@ class LoopAPNSService {
         return fields
     }
 
+    /// Keys are prefixed so an unpatched Loop rejects the command. The fingerprint identifies the previewed profile values.
+    static func profileSwitchCommandPayload(name: String, fingerprint: String, otp: String, now: Date = Date()) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Profile Switch: \(name)", now: now)
+        fields["profile-switch"] = name
+        fields["profile-switch-fingerprint"] = fingerprint
+        return fields
+    }
+
     /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
     private func encryptedReturnNotification(otp: String) -> String? {
         guard let returnInfo = createReturnNotificationInfo() else {
@@ -256,6 +264,12 @@ class LoopAPNSService {
             otp: otp
         )
         sendConfirmedCommand(payload, otp: otp, completion: completion)
+    }
+
+    /// Switches Loop to the saved profile `name`. Requires the Loop remote profile patch.
+    func sendProfileSwitch(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending profile switch to \(name) fingerprint=\(fingerprint)")
+        sendConfirmedCommand(Self.profileSwitchCommandPayload(name: name, fingerprint: fingerprint, otp: otp), otp: otp, completion: completion)
     }
 
     /// Sends carbs via APNS push notification

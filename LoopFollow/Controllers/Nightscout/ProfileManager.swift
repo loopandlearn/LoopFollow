@@ -123,6 +123,7 @@ final class ProfileManager {
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
         Storage.shared.remoteCommands.value = profileData.remoteCommands ?? []
+        Observable.shared.loopProfiles.set(LoopProfileSet(profileData))
     }
 
     func currentISF() -> HKQuantity? {
@@ -227,5 +228,6 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
+        Observable.shared.loopProfiles.set(nil)
     }
 }
