@@ -41,6 +41,8 @@ struct HubSettingsView: View {
     @State private var shownInvite: ShownInvite?
     @State private var notifications: HubChecklist.Permission?
     @State private var confirmingDisconnect = false
+    /// Just connected while another Background Refresh mode is chosen.
+    @State private var offeringHubMode = false
     @State private var busy = false
     @State private var errorText: String?
     @State private var infoText: String?
@@ -147,6 +149,14 @@ struct HubSettingsView: View {
         } message: { action in
             Text(action == .take ? "This app's Nightscout and Dexcom settings are replaced."
                 : "The hub's Nightscout and Dexcom settings are replaced for every phone.")
+        }
+        .confirmationDialog("Use LF Hub for Background Refresh?", isPresented: $offeringHubMode,
+                            titleVisibility: .visible)
+        {
+            Button("Use LF Hub") { BackgroundRefreshSettingsViewModel.change(to: .hub) }
+            Button("Not Now", role: .cancel) {}
+        } message: {
+            Text("The hub keeps the badge, Live Activity and alarms up to date while LoopFollow is closed. You can change this under Background Refresh.")
         }
         .confirmationDialog("Disconnect from LF Hub?", isPresented: $confirmingDisconnect, titleVisibility: .visible) {
             Button("Disconnect", role: .destructive) { Task { await disconnect() } }
@@ -558,6 +568,7 @@ struct HubSettingsView: View {
             }
             try await load()
         }
+        if connected, backgroundRefreshType.value != .hub { offeringHubMode = true }
     }
 
     private func sendSources() async {
