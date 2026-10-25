@@ -98,12 +98,14 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var resumeGraphData: [DataStructs.timestampOnlyStruct] = []
     var sensorStartGraphData: [DataStructs.timestampOnlyStruct] = []
     var noteGraphData: [DataStructs.noteStruct] = []
+    var cgmSensorStates: [CGMSensorState] = []
     var deviceBatteryData: [DataStructs.batteryStruct] = []
     var lastCalDate: Double = 0
     var latestLoopStatusString = ""
     var latestCOB: CarbMetric?
     var latestBasal = ""
     var latestPumpVolume: Double?
+    var latestPumpBatteryDate: Date?
     var latestIOB: InsulinMetric?
     var lastOverrideStartTime: TimeInterval = 0
     var lastOverrideEndTime: TimeInterval = 0
@@ -595,7 +597,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     @objc func appMovedToBackground() {
         LogManager.shared.log(
             category: .general,
-            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)))"
+            message: "App moved to background (refreshType=\(Storage.shared.backgroundRefreshType.value.rawValue), lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled), backgroundRefreshStatus=\(Self.describe(UIApplication.shared.backgroundRefreshStatus)), \(ExitDiagnostics.memoryDescription()))"
         )
 
         // Allow screen to turn off
@@ -818,7 +820,11 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
 
         #if !targetEnvironment(macCatalyst)
-            LiveActivityManager.shared.startFromCurrentState()
+            // Creation at launch belongs to didBecomeActive; this covers
+            // returning to the tab while the app is already active.
+            if UIApplication.shared.applicationState == .active {
+                LiveActivityManager.shared.startFromCurrentState()
+            }
         #endif
     }
 

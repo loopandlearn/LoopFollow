@@ -53,7 +53,8 @@ extension MainViewController {
 
             let endDate = dateTimeStamp + duration
 
-            let dot = DataStructs.tempTargetStruct(date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason)
+            let detail = Treatment.historyEntries(from: currentEntry, date: parsedDate.timeIntervalSince1970) { 0 }.entries.first
+            let dot = DataStructs.tempTargetStruct(date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason, detail: detail)
             tempTargetGraphData.append(dot)
 
             // Set activeTempTarget only if it is still active

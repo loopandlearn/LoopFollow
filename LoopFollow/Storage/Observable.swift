@@ -57,6 +57,9 @@ class Observable {
 
     var isNotLooping = ObservableValue<Bool>(default: false)
 
+    /// CGM state reported after the newest reading; nil while readings flow.
+    var cgmSensorState = ObservableValue<CGMSensorState?>(default: nil)
+
     /// Selected tab index used by SwiftUI TabView — set from MainViewController to switch tabs
     var selectedTabIndex = ObservableValue<Int>(default: 0)
 

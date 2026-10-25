@@ -16,6 +16,7 @@ struct BGDisplayView: View {
     @ObservedObject var predictionText = Observable.shared.predictionText
     @ObservedObject var predictionColor = Observable.shared.predictionColor
     @ObservedObject var isNotLooping = Observable.shared.isNotLooping
+    @ObservedObject var cgmSensorState = Observable.shared.cgmSensorState
     @ObservedObject var retro = RetroSelection.shared
 
     var onRefresh: (() -> Void)?
@@ -63,6 +64,14 @@ struct BGDisplayView: View {
                 } else {
                     Text(minAgoText.value)
                         .font(.system(size: 17))
+
+                    if let state = cgmSensorState.value {
+                        Text("CGM: \(state.summary)")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.orange)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
 
                     if isNotLooping.value {
                         Text(loopStatusText.value)

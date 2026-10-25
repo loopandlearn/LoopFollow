@@ -17,6 +17,21 @@ extension MainViewController {
         let previousLastLoopTime = Observable.shared.previousAlertLastLoopTime.value ?? 0
         let lastLoopTime = Observable.shared.alertLastLoopTime.value ?? 0
 
+        // Loop reports IOB and COB even when the loop failed.
+        if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+            infoManager.updateInfoData(type: .iob, value: insulinMetric)
+            latestIOB = insulinMetric
+            Observable.shared.iobText.value = insulinMetric.formattedValue()
+        }
+
+        if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
+            infoManager.updateInfoData(type: .cob, value: cobMetric)
+            latestCOB = cobMetric
+        }
+
+        Storage.shared.lastIOB.value = latestIOB?.value
+        Storage.shared.lastCOB.value = latestCOB?.value
+
         if lastLoopRecord["failureReason"] != nil {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
@@ -51,19 +66,6 @@ extension MainViewController {
             }
             Storage.shared.lastTargetLowMgdl.value = profileTargetLow?.doubleValue(for: .milligramsPerDeciliter)
             Storage.shared.lastTargetHighMgdl.value = profileTargetHigh?.doubleValue(for: .milligramsPerDeciliter)
-
-            // IOB
-            if let insulinMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
-                infoManager.updateInfoData(type: .iob, value: insulinMetric)
-                latestIOB = insulinMetric
-                Observable.shared.iobText.value = insulinMetric.formattedValue()
-            }
-
-            // COB
-            if let cobMetric = CarbMetric(from: lastLoopRecord["cob"], key: "cob") {
-                infoManager.updateInfoData(type: .cob, value: cobMetric)
-                latestCOB = cobMetric
-            }
 
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject],
                let prediction = predictdata["values"] as? [Double],
@@ -132,8 +134,6 @@ extension MainViewController {
             }
 
             // Live Activity storage
-            Storage.shared.lastIOB.value = latestIOB?.value
-            Storage.shared.lastCOB.value = latestCOB?.value
             if let predictdata = lastLoopRecord["predicted"] as? [String: AnyObject],
                let values = predictdata["values"] as? [Double]
             {
