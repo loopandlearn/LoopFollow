@@ -13,8 +13,10 @@ struct NightscoutSettingsView: View {
 
     var body: some View {
         Form {
-            urlSection
-            tokenSection
+            HubManagedSources {
+                urlSection
+                tokenSection
+            }
             statusSection
             webSocketSection
 

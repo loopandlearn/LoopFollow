@@ -27,6 +27,7 @@ struct SettingsMenuView: View {
 // MARK: – Sheet routing
 
 enum SettingsSection: String, CaseIterable, Hashable {
+    case hub = "LoopFollow Hub"
     case data = "Data Settings"
     case display = "Display Settings"
     case app = "App Settings"
@@ -53,6 +54,7 @@ enum SettingsRoute: Hashable, Identifiable {
     case units
     case nightscout, dexcom
     case backgroundRefresh
+    case hub
     case general, graph
     case tabSettings
     case infoDisplay
@@ -84,6 +86,7 @@ enum SettingsRoute: Hashable, Identifiable {
         case .units: return "Units and Metrics"
         case .tabSettings: return "Tabs"
         case .backgroundRefresh: return "Background Refresh"
+        case .hub: return "LF Hub"
         case .importExport: return "Import/Export"
         case .apn: return "APN"
         #if !targetEnvironment(macCatalyst)
@@ -108,6 +111,7 @@ enum SettingsRoute: Hashable, Identifiable {
         case .units: return "scalemass"
         case .tabSettings: return "rectangle.3.group"
         case .backgroundRefresh: return "arrow.clockwise"
+        case .hub: return "server.rack"
         case .importExport: return "square.and.arrow.down"
         case .apn: return "bell.and.waves.left.and.right"
         #if !targetEnvironment(macCatalyst)
@@ -129,6 +133,7 @@ enum SettingsRoute: Hashable, Identifiable {
         case .units: return ["mmol", "mgdl", "metrics"]
         case .infoDisplay: return ["info"]
         case .apn: return ["push", "notification"]
+        case .hub: return ["server", "hub", "alarm"]
         #if !targetEnvironment(macCatalyst)
             case .liveActivity: return ["dynamic island", "lock screen"]
         #endif
@@ -198,6 +203,9 @@ enum SettingsRoute: Hashable, Identifiable {
             ]
         case .backgroundRefresh: return [
                 SettingsLeaf("Background Refresh Type", ["silent tune", "bluetooth", "rileylink", "omnipod", "heartbeat"]),
+            ]
+        case .hub: return [
+                SettingsLeaf("Send Test Alarm", ["alarm", "test"]),
             ]
         case .importExport: return [
                 SettingsLeaf("Scan QR Code to Import Settings", ["qr"]),
@@ -280,7 +288,11 @@ enum SettingsRoute: Hashable, Identifiable {
             app.append(.remote)
         }
 
-        return [
+        var sections: [(SettingsSection, [SettingsRoute])] = []
+        if HubClient.isSupported {
+            sections.append((.hub, [.hub]))
+        }
+        return sections + [
             (.data, [.nightscout, .dexcom]),
             (.display, display),
             (.app, app),
@@ -298,6 +310,7 @@ enum SettingsRoute: Hashable, Identifiable {
         case .nightscout: NightscoutSettingsView(viewModel: .init())
         case .dexcom: DexcomSettingsView(viewModel: .init())
         case .backgroundRefresh: BackgroundRefreshSettingsView(viewModel: .init())
+        case .hub: HubSettingsView()
         case .general: GeneralSettingsView()
         case .graph: GraphSettingsView()
         case .tabSettings: TabCustomizationModal()

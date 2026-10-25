@@ -17,6 +17,7 @@
 		DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */ = {isa = PBXBuildFile; fileRef = DDF2C0132BEFD468007A20E6 /* blacklisted-versions.json */; };
 		FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = FC5A5C3C2497B229009C550E /* Config.xcconfig */; };
 		FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFEEC9D2486E68E00402A7F /* WebKit.framework */; };
+		5D69EE5A57B7707A4CC26B71 /* LoopFollowNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 596074433E79A175BE10D73D /* LoopFollowNotificationService.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +35,13 @@
 			remoteGlobalIDString = FC9788132485969B00A7906C;
 			remoteInfo = LoopFollow;
 		};
+		DAB89B42788ADE45065F521D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FC97880C2485969B00A7906C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EEEA50EDC79B8FCDBBED8FB6;
+			remoteInfo = LoopFollowNotificationService;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +52,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				37A4BDE82F5B6B4C00EEB289 /* LoopFollowLAExtensionExtension.appex in Embed Foundation Extensions */,
+				5D69EE5A57B7707A4CC26B71 /* LoopFollowNotificationService.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -68,6 +77,7 @@
 		FC9788142485969B00A7906C /* Loop Follow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Loop Follow.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCE537C2249AAB2600F80BF8 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		FCFEEC9D2486E68E00402A7F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		596074433E79A175BE10D73D /* LoopFollowNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LoopFollowNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -77,6 +87,14 @@
 				Info.plist,
 			);
 			target = FC9788132485969B00A7906C /* LoopFollow */;
+		};
+		6A4F9913224EE1D80273A65D /* Exceptions for "LoopFollowNotificationService" folder in "LoopFollowNotificationService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				LoopFollowNotificationService.entitlements,
+			);
+			target = EEEA50EDC79B8FCDBBED8FB6 /* LoopFollowNotificationService */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -118,6 +136,29 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
+		AA1DB0AA90993486408F9C96 /* LoopFollowNotificationService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6A4F9913224EE1D80273A65D /* Exceptions for "LoopFollowNotificationService" folder in "LoopFollowNotificationService" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = LoopFollowNotificationService;
+			sourceTree = "<group>";
+		};
+		63C6AEAB74B2AAFE8858AD73 /* HubShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = HubShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +185,13 @@
 				DD50C10A2F60A00000000001 /* SocketIO in Frameworks */,
 				FCFEEC9E2486E68E00402A7F /* WebKit.framework in Frameworks */,
 				3F1335F351590E573D8E6962 /* Pods_LoopFollow.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2C03EEFB64198A86B554FA76 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,11 +239,13 @@
 				FC5A5C3C2497B229009C550E /* Config.xcconfig */,
 				DDCC3AD72DDE1790006F1C10 /* Tests */,
 				37A4BDDE2F5B6B4A00EEB289 /* LoopFollowLAExtension */,
+				AA1DB0AA90993486408F9C96 /* LoopFollowNotificationService */,
 				FC9788152485969B00A7906C /* Products */,
 				8E32230C453C93FDCE59C2B9 /* Pods */,
 				6A5880E0B811AF443B05AB02 /* Frameworks */,
 				9555FE45F7FAEFA6142D04CA /* LoopFollow */,
 				BC0FBFD3754955D028EF6631 /* Shared */,
+				63C6AEAB74B2AAFE8858AD73 /* HubShared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -205,6 +255,7 @@
 				FC9788142485969B00A7906C /* Loop Follow.app */,
 				DDCC3AD62DDE1790006F1C10 /* Tests.xctest */,
 				37A4BDD92F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension.appex */,
+				596074433E79A175BE10D73D /* LoopFollowNotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -271,10 +322,12 @@
 			);
 			dependencies = (
 				37A4BDE72F5B6B4C00EEB289 /* PBXTargetDependency */,
+				543F5550B040328239BAB8F8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9555FE45F7FAEFA6142D04CA /* LoopFollow */,
 				BC0FBFD3754955D028EF6631 /* Shared */,
+				63C6AEAB74B2AAFE8858AD73 /* HubShared */,
 			);
 			name = LoopFollow;
 			packageProductDependencies = (
@@ -283,6 +336,28 @@
 			productName = LoopFollow;
 			productReference = FC9788142485969B00A7906C /* Loop Follow.app */;
 			productType = "com.apple.product-type.application";
+		};
+		EEEA50EDC79B8FCDBBED8FB6 /* LoopFollowNotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42916AF8702E56F154251F93 /* Build configuration list for PBXNativeTarget "LoopFollowNotificationService" */;
+			buildPhases = (
+				82884377624835ABEDB5489D /* Sources */,
+				2C03EEFB64198A86B554FA76 /* Frameworks */,
+				EC4E6C033A4E09C500F4D170 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA1DB0AA90993486408F9C96 /* LoopFollowNotificationService */,
+				63C6AEAB74B2AAFE8858AD73 /* HubShared */,
+				BC0FBFD3754955D028EF6631 /* Shared */,
+			);
+			name = LoopFollowNotificationService;
+			productName = LoopFollowNotificationService;
+			productReference = 596074433E79A175BE10D73D /* LoopFollowNotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -296,6 +371,9 @@
 				TargetAttributes = {
 					37A4BDD82F5B6B4A00EEB289 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					EEEA50EDC79B8FCDBBED8FB6 = {
+						CreatedOnToolsVersion = 27.0;
 					};
 					DDCC3AD52DDE1790006F1C10 = {
 						CreatedOnToolsVersion = 16.3;
@@ -325,6 +403,7 @@
 				FC9788132485969B00A7906C /* LoopFollow */,
 				DDCC3AD52DDE1790006F1C10 /* Tests */,
 				37A4BDD82F5B6B4A00EEB289 /* LoopFollowLAExtensionExtension */,
+				EEEA50EDC79B8FCDBBED8FB6 /* LoopFollowNotificationService */,
 			);
 		};
 /* End PBXProject section */
@@ -352,6 +431,13 @@
 				DDF2C0142BEFD468007A20E6 /* blacklisted-versions.json in Resources */,
 				FC5A5C3D2497B229009C550E /* Config.xcconfig in Resources */,
 				DDCFCAF22B17273200BE5751 /* LoopFollowDisplayNameConfig.xcconfig in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC4E6C033A4E09C500F4D170 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -462,6 +548,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		82884377624835ABEDB5489D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -475,6 +568,12 @@
 			isa = PBXTargetDependency;
 			target = FC9788132485969B00A7906C /* LoopFollow */;
 			targetProxy = DDCC3ADA2DDE1790006F1C10 /* PBXContainerItemProxy */;
+		};
+		543F5550B040328239BAB8F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = EEEA50EDC79B8FCDBBED8FB6 /* LoopFollowNotificationService */;
+			targetProxy = DAB89B42788ADE45065F521D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -813,6 +912,81 @@
 			};
 			name = Release;
 		};
+		A3D75A5E85326D3CE53B355B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LoopFollowNotificationService/LoopFollowNotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowNotificationService/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix).LoopFollowNotificationService";
+				PRODUCT_MODULE_NAME = LoopFollowNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7CD558935EC15EB016317671 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = LoopFollowNotificationService/LoopFollowNotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "$(LF_DEVELOPMENT_TEAM)";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LoopFollowNotificationService/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = "$(MARKETING_VERSION)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.$(unique_id).LoopFollow$(app_suffix).LoopFollowNotificationService";
+				PRODUCT_MODULE_NAME = LoopFollowNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -848,6 +1022,15 @@
 			buildConfigurations = (
 				FC97882E2485969C00A7906C /* Debug */,
 				FC97882F2485969C00A7906C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		42916AF8702E56F154251F93 /* Build configuration list for PBXNativeTarget "LoopFollowNotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A3D75A5E85326D3CE53B355B /* Debug */,
+				7CD558935EC15EB016317671 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

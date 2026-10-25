@@ -29,7 +29,7 @@ struct DBSizeData: Codable {
 extension MainViewController {
     // NS Database Size Web Call
     func webLoadNSDBSize() {
-        NightscoutUtils.executeRequest(eventType: .dbSize, parameters: [:]) { (result: Result<DBSizeProperties, Error>) in
+        NightscoutUtils.executeRequest(eventType: .dbSize, parameters: [:], hubPart: .dbsize) { (result: Result<DBSizeProperties, Error>) in
             switch result {
             case let .success(properties):
                 self.updateDBSize(data: properties.dbsize)

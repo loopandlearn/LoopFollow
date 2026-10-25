@@ -22,10 +22,18 @@ struct CalendarSettingsView: View {
     var body: some View {
         Form {
             // ------------- Calendar write -------------
+            if HubClient.shared.isHubMode {
+                Section {
+                    Label(HubModeLimits.calendarNote, systemImage: "xmark.circle")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section {
                 Toggle("Save BG to Calendar",
                        isOn: $writeCalendarEvent.value)
-                    .disabled(accessDenied) // prevent use when no access
+                    .disabled(accessDenied || HubClient.shared.isHubMode) // prevent use when no access
             } footer: {
                 Text("""
                 Add the Apple-Calendar complication to your watch or CarPlay \

@@ -50,7 +50,8 @@ private func makeDynamicIsland(context: ActivityViewContext<GlucoseLiveActivityA
 struct LoopFollowLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: GlucoseLiveActivityAttributes.self) { context in
-            LockScreenFamilyAdaptiveView(state: context.state)
+            LockScreenFamilyAdaptiveView(state: context.state,
+                                         hubStopped: context.isStale && context.state.reason == "hub")
                 .id(context.state.seq)
                 .background(
                     LALivenessMarker(
@@ -75,15 +76,20 @@ struct LoopFollowLiveActivityWidget: Widget {
 /// - everything else → full lock screen layout
 private struct LockScreenFamilyAdaptiveView: View {
     let state: GlucoseLiveActivityAttributes.ContentState
+    /// The last update came from LF Hub and the activity is past its stale date,
+    /// which the hub sets 15 minutes after each update: the hub has stopped sending.
+    let hubStopped: Bool
 
     @Environment(\.activityFamily) private var activityFamily
 
     var body: some View {
         if activityFamily == .small {
             SmallFamilyView(snapshot: state.snapshot)
+                .overlay(alignment: .bottom) { if hubStopped { NotUpdatingBadge(compact: true) } }
                 .activityBackgroundTint(Color.black.opacity(0.25))
         } else {
             LockScreenLiveActivityView(state: state)
+                .overlay(alignment: .bottom) { if hubStopped { NotUpdatingBadge(compact: false).padding(.bottom, 4) } }
                 .activityBackgroundTint(LAColors.backgroundTint(for: state.snapshot))
         }
     }
@@ -300,6 +306,20 @@ private struct LockScreenLiveActivityView: View {
             }
             .opacity(state.snapshot.showRenewalOverlay ? 1 : 0)
         )
+    }
+}
+
+/// Shown once an activity LF Hub updates is past its stale date: no update arrived in time.
+private struct NotUpdatingBadge: View {
+    let compact: Bool
+
+    var body: some View {
+        Text(compact ? "Not updating" : "Not updating — open LoopFollow")
+            .font(.system(size: compact ? 10 : 12, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Color(uiColor: UIColor.systemRed).opacity(0.9)))
     }
 }
 

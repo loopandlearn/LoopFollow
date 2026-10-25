@@ -35,7 +35,8 @@ class NightscoutSocketManager {
     // MARK: - Public API
 
     func connectIfNeeded() {
-        guard Storage.shared.webSocketEnabled.value else {
+        // In Hub mode the hub follows Nightscout and the app long-polls the hub.
+        guard Storage.shared.webSocketEnabled.value, !HubClient.shared.isHubMode else {
             disconnect()
             return
         }

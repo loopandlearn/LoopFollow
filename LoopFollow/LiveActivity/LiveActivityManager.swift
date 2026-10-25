@@ -72,6 +72,7 @@ final class LiveActivityManager {
                     category: .general,
                     message: "[LA] push-to-start token received #\(deliveries) token=…\(tail) (prev=…\(previousTail))\(changed ? " CHANGED" : " same")"
                 )
+                HubClient.shared.reportLiveActivitySoon()
             }
             LogManager.shared.log(
                 category: .general,
@@ -152,10 +153,20 @@ final class LiveActivityManager {
                 message: "[LA] activityUpdates: adopting new activity id=\(activity.id) (no prior current)"
             )
         }
-        // Fresh deadline — push-to-start-initiated LAs reset the 8-hour clock.
-        Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
-        Storage.shared.laRenewalFailed.value = false
-        cancelRenewalFailedNotification()
+        // An activity bound before this launch keeps its deadline, since iOS counts its
+        // 8 hours from when it started; one started through push-to-start gets a fresh one.
+        let boundBeforeLaunch = Storage.shared.laBoundActivityId.value == activity.id
+            && Storage.shared.laRenewBy.value > 0
+        if boundBeforeLaunch {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] adopt: id=\(activity.id) was bound before this launch — keeping renewBy=\(Storage.shared.laRenewBy.value)"
+            )
+        } else {
+            Storage.shared.laRenewBy.value = Date().timeIntervalSince1970 + LiveActivityManager.renewalThreshold
+            Storage.shared.laRenewalFailed.value = false
+            cancelRenewalFailedNotification()
+        }
         dismissedByUser = false
         // A fresh LA invalidates any latched foreground-restart intent — the
         // condition that prompted the latch (overlay showing / renewal failed)
@@ -176,7 +187,7 @@ final class LiveActivityManager {
     /// directly to the Live Activity while the app is still foreground-active,
     /// ensuring the LA is up to date the moment the lock screen appears.
     @objc private func handleWillResignActive() {
-        guard Storage.shared.laEnabled.value, let activity = current else { return }
+        guard Storage.shared.laEnabled.value, !HubClient.shared.drivesLiveActivity, let activity = current else { return }
 
         refreshCoalescer.cancel()
 
@@ -434,6 +445,12 @@ final class LiveActivityManager {
     private static let pushToStartTokenRetryDelay: TimeInterval = 10
 
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
+
+    /// Push token of the activity currently tracked, as reported to LF Hub.
+    var currentPushToken: String? {
+        current == nil ? nil : pushToken
+    }
+
     private var stateObserverTask: Task<Void, Never>?
     private var updateTask: Task<Void, Never>?
     private var seq: Int = 0
@@ -668,7 +685,8 @@ final class LiveActivityManager {
     /// deadline has passed, working around Apple's 8-hour maximum LA lifetime.
     /// Returns true if renewal was performed (caller should return early).
     private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
-        guard let oldActivity = current else { return false }
+        // LF Hub renews through push-to-start when it drives the activity.
+        guard !HubClient.shared.drivesLiveActivity, let oldActivity = current else { return false }
 
         let renewBy = Storage.shared.laRenewBy.value
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
@@ -1121,6 +1139,8 @@ final class LiveActivityManager {
         }
 
         guard let activity = current else { return }
+        // LF Hub sends every update while it drives the activity.
+        if HubClient.shared.drivesLiveActivity { return }
 
         updateTask?.cancel()
 
@@ -1210,6 +1230,7 @@ final class LiveActivityManager {
     private func bind(to activity: Activity<GlucoseLiveActivityAttributes>, logReason: String) {
         if current?.id == activity.id { return }
         current = activity
+        Storage.shared.laBoundActivityId.value = activity.id
         let wasEndingForRestart = endingForRestart
         dismissedByUser = false
         endingForRestart = false
@@ -1235,6 +1256,7 @@ final class LiveActivityManager {
                     category: .general,
                     message: "[LA] push token received id=\(activityID) token=…\(tail) (prev=…\(previousTail))"
                 )
+                HubClient.shared.reportLiveActivitySoon()
             }
         }
     }
@@ -1332,6 +1354,7 @@ final class LiveActivityManager {
                     let wasCurrentActivity = current?.id == activity.id
                     if wasCurrentActivity {
                         current = nil
+                        HubClient.shared.reportLiveActivitySoon()
                         // Do NOT clear laRenewBy here. Preserving it means handleForeground()
                         // can detect the renewal window on the next foreground event and restart
                         // automatically — whether the LA ended normally (.ended) or was
