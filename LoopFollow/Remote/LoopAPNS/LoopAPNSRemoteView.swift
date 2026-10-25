@@ -30,7 +30,7 @@ struct LoopAPNSRemoteView: View {
                                 command: "Profiles",
                                 iconName: "arrow.triangle.2.circlepath",
                                 title: "Profiles Not Available",
-                                message: "Switching Loop profiles from LoopFollow needs Loop built with a recent version of the Profile Save & Load customization, added with the Loop and Learn Customization Select script."
+                                message: "Switching Loop profiles from LoopFollow needs Loop built with the Profile Save & Load customization, added with the Loop and Learn Customization Select script."
                             )
                         }
                     }
