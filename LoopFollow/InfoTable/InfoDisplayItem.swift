@@ -59,15 +59,25 @@ struct InfoColoring: Codable, Equatable {
     /// the default text color); when enabled, an in-range value reads green,
     /// mirroring the app's BG text coloring.
     func color(for value: Double, direction: InfoColorDirection) -> Color? {
+        switch level(for: value, direction: direction) {
+        case .urgent: .red
+        case .warning: .yellow
+        case .normal: .green
+        case nil: nil
+        }
+    }
+
+    /// The threshold band a value falls in, or `nil` when coloring is off.
+    func level(for value: Double, direction: InfoColorDirection) -> InfoColorLevel? {
         guard enabled else { return nil }
         switch direction {
         case .above:
-            if let urgent, value >= urgent { return .red }
-            if let warning, value >= warning { return .yellow }
+            if let urgent, value >= urgent { return .urgent }
+            if let warning, value >= warning { return .warning }
         case .below:
-            if let urgent, value <= urgent { return .red }
-            if let warning, value <= warning { return .yellow }
+            if let urgent, value <= urgent { return .urgent }
+            if let warning, value <= warning { return .warning }
         }
-        return .green
+        return .normal
     }
 }

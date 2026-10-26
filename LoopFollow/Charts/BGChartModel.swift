@@ -403,6 +403,7 @@ final class BGChartModel: ObservableObject {
             guard let self else { return }
             self.rebuildScheduled = false
             self.performRebuild()
+            WatchSessionManager.shared.requestUpdate(reason: "chart")
         }
     }
 
