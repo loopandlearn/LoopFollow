@@ -201,12 +201,7 @@ class StatsDataFetcher {
         var lastFoundIndex = 0
 
         for currentEntry in bolusEntries.reversed() {
-            var bolusDate: String
-            if currentEntry["timestamp"] != nil {
-                bolusDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                bolusDate = currentEntry["created_at"] as! String
-            } else {
+            guard let bolusDate = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else {
                 continue
             }
 
@@ -250,12 +245,7 @@ class StatsDataFetcher {
         var lastFoundIndex = 0
 
         for currentEntry in smbEntries.reversed() {
-            var bolusDate: String
-            if currentEntry["timestamp"] != nil {
-                bolusDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                bolusDate = currentEntry["created_at"] as! String
-            } else {
+            guard let bolusDate = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else {
                 continue
             }
 
@@ -296,12 +286,7 @@ class StatsDataFetcher {
         var lastFoundBolus = 0
 
         for currentEntry in carbEntries.reversed() {
-            var carbDate: String
-            if currentEntry["timestamp"] != nil {
-                carbDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                carbDate = currentEntry["created_at"] as! String
-            } else {
+            guard let carbDate = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else {
                 continue
             }
 

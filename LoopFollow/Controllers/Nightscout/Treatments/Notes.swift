@@ -13,12 +13,7 @@ extension MainViewController {
         for currentEntry in entries.reversed() {
             guard let currentEntry = currentEntry as? [String: AnyObject] else { continue }
 
-            var date: String
-            if currentEntry["timestamp"] != nil {
-                date = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                date = currentEntry["created_at"] as! String
-            } else {
+            guard let date = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else {
                 continue
             }
 

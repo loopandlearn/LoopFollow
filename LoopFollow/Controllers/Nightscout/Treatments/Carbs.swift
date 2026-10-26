@@ -13,12 +13,7 @@ extension MainViewController {
         var lastFoundSmb = 0
 
         for currentEntry in entries.reversed() {
-            var carbDate: String
-            if currentEntry["timestamp"] != nil {
-                carbDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                carbDate = currentEntry["created_at"] as! String
-            } else {
+            guard let carbDate = currentEntry["timestamp"] as? String ?? currentEntry["created_at"] as? String else {
                 continue
             }
 
