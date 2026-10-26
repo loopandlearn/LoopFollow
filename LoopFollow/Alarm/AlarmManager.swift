@@ -240,7 +240,7 @@ class AlarmManager {
         UNUserNotificationCenter.current().setNotificationCategories([
             UNNotificationCategory(identifier: BackgroundAlertIdentifier.categoryIdentifier, actions: [openApp], intentIdentifiers: [], options: []),
             UNNotificationCategory(identifier: "category", actions: [snooze], intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: "lfhub-ack", actions: [acknowledge], intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: HubAppGroup.acknowledgeCategory, actions: [acknowledge], intentIdentifiers: [], options: []),
         ])
     }
 }

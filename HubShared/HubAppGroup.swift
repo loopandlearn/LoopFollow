@@ -8,6 +8,10 @@ enum HubAppGroup {
     /// The hub's address while the app is connected to a hub; absent otherwise.
     static let hubURLKey = "lfhubURL"
 
+    /// The notification category of a hub alarm whose snooze is 0: its buttons read
+    /// Acknowledge, as the app's own action for such an alarm does.
+    static let acknowledgeCategory = "lfhub-ack"
+
     /// How the extension delivers a push from the hub.
     enum Delivery: Equatable {
         /// As a system alarm, when the hub asks for one.

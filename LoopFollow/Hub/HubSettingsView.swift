@@ -15,6 +15,7 @@ struct HubSettingsView: View {
     @ObservedObject private var hubInfo = HubClient.shared.hubInfo
     @ObservedObject private var hubConfirmed = HubClient.shared.hubConfirmed
     @ObservedObject private var hubProblems = HubClient.shared.hubProblems
+    @ObservedObject private var removedFromHub = HubClient.shared.removedFromHub
     @ObservedObject private var lfKeyId = Storage.shared.lfKeyId
     @ObservedObject private var lfApnsKey = Storage.shared.lfApnsKey
 
@@ -25,10 +26,15 @@ struct HubSettingsView: View {
     /// The hub's devices offered when joining; nil until the address and token, or the
     /// invite, are checked.
     @State private var joinableDevices: [HubClient.Device]?
+    /// The patient's name the hub gave with the devices offered when joining.
+    @State private var joinPatientName: String?
     @State private var join = HubClient.Join.new
+    /// A recently used device about to be replaced, with the question to ask first.
+    @State private var replaceCandidate: ReplaceCandidate?
     /// The invite being joined with; nil while joining with the setup token.
     @State private var joinInvite: HubClient.Invite?
     @State private var inviteLink = ""
+    @State private var inviteError: String?
     @State private var scanningInvite = false
 
     @State private var status: HubClient.Status?
@@ -44,8 +50,12 @@ struct HubSettingsView: View {
     /// Just connected while another Background Refresh mode is chosen.
     @State private var offeringHubMode = false
     @State private var busy = false
-    @State private var errorText: String?
-    @State private var infoText: String?
+    @State private var actionError: ActionError?
+    @State private var testAlarmInfo: String?
+    @State private var sourcesInfo: String?
+
+    /// How often the page reads the hub's view again while it is shown.
+    private static let reloadInterval: UInt64 = 30
 
     private enum SourceAction: Identifiable {
         case send, take
@@ -58,6 +68,18 @@ struct HubSettingsView: View {
         var id: String { invite.code }
     }
 
+    private struct ActionError: Identifiable {
+        let title: String
+        let message: String
+        var id: String { title + message }
+    }
+
+    private struct ReplaceCandidate: Identifiable {
+        let device: HubClient.Device
+        let warning: String
+        var id: UUID { device.id }
+    }
+
     private var connected: Bool {
         !hubURL.value.isEmpty && !deviceKey.value.isEmpty
     }
@@ -68,11 +90,6 @@ struct HubSettingsView: View {
 
     private var isAdmin: Bool {
         connected && role.value == .admin
-    }
-
-    /// This app's data sources go to the hub: an admin that did not join with an invite.
-    private var sendsOwnSources: Bool {
-        isAdmin && !joinedWithInvite.value
     }
 
     private func offers(_ feature: String) -> Bool {
@@ -88,51 +105,73 @@ struct HubSettingsView: View {
             } else {
                 connectSections
             }
-
-            if let errorText {
-                Section { Text(errorText).foregroundColor(.red) }
-            }
-            if let infoText {
-                Section { Text(infoText).foregroundColor(.secondary) }
-            }
         }
         .disabled(busy)
         .task {
             await readNotificationPermission()
             await refresh()
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: Self.reloadInterval * 1_000_000_000)
+                if Task.isCancelled { break }
+                await reload()
+            }
         }
         .refreshable { await refresh() }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            Task { await readNotificationPermission() }
+            Task {
+                await readNotificationPermission()
+                await reload()
+            }
         }
         .sheet(isPresented: $scanningInvite) {
             SimpleQRCodeScannerView { result in
                 // The scanner can report a code more than once before it stops.
                 guard scanningInvite else { return }
                 scanningInvite = false
-                if case let .success(text) = result { readInvite(text) }
+                if case let .success(text) = result {
+                    inviteLink = text
+                    readInvite(text)
+                }
             }
         }
         .sheet(item: $shownInvite) { shown in
             HubInviteSheet(invite: shown.invite, expiresAt: shown.expiresAt,
                            patientName: status?.patient.name ?? HubClient.shared.patientName.value)
         }
-        .confirmationDialog(deviceToRemove.map { "Remove \($0.name)?" } ?? "",
-                            isPresented: Binding(get: { deviceToRemove != nil },
-                                                 set: { if !$0 { deviceToRemove = nil } }),
-                            titleVisibility: .visible,
-                            presenting: deviceToRemove)
+        .alert(actionError?.title ?? "", isPresented: Binding(get: { actionError != nil },
+                                                              set: { if !$0 { actionError = nil } }),
+               presenting: actionError)
+        { _ in
+            Button("OK", role: .cancel) {}
+        } message: { error in
+            Text(error.message)
+        }
+        .alert(replaceCandidate.map { "Replace \($0.device.name)?" } ?? "",
+               isPresented: Binding(get: { replaceCandidate != nil },
+                                    set: { if !$0 { replaceCandidate = nil } }),
+               presenting: replaceCandidate)
+        { candidate in
+            Button("Cancel", role: .cancel) {}
+            Button("Replace", role: .destructive) { choose(.replace(candidate.device.id), name: candidate.device.name) }
+        } message: { candidate in
+            Text(candidate.warning)
+        }
+        .alert(deviceToRemove.map { "Remove \($0.name)?" } ?? "",
+               isPresented: Binding(get: { deviceToRemove != nil },
+                                    set: { if !$0 { deviceToRemove = nil } }),
+               presenting: deviceToRemove)
         { device in
+            Button("Cancel", role: .cancel) {}
             Button("Remove", role: .destructive) { Task { await remove(device) } }
         } message: { _ in
             Text("The hub stops sending to it.")
         }
-        .confirmationDialog("Make this phone a member?",
-                            isPresented: Binding(get: { deviceToDemote != nil },
-                                                 set: { if !$0 { deviceToDemote = nil } }),
-                            titleVisibility: .visible,
-                            presenting: deviceToDemote)
+        .alert("Make this phone a member?",
+               isPresented: Binding(get: { deviceToDemote != nil },
+                                    set: { if !$0 { deviceToDemote = nil } }),
+               presenting: deviceToDemote)
         { device in
+            Button("Cancel", role: .cancel) {}
             Button("Make Member") { Task { await setRole(.member, of: device) } }
         } message: { _ in
             Text("This phone can no longer change the data source, invite or manage phones. Only another admin can make it an admin again.")
@@ -150,11 +189,14 @@ struct HubSettingsView: View {
             Text(action == .take ? "This app's Nightscout and Dexcom settings are replaced."
                 : "The hub's Nightscout and Dexcom settings are replaced for every phone.")
         }
-        .confirmationDialog("Use LF Hub for Background Refresh?", isPresented: $offeringHubMode,
-                            titleVisibility: .visible)
-        {
-            Button("Use LF Hub") { BackgroundRefreshSettingsViewModel.change(to: .hub) }
+        .alert("Use LF Hub for Background Refresh?", isPresented: $offeringHubMode) {
             Button("Not Now", role: .cancel) {}
+            Button("Use LF Hub") {
+                Task {
+                    await BackgroundRefreshSettingsViewModel.change(to: .hub)?.value
+                    await reload()
+                }
+            }
         } message: {
             Text("The hub keeps the badge, Live Activity and alarms up to date while LoopFollow is closed. You can change this under Background Refresh.")
         }
@@ -172,9 +214,21 @@ struct HubSettingsView: View {
 
     @ViewBuilder
     private var connectSections: some View {
+        if removedFromHub.value {
+            Section {
+                Label("This phone was removed from LF Hub", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("Another phone replaced it, or an admin removed it. LoopFollow alarms by itself now. To use LF Hub again, ask an admin for an invite and join below.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                Button("Dismiss") { removedFromHub.value = false }
+            }
+        }
+
         if let joinInvite, let joinableDevices {
             Section(header: Text("Join with Invite")) {
                 row("Hub", Self.host(joinInvite))
+                if let joinPatientName { row("Patient", joinPatientName) }
                 Button("Use a Different Invite") { leaveInvite() }
             }
             joinChoiceSections(joinableDevices, invite: joinInvite)
@@ -184,6 +238,7 @@ struct HubSettingsView: View {
                 footer: Text("Someone who manages LF Hub shows the invite under Settings → LF Hub → Invite Family Member.")
             ) {
                 Button {
+                    inviteError = nil
                     scanningInvite = true
                 } label: {
                     Label("Scan Invite Code", systemImage: "qrcode.viewfinder")
@@ -193,9 +248,14 @@ struct HubSettingsView: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .onSubmit { readInvite(inviteLink) }
-                    .onChange(of: inviteLink) { if HubClient.Invite(link: inviteLink) != nil { readInvite(inviteLink) } }
-                if !inviteLink.isEmpty, HubClient.Invite(link: inviteLink) == nil {
-                    Text("This is not an LF Hub invite link.").font(.caption).foregroundColor(.orange)
+                    .onChange(of: inviteLink) { old, new in
+                        if new.isEmpty { inviteError = nil }
+                        if let invite = HubClient.Invite.pasted(from: old, to: new) { readInvite(invite.link) }
+                    }
+                Button("Continue") { readInvite(inviteLink) }
+                    .disabled(inviteLink.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if let inviteError {
+                    Text(inviteError).font(.caption).foregroundColor(.red)
                 }
             }
 
@@ -213,6 +273,8 @@ struct HubSettingsView: View {
                 if joinableDevices == nil {
                     Button("Continue") { Task { await listDevices() } }
                         .disabled(urlInput.isEmpty || setupToken.isEmpty)
+                } else if let joinPatientName {
+                    row("Patient", joinPatientName)
                 }
             }
 
@@ -243,6 +305,13 @@ struct HubSettingsView: View {
                 ForEach(replaceable) { device in
                     joinRow("Replace \(device.name)", detail: deviceDetail(device), .replace(device.id),
                             name: device.name)
+                    {
+                        if let warning = HubClient.recentUseWarning(device, now: Date()) {
+                            replaceCandidate = ReplaceCandidate(device: device, warning: warning)
+                        } else {
+                            choose(.replace(device.id), name: device.name)
+                        }
+                    }
                 }
                 ForEach(devices) { device in
                     joinRow("Copy Settings from \(device.name)", detail: nil, .copy(device.id),
@@ -261,10 +330,16 @@ struct HubSettingsView: View {
         URL(string: invite.hubURL)?.host ?? invite.hubURL
     }
 
-    private func joinRow(_ title: String, detail: String?, _ choice: HubClient.Join, name: String) -> some View {
+    private func choose(_ choice: HubClient.Join, name: String) {
+        join = choice
+        deviceName = name
+    }
+
+    private func joinRow(_ title: String, detail: String?, _ choice: HubClient.Join, name: String,
+                         onSelect: (() -> Void)? = nil) -> some View
+    {
         Button {
-            join = choice
-            deviceName = name
+            if let onSelect { onSelect() } else { choose(choice, name: name) }
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -287,6 +362,9 @@ struct HubSettingsView: View {
     private var connectedSections: some View {
         Section(header: Text("Hub")) {
             row("Address", hubURL.value)
+            if let version = hubInfo.value?.version {
+                row("LF Hub version", version)
+            }
             if let status {
                 row("Patient", status.patient.name)
                 row("This device", status.device.name)
@@ -338,7 +416,7 @@ struct HubSettingsView: View {
             footer: Text(sourcesFooter)
         ) {
             if let status {
-                if sendsOwnSources, offers("sourceRevision") {
+                if isAdmin, offers("sourceRevision") {
                     NavigationLink(value: SettingsRoute.nightscout) {
                         row("Nightscout", status.patient.nightscoutHost ?? "Not set")
                     }
@@ -358,6 +436,9 @@ struct HubSettingsView: View {
                 Button("Use the Hub's Sources in This App") { sourceAction = .take }
                     .disabled(status.map { $0.patient.nightscoutHost == nil && $0.patient.dexcom != true } ?? true)
             }
+            if let sourcesInfo {
+                Text(sourcesInfo).font(.footnote).foregroundColor(.secondary)
+            }
         }
 
         if isAdmin, offers("invites") {
@@ -373,27 +454,12 @@ struct HubSettingsView: View {
         if !devices.isEmpty {
             Section {
                 ForEach(devices) { device in
-                    deviceRow(device)
-                        .swipeActions {
-                            if isAdmin, device.current != true {
-                                Button("Remove", role: .destructive) { deviceToRemove = device }
-                            }
-                            if isAdmin, offers("roles"), let role = device.role {
-                                Button(role == .admin ? "Make Member" : "Make Admin") {
-                                    if device.current == true, role == .admin {
-                                        deviceToDemote = device
-                                    } else {
-                                        Task { await setRole(role == .admin ? .member : .admin, of: device) }
-                                    }
-                                }
-                                .tint(.blue)
-                            }
-                        }
+                    deviceEntry(device)
                 }
             } header: {
                 Text("Devices")
             } footer: {
-                if isAdmin { Text("Swipe a phone to remove it or change its role.") }
+                if isAdmin { Text("Tap a phone to remove it or change its role.") }
             }
         }
 
@@ -401,6 +467,9 @@ struct HubSettingsView: View {
             row("Background Refresh", backgroundRefreshType.value.rawValue)
             Button("Send Test Alarm") { Task { await testAlarm() } }
             Button("Send Test Alarm in 30 s") { Task { await testAlarm(delaySeconds: 30) } }
+            if let testAlarmInfo {
+                Text(testAlarmInfo).font(.footnote).foregroundColor(.secondary)
+            }
         }
 
         Section {
@@ -416,7 +485,7 @@ struct HubSettingsView: View {
         guard offers("sourceRevision") else {
             return "The hub reads Dexcom if set, otherwise Nightscout. Every phone keeps a copy for when LoopFollow reads the data itself."
         }
-        return (sendsOwnSources
+        return (isAdmin
             ? "A change made here reaches every phone following \(patientDisplayName)."
             : "An admin manages \(patientDisplayName)'s data sources.")
             + " The hub reads Dexcom if set, otherwise Nightscout. Every phone keeps a copy for when LoopFollow reads the data itself."
@@ -432,7 +501,7 @@ struct HubSettingsView: View {
         facts.liveActivityOn = laEnabled.value
         facts.ownApnKey = !lfKeyId.value.isEmpty && !lfApnsKey.value.isEmpty && !joinedWithInvite.value
         facts.ownKeyAllowed = !joinedWithInvite.value
-        facts.isAdmin = sendsOwnSources
+        facts.isAdmin = isAdmin
         facts.hubSharesKeys = offers("sharedApnsKey")
         facts.sourcesDiffer = HubSourceSync.shared.isActive && HubSourceSync.shared.differsFromHub
         facts.drivesAlarms = HubClient.shared.drivesAlarms
@@ -440,10 +509,42 @@ struct HubSettingsView: View {
         return HubChecklist.items(status: status, error: statusError, facts: facts, now: Date())
     }
 
+    /// A device of the patient; an admin taps it, or swipes it, for its role and removal.
+    @ViewBuilder
+    private func deviceEntry(_ device: HubClient.Device) -> some View {
+        if isAdmin, device.current != true || (offers("roles") && device.role != nil) {
+            Menu {
+                deviceActions(device)
+            } label: {
+                deviceRow(device).contentShape(Rectangle())
+            }
+            .swipeActions { deviceActions(device) }
+        } else {
+            deviceRow(device)
+        }
+    }
+
+    @ViewBuilder
+    private func deviceActions(_ device: HubClient.Device) -> some View {
+        if offers("roles"), let role = device.role {
+            Button(role == .admin ? "Make Member" : "Make Admin") {
+                if device.current == true, role == .admin {
+                    deviceToDemote = device
+                } else {
+                    Task { await setRole(role == .admin ? .member : .admin, of: device) }
+                }
+            }
+            .tint(.blue)
+        }
+        if device.current != true {
+            Button("Remove", role: .destructive) { deviceToRemove = device }
+        }
+    }
+
     private func deviceRow(_ device: HubClient.Device) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack {
-                Text(device.name)
+                Text(device.name).foregroundColor(.primary)
                 if device.current == true {
                     Text("This device").font(.caption).foregroundColor(.secondary)
                 }
@@ -475,38 +576,68 @@ struct HubSettingsView: View {
     }
 
     private func relative(_ date: Date) -> String {
+        Self.relative(date, now: Date())
+    }
+
+    /// A time relative to now; within a minute of now in words.
+    static func relative(_ date: Date, now: Date) -> String {
+        let interval = date.timeIntervalSince(now)
+        if abs(interval) < 60 { return interval > 0 ? "in under a minute" : "just now" }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
-        return formatter.localizedString(for: date, relativeTo: Date())
+        return formatter.localizedString(for: date, relativeTo: now)
     }
 
     // MARK: - Actions
 
-    private func run(_ action: () async throws -> Void) async {
+    /// Runs an action the user started; a failure shows in an alert with `failureTitle`,
+    /// in plain words, and goes to the log as the hub said it.
+    private func run(_ failureTitle: String, _ action: () async throws -> Void) async {
         busy = true
-        errorText = nil
-        infoText = nil
-        do { try await action() } catch { errorText = error.localizedDescription }
+        do {
+            try await action()
+        } catch {
+            LogManager.shared.log(category: .hub, message: "\(failureTitle): \(error.localizedDescription)")
+            actionError = ActionError(title: failureTitle, message: HubClient.userMessage(for: error))
+        }
         busy = false
     }
 
+    /// Brings the hub up to date, then reads its view of this device and the patient's devices.
     private func refresh() async {
         guard connected else { return }
-        await run { try await load() }
+        await HubClient.shared.sync()
+        await reload()
     }
 
-    /// Brings the hub up to date and reads its view of this device and the patient's devices.
-    private func load() async throws {
-        await HubClient.shared.sync()
+    /// Reads the hub's view of this device and the patient's devices again, without
+    /// sending anything. A hub that does not answer shows on the Ready list.
+    private func reload() async {
+        guard connected else { return }
         do {
-            let status = try await HubClient.shared.status()
-            self.status = status
+            status = try await HubClient.shared.currentStatus()
             statusError = nil
         } catch {
-            statusError = error.localizedDescription
+            if HubClient.isCancellation(error) { return }
+            guard connected else {
+                status = nil
+                statusError = nil
+                devices = []
+                return
+            }
+            LogManager.shared.log(category: .hub, message: "Hub status failed: \(error.localizedDescription)")
+            statusError = HubClient.userMessage(for: error)
             return
         }
-        devices = offers("devices") ? try await HubClient.shared.devices() : []
+        guard offers("devices") else {
+            devices = []
+            return
+        }
+        do {
+            devices = try await HubClient.shared.devices()
+        } catch {
+            LogManager.shared.log(category: .hub, message: "Hub device list failed: \(error.localizedDescription)")
+        }
     }
 
     private func readNotificationPermission() async {
@@ -515,29 +646,37 @@ struct HubSettingsView: View {
     }
 
     private func listDevices() async {
-        await run {
-            let devices = try await HubClient.shared.joinableDevices(url: urlInput, setupToken: setupToken)
+        await run("Could Not Reach LF Hub") {
+            let list = try await HubClient.shared.joinableDevices(url: urlInput, setupToken: setupToken)
             joinInvite = nil
             join = .new
             deviceName = UIDevice.current.model
-            joinableDevices = devices
+            joinPatientName = list.patientName
+            joinableDevices = list.devices
         }
     }
 
-    /// Reads a scanned or pasted invite and offers the hub's devices to join as.
+    /// Reads a scanned, pasted or submitted invite and offers the hub's devices to join as.
     private func readInvite(_ text: String) {
         guard let invite = HubClient.Invite(link: text) else {
-            errorText = "This is not an LF Hub invite code."
+            inviteError = "This is not an LF Hub invite link."
             return
         }
-        guard invite != joinInvite else { return }
+        guard invite != joinInvite, !busy else { return }
+        inviteError = nil
         Task {
-            await run {
-                let devices = try await HubClient.shared.joinableDevices(invite: invite)
+            busy = true
+            defer { busy = false }
+            do {
+                let list = try await HubClient.shared.joinableDevices(invite: invite)
                 join = .new
                 deviceName = UIDevice.current.model
                 joinInvite = invite
-                joinableDevices = devices
+                joinPatientName = list.patientName
+                joinableDevices = list.devices
+            } catch {
+                LogManager.shared.log(category: .hub, message: "Invite not read: \(error.localizedDescription)")
+                inviteError = HubClient.userMessage(for: error)
             }
         }
     }
@@ -545,16 +684,18 @@ struct HubSettingsView: View {
     private func leaveInvite() {
         joinInvite = nil
         joinableDevices = nil
+        joinPatientName = nil
         inviteLink = ""
-        errorText = nil
+        inviteError = nil
     }
 
     private func connect() async {
-        await run {
+        await run("Could Not Join LF Hub") {
             defer {
                 if connected {
                     setupToken = ""
                     joinableDevices = nil
+                    joinPatientName = nil
                     joinInvite = nil
                     inviteLink = ""
                 }
@@ -566,52 +707,55 @@ struct HubSettingsView: View {
                 try await HubClient.shared.claim(url: urlInput, setupToken: setupToken, patientName: patientName,
                                                  deviceName: deviceName, join: choice)
             }
-            try await load()
         }
+        await reload()
         if connected, backgroundRefreshType.value != .hub { offeringHubMode = true }
     }
 
     private func sendSources() async {
-        await run {
+        sourcesInfo = nil
+        await run("Could Not Send the Data Sources") {
             try await HubSourceSync.shared.sendOwn()
-            infoText = "Data sources sent to the hub."
+            sourcesInfo = "Data sources sent to the hub."
             status = try await HubClient.shared.status()
         }
     }
 
     private func takeSources() async {
-        await run {
+        sourcesInfo = nil
+        await run("Could Not Use the Hub's Data Sources") {
             try await HubSourceSync.shared.takeHub()
-            infoText = "This app now uses the hub's data sources."
+            sourcesInfo = "This app now uses the hub's data sources."
         }
     }
 
     private func createInvite() async {
-        await run {
+        await run("Could Not Create an Invite") {
             let (invite, expiresAt) = try await HubClient.shared.createInvite()
             shownInvite = ShownInvite(invite: invite, expiresAt: expiresAt)
         }
     }
 
     private func setRole(_ role: HubClient.Role, of device: HubClient.Device) async {
-        await run {
+        await run("Could Not Change the Role") {
             try await HubClient.shared.setRole(role, of: device.id)
             LogManager.shared.log(category: .hub, message: "Device \(device.id.uuidString.prefix(8)) made \(role.rawValue)")
-            try await load()
         }
+        await reload()
     }
 
     private func remove(_ device: HubClient.Device) async {
-        await run {
+        await run("Could Not Remove the Phone") {
             try await HubClient.shared.deleteDevice(device.id)
-            devices = try await HubClient.shared.devices()
         }
+        await reload()
     }
 
     private func testAlarm(delaySeconds: Int = 0) async {
-        await run {
+        testAlarmInfo = nil
+        await run("Could Not Send the Test Alarm") {
             try await HubClient.shared.sendTestAlarm(delaySeconds: delaySeconds)
-            infoText = delaySeconds > 0 ? "Test alarm in \(delaySeconds) s. Lock the phone now." : "Test alarm sent."
+            testAlarmInfo = delaySeconds > 0 ? "Test alarm in \(delaySeconds) s. Lock the phone now." : "Test alarm sent."
         }
     }
 
@@ -668,14 +812,23 @@ struct HubInviteSheet: View {
     }
 }
 
-/// Shown while LoopFollow Hub mode is selected and the hub does not drive the alarms:
+/// Shown while LF Hub mode is selected and the hub does not drive the alarms:
 /// the app alarms itself, and the LF Hub page lists what is missing.
 struct HubModeWarning: View {
     @ObservedObject private var backgroundRefreshType = Storage.shared.backgroundRefreshType
     @ObservedObject private var hubConfirmed = HubClient.shared.hubConfirmed
+    @ObservedObject private var hubProblems = HubClient.shared.hubProblems
+    @ObservedObject private var notificationsAllowed = HubClient.shared.notificationsAllowed
+    @ObservedObject private var looksHealthy = HubWatchdog.looksHealthy
+
+    /// Hub mode is selected and the hub does not drive the alarms. The hub's health turns
+    /// with time; views follow it through `HubWatchdog.looksHealthy`, set at each check.
+    static var isShown: Bool {
+        HubClient.isSupported && Storage.shared.backgroundRefreshType.value == .hub && !HubClient.shared.drivesAlarms
+    }
 
     var body: some View {
-        if backgroundRefreshType.value == .hub, !HubClient.shared.drivesAlarms {
+        if Self.isShown {
             NavigationLink(value: SettingsRoute.hub) {
                 VStack(alignment: .leading, spacing: 4) {
                     Label("LF Hub is not sending this phone's alarms", systemImage: "exclamationmark.triangle.fill")
@@ -687,6 +840,56 @@ struct HubModeWarning: View {
                 }
                 .padding(.vertical, 4)
             }
+        }
+    }
+}
+
+/// A compact line on Home while LF Hub mode is selected and the hub does not drive the
+/// alarms; tapping it opens the LF Hub page.
+struct HubStatusBanner: View {
+    let onTap: () -> Void
+
+    @ObservedObject private var backgroundRefreshType = Storage.shared.backgroundRefreshType
+    @ObservedObject private var hubConfirmed = HubClient.shared.hubConfirmed
+    @ObservedObject private var hubProblems = HubClient.shared.hubProblems
+    @ObservedObject private var notificationsAllowed = HubClient.shared.notificationsAllowed
+    @ObservedObject private var looksHealthy = HubWatchdog.looksHealthy
+
+    var body: some View {
+        if HubModeWarning.isShown {
+            Button(action: onTap) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                    Text("LF Hub isn't sending alarms. LoopFollow is alarming by itself.")
+                        .font(.footnote.weight(.semibold))
+                        .multilineTextAlignment(.leading)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right").font(.footnote)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.orange, in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+            .padding([.horizontal, .top], 8)
+        }
+    }
+}
+
+/// The LF Hub page on its own, as Home opens it from the banner.
+struct HubSettingsSheet: View {
+    let onDone: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            HubSettingsView()
+                .navigationDestination(for: SettingsRoute.self) { $0.destination }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done", action: onDone)
+                    }
+                }
         }
     }
 }

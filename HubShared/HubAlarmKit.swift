@@ -41,10 +41,11 @@ import Foundation
 
         /// Whether the alarm is ringing or about to, when it starts if this call scheduled it,
         /// and why. Not ringing when AlarmKit is not authorized or scheduling failed, so the
-        /// notification keeps its sound.
-        /// `symbol` is the SF Symbol on the alarm's button: the alarm type's icon.
-        static func ring(alarmID: UUID, title: String, soundName: String?,
-                         symbol: String = "moon.zzz") async -> (ringing: Bool, firesAt: Date?, detail: String)
+        /// notification keeps its sound. Without `soundName` it rings with the default sound.
+        /// `symbol` is the SF Symbol on the alarm's button: the alarm type's icon. The button
+        /// reads Acknowledge for an alarm whose snooze is 0 (`acknowledge`), as in the app.
+        static func ring(alarmID: UUID, title: String, soundName: String?, symbol: String = "moon.zzz",
+                         acknowledge: Bool = false) async -> (ringing: Bool, firesAt: Date?, detail: String)
         {
             // A denied state is final; notDetermined is what an extension reads even
             // after the app was authorized, so scheduling is attempted then too.
@@ -58,7 +59,7 @@ import Foundation
                 alert: AlarmPresentation.Alert(
                     title: LocalizedStringResource(stringLiteral: title),
                     stopButton: AlarmButton(
-                        text: LocalizedStringResource(stringLiteral: "Snooze"),
+                        text: LocalizedStringResource(stringLiteral: buttonTitle(acknowledge: acknowledge)),
                         textColor: .white,
                         systemImageName: symbol
                     )
@@ -77,6 +78,10 @@ import Foundation
             } catch {
                 return (false, nil, "schedule failed with authorization \(state): \(error)")
             }
+        }
+
+        static func buttonTitle(acknowledge: Bool) -> String {
+            acknowledge ? "Acknowledge" : "Snooze"
         }
 
         /// Rings a notice from the app itself (not a LoopFollow alarm) as a system

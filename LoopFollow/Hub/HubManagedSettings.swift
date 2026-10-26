@@ -4,8 +4,9 @@
 import SwiftUI
 
 /// Data-source settings while LF Hub keeps the patient's data source the same on every
-/// phone. A member, and any phone that joined with an invite, sees them read only. An admin confirms once that a change reaches every
-/// phone; the change then goes to the hub after the app's own check of it.
+/// phone. A member sees them read only. An admin confirms once that a change reaches every
+/// phone; the change then goes to the hub after the app's own check of it. While this
+/// phone's settings are not the hub's, an admin can put the hub's back or try again.
 struct HubManagedSources<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -14,6 +15,11 @@ struct HubManagedSources<Content: View>: View {
     @ObservedObject private var hubInfo = HubClient.shared.hubInfo
     @ObservedObject private var patientName = HubClient.shared.patientName
     @ObservedObject private var sync = HubSourceSync.shared
+    @ObservedObject private var url = Storage.shared.url
+    @ObservedObject private var token = Storage.shared.token
+    @ObservedObject private var dexcomUser = Storage.shared.shareUserName
+    @ObservedObject private var dexcomPassword = Storage.shared.sharePassword
+    @ObservedObject private var dexcomServer = Storage.shared.shareServer
     @State private var unlocked = false
     @State private var confirming = false
 
@@ -24,9 +30,11 @@ struct HubManagedSources<Content: View>: View {
     var body: some View {
         if sync.isActive {
             Section {
-                if HubClient.shared.sendsOwnSources {
+                if HubClient.shared.isAdmin {
                     if unlocked {
                         changeStatus
+                    } else if sync.differsFromHub {
+                        notShared(sync.state.failure)
                     } else {
                         Text("LF Hub shares this data source with every phone following \(patient).")
                             .foregroundColor(.secondary)
@@ -48,9 +56,10 @@ struct HubManagedSources<Content: View>: View {
             } message: {
                 Text("This changes the data source for everyone following \(patient).")
             }
+            .onDisappear { if unlocked { sync.endEditing() } }
         }
         Group { content }
-            .disabled(sync.isActive && !(HubClient.shared.sendsOwnSources && unlocked))
+            .disabled(sync.isActive && !(HubClient.shared.isAdmin && unlocked))
     }
 
     @ViewBuilder
@@ -69,9 +78,29 @@ struct HubManagedSources<Content: View>: View {
             Label("Sent to LF Hub", systemImage: "checkmark.circle.fill")
                 .foregroundColor(.green)
         case let .failed(reason):
-            Text(reason).font(.footnote).foregroundColor(.red)
-            Button("Try Again") { Task { await sync.retry() } }
+            notShared(reason)
         }
+    }
+
+    /// This phone's data source is not the one LF Hub shares: why, and the way back.
+    @ViewBuilder
+    private func notShared(_ reason: String?) -> some View {
+        Label("Not shared with LF Hub", systemImage: "exclamationmark.triangle.fill")
+            .foregroundColor(.orange)
+        Text((reason.map { $0 + " " } ?? "")
+            + "Until it is, this phone's data source is not the one other phones use.")
+            .font(.footnote)
+            .foregroundColor(.secondary)
+        Button("Undo") { Task { await sync.undo() } }
+        Button("Try Again") { Task { await sync.retry() } }
+    }
+}
+
+extension HubSourceSync.State {
+    /// Why the last change did not reach the hub, if it did not.
+    var failure: String? {
+        if case let .failed(reason) = self { return reason }
+        return nil
     }
 }
 

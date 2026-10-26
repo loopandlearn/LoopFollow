@@ -159,7 +159,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             infoManager: infoManager,
             statsModel: statsDisplayModel,
             onRefresh: { [weak self] in self?.refresh() },
-            onStatsTap: { [weak self] in self?.statsViewTapped() }
+            onStatsTap: { [weak self] in self?.statsViewTapped() },
+            onHubBannerTap: { [weak self] in self?.showHubSettings() }
         )
         let hosting = UIHostingController(rootView: mainView)
         // Exclude the keyboard from the hosting controller's safe area. Home has
@@ -714,6 +715,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         // ran during a BGAppRefreshTask background launch and deferred migrations.
         runMigrationsIfNeeded()
         HubBundle.shared.startListening()
+        HubClient.shared.retryUnregistrationWhileActive()
         Task {
             await HubClient.shared.readNotificationPermission()
             await HubClient.shared.sync()
@@ -1179,6 +1181,17 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     private func hideFirstTimeButtons() {
         setupNightscoutButton?.isHidden = true
         setupDexcomButton?.isHidden = true
+    }
+
+    /// Opens the LF Hub page from Home's banner.
+    private func showHubSettings() {
+        guard presentedViewController == nil else { return }
+        let hostingController = UIHostingController(rootView: HubSettingsSheet { [weak self] in
+            self?.dismiss(animated: true)
+        })
+        hostingController.overrideUserInterfaceStyle = Storage.shared.appearanceMode.value.userInterfaceStyle
+        hostingController.modalPresentationStyle = .pageSheet
+        present(hostingController, animated: true)
     }
 
     @objc private func setupNightscoutTapped() {

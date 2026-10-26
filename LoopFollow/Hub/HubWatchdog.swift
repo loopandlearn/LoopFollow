@@ -18,7 +18,6 @@ enum HubWatchdog {
 
     private static let notificationID = "lfhub.watchdog"
     private static let alertID = UUID(uuidString: "6C1F5A2E-0B7D-4E4F-9F3A-48B1A1E0D0A1")!
-    private static let alertTitle = "⚠️ LF Hub not responding"
     private static let alertSymbol = "exclamationmark.icloud"
 
     private static let lastHealthy = StorageValue<TimeInterval>(key: "hubWatchdogLastHealthy", defaultValue: 0)
@@ -37,6 +36,9 @@ enum HubWatchdog {
         case raiseAlert(minutes: Int)
         case clearAlert
     }
+
+    /// `hubLooksHealthy` as of the last check, for views to observe.
+    static let looksHealthy = ObservableValue<Bool>(default: true)
 
     /// False once checks have failed for `unhealthyTolerance`: the app then runs its
     /// own alarm check, alongside the hub.
@@ -76,12 +78,28 @@ enum HubWatchdog {
         State(lastHealthy: lastHealthy.value, unhealthySince: unhealthySince.value, alerted: alerted.value)
     }
 
+    /// The alert's title and text for why the hub is unhealthy.
+    static func alert(for cause: HubClient.Unhealthy?, minutes: Int) -> (title: String, body: String) {
+        switch cause {
+        case .keyRejected:
+            return ("⚠️ Apple rejects LF Hub's APN key",
+                    "LF Hub's alarms cannot reach this phone, so LoopFollow alarms by itself while it runs. Open LoopFollow → Settings → LF Hub to fix it.")
+        case .noPushYet, .registrationRejected, .pushFailing:
+            return ("⚠️ LF Hub can't reach this phone",
+                    "LF Hub answers, but its notifications have not reached this phone for \(minutes) minutes. LoopFollow alarms by itself while it runs. Open LoopFollow → Settings → LF Hub.")
+        case .noAnswer, nil:
+            return ("⚠️ LF Hub not responding",
+                    "No working connection to LF Hub for \(minutes) minutes, so its alarms may not reach this phone. Open LoopFollow.")
+        }
+    }
+
     @MainActor
     static func check() async {
         await HubClient.shared.readNotificationPermission()
         let hubMode = HubClient.shared.isHubMode
-        let health: HubClient.Health = hubMode ? await HubClient.shared.health() : .unknown
         let wasHealthy = hubLooksHealthy
+        let (health, cause): (HubClient.Health, HubClient.Unhealthy?) =
+            hubMode ? await HubClient.shared.healthCheck() : (.unknown, nil)
         let (state, action) = next(currentState, hubMode: hubMode, health: health,
                                    now: Date().timeIntervalSince1970)
         lastHealthy.value = state.lastHealthy
@@ -95,29 +113,30 @@ enum HubWatchdog {
         if wasHealthy, !hubLooksHealthy {
             LogManager.shared.log(category: .hub, message: "Hub watchdog: hub unhealthy; the app alarms itself")
         }
+        if looksHealthy.value != hubLooksHealthy { looksHealthy.value = hubLooksHealthy }
         switch action {
         case .none:
             break
         case let .raiseAlert(minutes):
-            await raiseAlert(minutes: minutes)
+            await raiseAlert(alert(for: cause, minutes: minutes), minutes: minutes)
         case .clearAlert:
             clearAlert()
             LogManager.shared.log(category: .hub, message: hubMode ? "Hub watchdog: hub healthy again" : "Hub watchdog: alert cleared")
         }
     }
 
-    private static func raiseAlert(minutes: Int) async {
-        LogManager.shared.log(category: .hub, message: "Hub watchdog: alerting after \(minutes) min")
+    private static func raiseAlert(_ alert: (title: String, body: String), minutes: Int) async {
+        LogManager.shared.log(category: .hub, message: "Hub watchdog: alerting after \(minutes) min: \(alert.title)")
         #if !targetEnvironment(macCatalyst)
             if #available(iOS 26, *),
-               await HubAlarmKit.ringNotice(id: alertID, title: alertTitle, symbol: alertSymbol)
+               await HubAlarmKit.ringNotice(id: alertID, title: alert.title, symbol: alertSymbol)
             {
                 return
             }
         #endif
         let content = UNMutableNotificationContent()
-        content.title = alertTitle
-        content.body = "No working connection to LF Hub for \(minutes) minutes, so its alarms may not reach this phone. Open LoopFollow."
+        content.title = alert.title
+        content.body = alert.body
         content.sound = .default
         content.interruptionLevel = .timeSensitive
         try? await UNUserNotificationCenter.current().add(

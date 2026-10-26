@@ -67,6 +67,13 @@ final class HubClient {
             self.init(hubURL: base, code: code)
         }
 
+        /// The invite a paste put in the field: the text grew by more than one character at
+        /// once into an invite link. Typed text is read only on Continue.
+        static func pasted(from old: String, to new: String) -> Invite? {
+            guard new.count - old.count > 1 else { return nil }
+            return Invite(link: new)
+        }
+
         /// The hub's codes are random bytes in base64url.
         private static func isCode(_ code: String) -> Bool {
             (16 ... 128).contains(code.count)
@@ -96,6 +103,21 @@ final class HubClient {
 
     struct DeviceList: Decodable {
         let devices: [Device]
+        /// The patient's name, in the lists offered when joining; absent on an older hub.
+        var patientName: String?
+    }
+
+    /// Replacing a device used this recently asks first: it may still be in use.
+    static let recentUse: TimeInterval = 15 * 60
+
+    /// The question to ask before replacing a device used within `recentUse`, if it was.
+    static func recentUseWarning(_ device: Device, now: Date) -> String? {
+        guard let seen = device.lastSeenAt else { return nil }
+        let ago = max(0, now.timeIntervalSince(seen))
+        guard ago < recentUse else { return nil }
+        let minutes = Int(ago / 60)
+        let when = minutes < 1 ? "just now" : minutes == 1 ? "1 minute ago" : "\(minutes) minutes ago"
+        return "\(device.name) was used \(when). Replace it anyway?"
     }
 
     /// How this phone joins a hub that already has devices.
@@ -226,6 +248,43 @@ final class HubClient {
         }
     }
 
+    /// An error in plain words for the user. The hub's own detail stays in the log.
+    static func userMessage(for error: Error) -> String {
+        switch error {
+        case let HubError.http(code, detail):
+            let lower = detail.lowercased()
+            switch code {
+            case 401: return "This phone is no longer part of LF Hub."
+            case 403 where lower.contains("take over"): return "A phone that joins with an invite cannot replace an admin's phone."
+            case 403 where lower.contains("admin"): return "Only an admin can do this."
+            case 403 where lower.contains("invite"): return HubError.inviteNotValid.errorDescription ?? ""
+            case 403 where lower.contains("setup token"): return "The setup token is not right."
+            case 403: return "LF Hub did not allow this."
+            case 404: return "LF Hub does not know this phone or device. It may have been removed."
+            case 409 where lower.contains("admin"):
+                return "LF Hub needs at least one admin. Make another phone an admin first."
+            case 409 where lower.contains("apns"):
+                return "LF Hub cannot notify this phone yet. Add the APN key under Settings → APN."
+            case 409: return "LF Hub cannot do this yet. Check the Ready list."
+            case 429: return HubError.tooManyTries.errorDescription ?? ""
+            case 502 where lower.hasPrefix("apns:"):
+                let status = detail.dropFirst("apns:".count).trimmingCharacters(in: .whitespaces)
+                return "Apple rejected the push: \(pushFailureReason(status))"
+            case 500...: return "LF Hub had a problem. Try again in a moment."
+            default: return "LF Hub did not accept this: \(detail)"
+            }
+        case HubError.notConnected: return HubError.notConnected.errorDescription ?? ""
+        case let error as HubError: return error.errorDescription ?? ""
+        case let error as URLError:
+            switch error.code {
+            case .notConnectedToInternet, .networkConnectionLost: return "This phone is offline. Try again when it is online."
+            case .timedOut: return "LF Hub did not answer in time. Try again in a moment."
+            default: return "LF Hub could not be reached. Check the address, or try again in a moment."
+            }
+        default: return error.localizedDescription
+        }
+    }
+
     /// The key this device authenticates to the hub with.
     let deviceKey = HubDeviceKey()
 
@@ -246,6 +305,9 @@ final class HubClient {
     let apnsKeyShared = StorageValue<Bool>(key: "hubApnsKeyShared", defaultValue: false)
     /// The patient's name at the hub, for messages about changes that reach every phone.
     let patientName = StorageValue<String>(key: "hubPatientName", defaultValue: "")
+    /// The hub stopped knowing this phone's key (the phone was replaced or removed), until
+    /// the phone joins again or the user dismisses the message.
+    let removedFromHub = StorageValue<Bool>(key: "hubRemovedFromHub", defaultValue: false)
 
     /// Connected, and allowed to manage the patient's data sources, devices and invites.
     var isAdmin: Bool { isConnected && role.value == .admin }
@@ -254,7 +316,8 @@ final class HubClient {
     var isMember: Bool { isConnected && role.value == .member }
 
     /// Connected as an admin that did not join with an invite: this app's data sources go
-    /// to the hub.
+    /// to the hub. An admin that joined with an invite sends them only on a change the
+    /// user confirms.
     var sendsOwnSources: Bool { isAdmin && !joinedWithInvite.value }
 
     /// The role after joining: an invite makes a member, the setup token an admin.
@@ -355,6 +418,12 @@ final class HubClient {
 
     static func alarmsCheckedHere(_ alarms: [Alarm], hubAPI: Int?) -> [Alarm] {
         alarms.filter { !hubChecks($0.type, api: hubAPI) }
+    }
+
+    /// How many of the alarms the hub should hold after reading this app's export: those
+    /// of a type it checks.
+    static func alarmCountForHub(_ alarms: [Alarm], hubAPI: Int?) -> Int {
+        alarms.filter { hubChecks($0.type, api: hubAPI) }.count
     }
 
     /// The hub sets the app badge while it drives the alarms; the app leaves it alone.
@@ -542,24 +611,24 @@ final class HubClient {
 
     /// The patient's devices at the hub, offered when joining; empty for a fresh hub.
     /// A hub without the device list answers 404 and takes new devices only.
-    func joinableDevices(url: String, setupToken: String) async throws -> [Device] {
+    func joinableDevices(url: String, setupToken: String) async throws -> DeviceList {
         let base = try Self.hubBase(url)
         let (data, code) = try await request("POST", "/v1/claim/devices", body: ["setupToken": setupToken],
                                              baseURL: base, key: nil)
         switch code {
-        case 200: return try Self.decoder.decode(DeviceList.self, from: data).devices
-        case 404: return []
+        case 200: return try Self.decoder.decode(DeviceList.self, from: data)
+        case 404: return DeviceList(devices: [])
         default: throw Self.httpError(code, data)
         }
     }
 
     /// The patient's devices offered when joining with the invite: any to copy, a member's
     /// to take over.
-    func joinableDevices(invite: Invite) async throws -> [Device] {
+    func joinableDevices(invite: Invite) async throws -> DeviceList {
         let (data, code) = try await request("POST", "/v1/join/devices", body: ["code": invite.code],
                                              baseURL: invite.hubURL, key: nil)
         guard code == 200 else { throw Self.joinError(code, data) }
-        return try Self.decoder.decode(DeviceList.self, from: data).devices
+        return try Self.decoder.decode(DeviceList.self, from: data)
     }
 
     /// Joins the hub as an admin device with the setup token, as `join` says, creating the
@@ -620,6 +689,8 @@ final class HubClient {
             case .copy: adoptionPending.value = .copied
             }
             try deviceKey.set(claim.deviceKey)
+            uploads.forget()
+            removedFromHub.value = false
             role.value = joinRole
             joinedWithInvite.value = withInvite
             // The new device has no APN key at the hub yet.
@@ -730,9 +801,10 @@ final class HubClient {
     }
 
     /// Sets the patient's sources to these settings; one that is not set is removed at
-    /// the hub. Admins only.
-    func sendSources(_ sources: LocalSources) async throws {
-        guard !joinedWithInvite.value else { throw HubError.invitedPhone }
+    /// the hub. Admins only; from a phone that joined with an invite only when the user
+    /// confirmed the change (`confirmed`).
+    func sendSources(_ sources: LocalSources, confirmed: Bool = false) async throws {
+        guard !joinedWithInvite.value || confirmed else { throw HubError.invitedPhone }
         var body: [String: Any] = [:]
         if sources.hasNightscout {
             body["nightscoutUrl"] = sources.nightscoutURL
@@ -778,7 +850,7 @@ final class HubClient {
         await HubAlarmSounds.prepare(for: Storage.shared.alarms.value)
         guard let json = AlarmSettingsExport.fromCurrentStorage().encodeToJSON() else { return }
         do {
-            _ = try await send("PUT", "/v1/device/alarms", rawBody: Data(json.utf8))
+            _ = try await send("PUT", "/v1/device/alarms", skipRepeat: true, rawBody: Data(json.utf8))
         } catch {
             // The hub holds an older alarm list: the app alarms itself until it takes this one.
             await setConfirmed(false, problems: [Problem.alarmsNotReceived])
@@ -790,7 +862,7 @@ final class HubClient {
     func uploadClientSettings() async throws {
         guard isConnected else { return }
         try await adoptIfPending()
-        _ = try await send("PUT", "/v1/device/clientsettings", body: Self.currentClientSettings())
+        _ = try await send("PUT", "/v1/device/clientsettings", skipRepeat: true, body: Self.currentClientSettings())
         await MainActor.run { clientSettingsPending.value = false }
     }
 
@@ -844,6 +916,51 @@ final class HubClient {
         case unknown
     }
 
+    /// Why the hub cannot deliver this device's alarms.
+    enum Unhealthy: Equatable {
+        /// The hub did not answer properly.
+        case noAnswer
+        /// No push has reached this device yet.
+        case noPushYet
+        /// Apple rejects the APN key the hub signs this device's pushes with.
+        case keyRejected
+        /// Apple rejects this phone's push registration.
+        case registrationRejected
+        /// Pushes have been failing for `pushFailureTolerance`.
+        case pushFailing
+    }
+
+    /// Why Apple rejects pushes, from APNs' answer as the hub reports it ("403 InvalidProviderToken").
+    enum PushRejection: Equatable {
+        case key
+        case registration
+        /// A failure that may pass.
+        case other
+    }
+
+    static func pushRejection(_ status: String?) -> PushRejection {
+        guard let status else { return .other }
+        let keyReasons = ["InvalidProviderToken", "MissingProviderToken", "TopicDisallowed", "BadCertificate"]
+        let registrationReasons = ["BadDeviceToken", "Unregistered", "DeviceTokenNotForTopic"]
+        if keyReasons.contains(where: status.contains) { return .key }
+        if registrationReasons.contains(where: status.contains) || status.hasPrefix("410") { return .registration }
+        return .other
+    }
+
+    /// APNs' reason for a rejected push in plain words.
+    static func pushFailureReason(_ status: String) -> String {
+        switch pushRejection(status) {
+        case .key: return "it does not accept the APN key. Check the Key ID and key under Settings → APN."
+        case .registration: return "this phone's registration is out of date. Tap Register Again in the Ready list."
+        case .other: return status
+        }
+    }
+
+    /// The failed push the status tells of: the last badge push's or the sounding alarm's answer.
+    private static func failedPushStatus(_ device: Status.Device) -> String? {
+        [device.lastPushStatus, device.activeAlarm?.lastPushStatus].compactMap { $0 }.first { !$0.hasPrefix("200") }
+    }
+
     /// Pushes to this device may fail this long before the hub counts as unable
     /// to reach it.
     static let pushFailureTolerance: TimeInterval = 10 * 60
@@ -852,26 +969,44 @@ final class HubClient {
     /// work), its engine is alive, and its pushes reach this device. Records the
     /// hub's confirmation from the same answer.
     func health() async -> Health {
-        guard isConnected else { return .unhealthy }
+        await healthCheck().health
+    }
+
+    /// The hub's health and, when it is unhealthy, why. A hub that does not know this
+    /// device's key gives no verdict: the phone has left it.
+    func healthCheck() async -> (health: Health, cause: Unhealthy?) {
+        guard isConnected else { return (.unhealthy, .noAnswer) }
         do {
             let status = try await status()
             await absorb(status)
             let (_, code) = try await request("GET", "/livez", key: nil)
-            guard code == 200 else { return .unhealthy }
-            return Self.health(of: status, now: Date())
+            guard code == 200 else { return (.unhealthy, .noAnswer) }
+            let cause = Self.unhealthiness(of: status, now: Date())
+            return (cause == nil ? .healthy : .unhealthy, cause)
         } catch {
-            return Self.isCancellation(error) ? .unknown : .unhealthy
+            if Self.isCancellation(error) || !isConnected { return (.unknown, nil) }
+            return (.unhealthy, .noAnswer)
         }
     }
 
     /// Healthy once a push has reached this device and while pushes have not been
     /// failing for `pushFailureTolerance`.
     static func health(of status: Status, now: Date) -> Health {
-        guard status.device.lastPushOkAt != nil else { return .unhealthy }
-        if let since = status.device.pushFailingSince, now.timeIntervalSince(since) >= pushFailureTolerance {
-            return .unhealthy
+        unhealthiness(of: status, now: now) == nil ? .healthy : .unhealthy
+    }
+
+    /// Why the hub's pushes do not reach this device, or nil while they do. Apple
+    /// rejecting the key or the phone's registration counts at once; any other failure
+    /// after `pushFailureTolerance`.
+    static func unhealthiness(of status: Status, now: Date) -> Unhealthy? {
+        if let since = status.device.pushFailingSince {
+            switch pushRejection(failedPushStatus(status.device)) {
+            case .key: return .keyRejected
+            case .registration: return .registrationRejected
+            case .other: if now.timeIntervalSince(since) >= pushFailureTolerance { return .pushFailing }
+            }
         }
-        return .healthy
+        return status.device.lastPushOkAt == nil ? .noPushYet : nil
     }
 
     static func isCancellation(_ error: Error) -> Bool {
@@ -921,10 +1056,25 @@ final class HubClient {
     }
 
     /// Tells the hub the alarm was snoozed or acknowledged here, so it stops
-    /// repeating it at once.
+    /// repeating it at once. The alarms with the new snooze go first, so the hub
+    /// never takes the alarm as handled without its snooze.
     func alarmHandled(_ alarmID: UUID) {
         guard isHubMode else { return }
-        uploadSoon { _ = try await $0.send("POST", "/v1/device/alarm/\(alarmID.uuidString)/handled") }
+        uploadSoon { client in
+            try await Self.reportHandled(upload: { try await client.uploadAlarms() },
+                                         handled: { _ = try await client.send("POST", "/v1/device/alarm/\(alarmID.uuidString)/handled") })
+        }
+    }
+
+    /// Uploads, then reports the alarm handled. An upload the hub refuses for good does
+    /// not hold back the report; one that may pass fails the whole step, to be retried.
+    static func reportHandled(upload: () async throws -> Void, handled: () async throws -> Void) async throws {
+        do {
+            try await upload()
+        } catch let error where !isRetryable(error) {
+            LogManager.shared.log(category: .hub, message: "Alarm upload before handled failed: \(error.localizedDescription)")
+        }
+        try await handled()
     }
 
     /// The alarm the hub is sounding that is the current alarm here, if any.
@@ -950,6 +1100,13 @@ final class HubClient {
         Observable.shared.currentAlarm.value = nil
     }
 
+    /// The hub's view of this device, recorded as a sync records it.
+    func currentStatus() async throws -> Status {
+        let status = try await status()
+        await absorb(status)
+        return status
+    }
+
     /// Reads the hub's view of this device: whether it confirms the alarms, and
     /// whether the adopted alarm still sounds there.
     func refreshStatus() async {
@@ -973,6 +1130,30 @@ final class HubClient {
         }
         await localDisconnect()
         await unregisterPending()
+        await retryUnregistrationWhileActive()
+    }
+
+    @MainActor private(set) var unregistrationRetry: Task<Void, Never>?
+    static let unregistrationRetryInterval: UInt64 = 60
+
+    /// Asks the hub every minute to remove the device this phone left, while one is
+    /// pending and the app is active. Coming to the foreground starts it again.
+    @MainActor func retryUnregistrationWhileActive() {
+        guard pendingUnregistration.current != nil, unregistrationRetry == nil else { return }
+        unregistrationRetry = Task { @MainActor [self] in
+            while pendingUnregistration.current != nil, UIApplication.shared.applicationState == .active {
+                try? await Task.sleep(nanoseconds: Self.unregistrationRetryInterval * 1_000_000_000)
+                if Task.isCancelled { break }
+                await unregisterPending()
+            }
+            if !Task.isCancelled { unregistrationRetry = nil }
+        }
+    }
+
+    /// Stops asking the hub to remove the device this phone left until the next start.
+    @MainActor func stopUnregistrationRetries() {
+        unregistrationRetry?.cancel()
+        unregistrationRetry = nil
     }
 
     /// Asks the hub to remove the device this phone left, if one is pending. Done once the
@@ -995,6 +1176,7 @@ final class HubClient {
     /// Forgets the hub; Hub mode falls back to Silent Tune so the app alarms again.
     @MainActor private func localDisconnect() {
         deviceKey.clear()
+        uploads.forget()
         shareHubURL()
         setConfirmed(false, problems: [])
         hubInfo.value = nil
@@ -1079,15 +1261,27 @@ final class HubClient {
         }
     }
 
-    private func forgotten() async {
+    /// The hub answered 401 to this phone's key: the phone was replaced or removed. Leaves
+    /// the hub at once, so the app alarms itself again, and tells the user once.
+    @MainActor private func forgotten() {
+        guard isConnected else { return }
         LogManager.shared.log(category: .hub, message: "Hub no longer knows this device")
-        await localDisconnect()
+        localDisconnect()
+        removedFromHub.value = true
+        let content = UNMutableNotificationContent()
+        content.title = "This phone was removed from LF Hub"
+        content.body = "LoopFollow alarms by itself again. To use LF Hub, join again under Settings → LF Hub."
+        content.sound = .default
+        postNotification(UNNotificationRequest(identifier: "lfhub.removed", content: content, trigger: nil))
     }
+
+    /// Delivers the app's own notices; tests replace it.
+    @MainActor var postNotification: (UNNotificationRequest) -> Void = { UNUserNotificationCenter.current().add($0) }
 
     /// Tells the hub what it drives for this device and records its confirmation.
     /// The badge and the Live Activity follow their settings in this app.
     private func pushHubSettings() async throws {
-        _ = try await send("PUT", "/v1/device/settings",
+        _ = try await send("PUT", "/v1/device/settings", skipRepeat: true,
                            body: ["badge": isHubMode && Storage.shared.appBadge.value,
                                   "liveActivity": isHubMode && Storage.shared.laEnabled.value,
                                   "alarms": isHubMode,
@@ -1123,7 +1317,9 @@ final class HubClient {
         }
         let problems = Self.confirmationProblems(status, alarmsPending: alarmsPending.value || adoptionPending.value != .none,
                                                  alarmKitAuthorized: Self.alarmKitAuthorized,
-                                                 notificationsAllowed: notificationsAllowed.value, now: Date())
+                                                 notificationsAllowed: notificationsAllowed.value, now: Date(),
+                                                 exportedAlarms: Self.alarmCountForHub(Storage.shared.alarms.value,
+                                                                                       hubAPI: status.hub?.api))
         setConfirmed(problems.isEmpty, problems: problems)
         if let alarmID = status.device.activeAlarm?.alarmId.flatMap(UUID.init(uuidString:)) {
             if problems.isEmpty { adoptHubAlarm(alarmID) }
@@ -1134,10 +1330,11 @@ final class HubClient {
 
     /// Whether the hub's status shows it delivering this device's alarms.
     static func confirms(_ status: Status, hubMode: Bool, alarmsPending: Bool, alarmKitAuthorized: Bool,
-                         notificationsAllowed: Bool, now: Date) -> Bool
+                         notificationsAllowed: Bool, now: Date, exportedAlarms: Int? = nil) -> Bool
     {
         hubMode && confirmationProblems(status, alarmsPending: alarmsPending, alarmKitAuthorized: alarmKitAuthorized,
-                                        notificationsAllowed: notificationsAllowed, now: now).isEmpty
+                                        notificationsAllowed: notificationsAllowed, now: now,
+                                        exportedAlarms: exportedAlarms).isEmpty
     }
 
     /// What keeps the hub from delivering this device's alarms, in words for the user.
@@ -1147,7 +1344,9 @@ final class HubClient {
         static let alarmsNotReceived = "The hub does not have this phone's latest alarms yet."
         static let notFollowed = "The hub is not reading the patient's data yet. Check the data sources under Settings → LF Hub."
         static let noPushYet = "No notification from the hub has arrived yet."
-        static let pushFailing = "Notifications from the hub are failing."
+        static let pushFailing = "Notifications from LF Hub are not reaching this phone."
+        static let apnKeyRejected = "Apple rejects the APN key, so LF Hub cannot notify this phone."
+        static let alarmsSkipped = "LF Hub could not read some of this phone's alarms, so LoopFollow checks the alarms itself. Updating LF Hub may help."
         static let alarmKitDenied = "Alarms may not ring through silent mode. Allow it under Settings → LF Hub."
         static let alarmKitUnavailable = "Ringing through silent mode requires iOS 26."
         static let notificationsOff = "Notifications for LoopFollow are off or delivered quietly, so LF Hub's alarms would not show."
@@ -1162,23 +1361,37 @@ final class HubClient {
 
     /// Each reason the status gives for the hub not delivering this device's alarms:
     /// a hub version this app does not work with, push not registered or not reaching the
-    /// phone, alarms off at the hub, the latest alarm list not received, the patient not
-    /// followed, AlarmKit not allowed, or notifications not allowed.
+    /// phone, alarms off at the hub, the latest alarm list not received or fewer alarms in
+    /// it than the `exportedAlarms` the hub should hold, the patient not followed, AlarmKit
+    /// not allowed, or notifications not allowed.
     static func confirmationProblems(_ status: Status, alarmsPending: Bool, alarmKitAuthorized: Bool,
-                                     notificationsAllowed: Bool, now: Date) -> [String]
+                                     notificationsAllowed: Bool, now: Date, exportedAlarms: Int? = nil) -> [String]
     {
         var problems: [String] = []
         if !supports(status.hub) { problems.append(Problem.hubOutdated) }
         if !status.device.apnsConfigured { problems.append(Problem.noPush) }
         if status.device.settings?.alarms != true { problems.append(Problem.alarmsOff) }
-        if alarmsPending || status.device.alarmsReceived != true { problems.append(Problem.alarmsNotReceived) }
+        if alarmsPending || status.device.alarmsReceived != true {
+            problems.append(Problem.alarmsNotReceived)
+        } else if let exportedAlarms, let held = status.device.alarmCount, held < exportedAlarms {
+            problems.append(Problem.alarmsSkipped)
+        }
         if status.patient.followed != true { problems.append(Problem.notFollowed) }
-        if status.device.apnsConfigured, health(of: status, now: now) != .healthy {
-            problems.append(status.device.lastPushOkAt == nil ? Problem.noPushYet : Problem.pushFailing)
+        if status.device.apnsConfigured, let cause = unhealthiness(of: status, now: now) {
+            problems.append(problem(for: cause))
         }
         if let problem = alarmKitProblem(authorized: alarmKitAuthorized) { problems.append(problem) }
         if !notificationsAllowed { problems.append(Problem.notificationsOff) }
         return problems
+    }
+
+    /// The words for the user for a push problem.
+    static func problem(for cause: Unhealthy) -> String {
+        switch cause {
+        case .noPushYet: return Problem.noPushYet
+        case .keyRejected: return Problem.apnKeyRejected
+        case .noAnswer, .registrationRejected, .pushFailing: return Problem.pushFailing
+        }
     }
 
     /// Why hub alarms cannot ring as system alarms, if they cannot.
@@ -1308,13 +1521,25 @@ final class HubClient {
         return decoder
     }()
 
-    /// The response body of a call answered with 2xx; any other answer throws.
-    private func send(_ method: String, _ path: String, body: Any? = nil, rawBody: Data? = nil,
-                      baseURL: String = Storage.shared.hubURL.value,
+    /// The uploads that reached the hub lately, so the same upload made again right after
+    /// (two syncs in a row, a snooze and its debounced upload) is not sent twice.
+    private let uploads = RecentUploads()
+
+    /// The response body of a call answered with 2xx; any other answer throws. With
+    /// `skipRepeat` an upload the hub took within `RecentUploads.window` is not sent again,
+    /// and answers an empty body.
+    private func send(_ method: String, _ path: String, skipRepeat: Bool = false, body: Any? = nil,
+                      rawBody: Data? = nil, baseURL: String = Storage.shared.hubURL.value,
                       key: String? = HubClient.shared.deviceKey.value) async throws -> Data
     {
+        let upload = skipRepeat ? RecentUploads.digest(body: body, rawBody: rawBody) : nil
+        if let upload, uploads.isRepeat(path, upload, now: Date()) {
+            LogManager.shared.log(category: .hub, message: "Hub upload \(path) skipped: the hub took the same just now", isDebug: true)
+            return Data()
+        }
         let (data, code) = try await request(method, path, body: body, rawBody: rawBody, baseURL: baseURL, key: key)
         guard (200 ..< 300).contains(code) else { throw Self.httpError(code, data) }
+        if let upload { uploads.record(path, upload, now: Date()) }
         return data
     }
 
@@ -1357,7 +1582,44 @@ final class HubClient {
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+        let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+        // Any call with this phone's key answered 401: the hub does not know the phone.
+        if code == 401, let key, key == deviceKey.value { await forgotten() }
+        return (data, code)
+    }
+}
+
+/// The uploads the hub took lately, by path, as a digest of their body.
+final class RecentUploads {
+    /// The same upload within this long after the last is skipped.
+    static let window: TimeInterval = 30
+
+    private let lock = NSLock()
+    private var taken: [String: (digest: String, at: Date)] = [:]
+
+    /// A digest of the body that does not depend on the order of its keys; nil when it
+    /// is not JSON.
+    static func digest(body: Any?, rawBody: Data?) -> String? {
+        let object: Any? = body ?? rawBody.flatMap { try? JSONSerialization.jsonObject(with: $0) }
+        guard let object,
+              let canonical = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+        else { return nil }
+        return SHA256.hash(data: canonical).map { String(format: "%02x", $0) }.joined()
+    }
+
+    func isRepeat(_ path: String, _ digest: String, now: Date) -> Bool {
+        lock.withLock {
+            guard let last = taken[path] else { return false }
+            return last.digest == digest && now.timeIntervalSince(last.at) < Self.window
+        }
+    }
+
+    func record(_ path: String, _ digest: String, now: Date) {
+        lock.withLock { taken[path] = (digest, now) }
+    }
+
+    func forget() {
+        lock.withLock { taken = [:] }
     }
 }
 

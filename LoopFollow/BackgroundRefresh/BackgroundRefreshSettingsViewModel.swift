@@ -38,8 +38,10 @@ class BackgroundRefreshSettingsViewModel: ObservableObject {
     }
 
     /// Switches the Background Refresh mode: the one path for every change, from
-    /// this screen or from LF Hub.
-    static func change(to newValue: BackgroundRefreshType) {
+    /// this screen or from LF Hub. Entering or leaving Hub mode answers the task that
+    /// brings the hub up to date.
+    @discardableResult
+    static func change(to newValue: BackgroundRefreshType) -> Task<Void, Never>? {
         let storage = Storage.shared
         LogManager.shared.log(category: .general, message: "Background refresh type changed to: \(newValue.rawValue)")
 
@@ -65,16 +67,15 @@ class BackgroundRefreshSettingsViewModel: ObservableObject {
 
         MainViewController.shared?.backgroundModeChanged()
         if storage.backgroundRefreshType.value != .hub { HubBundle.shared.stopListening() }
-        if hubModeChanges {
-            Task {
-                #if !targetEnvironment(macCatalyst)
-                    if newValue == .hub, #available(iOS 26, *) { _ = await HubAlarmKit.requestAuthorization() }
-                #endif
-                // In the foreground the sync starts the hub's long poll and its watchdog
-                // checks, as coming to the foreground does.
-                await HubClient.shared.sync()
-                if newValue == .hub { await HubWatchdog.check() }
-            }
+        guard hubModeChanges else { return nil }
+        return Task {
+            #if !targetEnvironment(macCatalyst)
+                if newValue == .hub, #available(iOS 26, *) { _ = await HubAlarmKit.requestAuthorization() }
+            #endif
+            // In the foreground the sync starts the hub's long poll and its watchdog
+            // checks, as coming to the foreground does.
+            await HubClient.shared.sync()
+            if newValue == .hub { await HubWatchdog.check() }
         }
     }
 }

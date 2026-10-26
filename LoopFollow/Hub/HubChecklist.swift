@@ -71,7 +71,8 @@ enum HubChecklist {
             return [hub]
         }
         guard let status else { return [] }
-        if facts.hubMode, !facts.hubLooksHealthy {
+        // Pushes that do not arrive show on their own item.
+        if facts.hubMode, !facts.hubLooksHealthy, HubClient.unhealthiness(of: status, now: now) == nil {
             hub.problem = "LF Hub has not answered properly for several minutes."
             hub.fix = .retry
         }
@@ -90,7 +91,7 @@ enum HubChecklist {
         let sharedKey = status.device.apnsKeyShared == true
         if facts.ownApnKey || sharedKey {
             items.append(Item(id: .apnKey, title: sharedKey && !facts.ownApnKey ? "APN key shared by an admin" : "APN key added"))
-            items.append(pushItem(status, now: now))
+            items.append(pushItem(status, ownApnKey: facts.ownApnKey, now: now))
         } else {
             if !facts.ownKeyAllowed {
                 items.append(Item(id: .apnKey, title: "APN key shared by an admin",
@@ -111,7 +112,8 @@ enum HubChecklist {
             var confirmed = Item(id: .confirmed, title: "LF Hub sends this phone's alarms")
             if !facts.drivesAlarms {
                 let covered = [HubClient.Problem.noPush, HubClient.Problem.notFollowed, HubClient.Problem.noPushYet,
-                               HubClient.Problem.pushFailing, HubClient.Problem.alarmKitDenied,
+                               HubClient.Problem.pushFailing, HubClient.Problem.apnKeyRejected,
+                               HubClient.Problem.alarmKitDenied,
                                HubClient.Problem.alarmKitUnavailable, HubClient.Problem.hubOutdated,
                                HubClient.Problem.notificationsOff]
                 let remaining = facts.hubProblems.filter { !covered.contains($0) }
@@ -182,7 +184,7 @@ enum HubChecklist {
     @MainActor static func perform(_ fix: Fix) async {
         switch fix {
         case .useHubMode:
-            BackgroundRefreshSettingsViewModel.change(to: .hub)
+            await BackgroundRefreshSettingsViewModel.change(to: .hub)?.value
         case .askNotifications:
             await withCheckedContinuation { continuation in
                 NotificationAuthorization.requestIfNeeded { continuation.resume() }
@@ -211,14 +213,36 @@ enum HubChecklist {
         }
     }
 
-    private static func pushItem(_ status: HubClient.Status, now: Date) -> Item {
+    /// Whether the hub's notifications arrive, and if not, what is wrong: Apple rejecting
+    /// the APN key is fixed where the key was added; anything else by registering again.
+    private static func pushItem(_ status: HubClient.Status, ownApnKey: Bool, now: Date) -> Item {
         var item = Item(id: .push, title: "Notifications from LF Hub arrive")
         if !status.device.apnsConfigured {
             item.problem = "LF Hub has not registered this phone for notifications yet."
-        } else if HubClient.health(of: status, now: now) != .healthy {
-            item.problem = status.device.lastPushOkAt == nil ? HubClient.Problem.noPushYet : HubClient.Problem.pushFailing
+            item.fix = .registerAgain
+            return item
         }
-        if item.problem != nil { item.fix = .registerAgain }
+        switch HubClient.unhealthiness(of: status, now: now) {
+        case nil:
+            break
+        case .keyRejected:
+            if ownApnKey {
+                item.problem = HubClient.Problem.apnKeyRejected + " Check the Key ID and key under Settings → APN."
+                item.fix = .goToAPN
+            } else {
+                item.problem = HubClient.Problem.apnKeyRejected + " Ask the admin who added the key to check it under Settings → APN."
+                item.fix = .askAdmin
+            }
+        case .registrationRejected:
+            item.problem = HubClient.Problem.pushFailing + " Apple says this phone's registration is out of date."
+            item.fix = .registerAgain
+        case .pushFailing, .noAnswer:
+            item.problem = HubClient.Problem.pushFailing
+            item.fix = .registerAgain
+        case .noPushYet:
+            item.problem = HubClient.Problem.noPushYet
+            item.fix = .registerAgain
+        }
         return item
     }
 

@@ -24,7 +24,9 @@ struct NightscoutSettingsView: View {
                 continueSection
             }
 
-            importSection
+            if !HubSourceSync.shared.hidesImport {
+                importSection
+            }
         }
         .navigationDestination(isPresented: $showUnitsSetup) {
             UnitsOnboardingView {

@@ -68,8 +68,9 @@ struct LocalSources: Equatable {
 /// hub the same, so the app's own fallback never follows the patient with old credentials.
 /// The hub counts each change of the sources in `sourceRevision`; a revision this app has
 /// not applied brings the hub's sources here. A change made in this app goes to the hub
-/// from an admin phone that did not join with an invite once the app's own check of the
-/// new source succeeds; on any other phone the hub's sources are put back.
+/// once the app's own check of the new source succeeds: from an admin phone that did not
+/// join with an invite, and from any admin phone while the user is making a change they
+/// confirmed. On a member phone the hub's sources are put back.
 @MainActor
 final class HubSourceSync: ObservableObject {
     static let shared = HubSourceSync()
@@ -91,6 +92,12 @@ final class HubSourceSync: ObservableObject {
     private var busy = false
     /// The settings changed while busy; looked at again when done.
     private var changedWhileBusy = false
+    /// An admin confirmed changing the data source here, so the change goes to the hub even
+    /// from a phone that joined with an invite. Lasts while the settings are open and
+    /// `confirmedChangeGrace` after, so the last edit still settles.
+    private var changeConfirmed = false
+    private var editingSession = 0
+    private static let confirmedChangeGrace: UInt64 = 5
     private var cancellables = Set<AnyCancellable>()
 
     private var client: HubClient { HubClient.shared }
@@ -98,8 +105,18 @@ final class HubSourceSync: ObservableObject {
     /// The hub keeps the patient's data sources in step across the devices.
     var isActive: Bool { client.offers("sourceRevision") }
 
+    /// A member does not import settings on the data source screens: the hub's data source
+    /// would replace them.
+    var hidesImport: Bool { isActive && client.isMember }
+
     /// This app's settings are not the hub's sources as this app last saw them.
     var differsFromHub: Bool { LocalSources.stored().digest != syncedDigest.value }
+
+    /// Whether a change of the settings goes to the hub: always from an admin that did not
+    /// join with an invite, and from any admin on a change the user confirmed.
+    nonisolated static func sendsChange(isAdmin: Bool, joinedWithInvite: Bool, confirmed: Bool) -> Bool {
+        isAdmin && (!joinedWithInvite || confirmed)
+    }
 
     /// Whether to take the hub's sources after a status: the hub counts revisions and
     /// this app has not applied the current one.
@@ -142,7 +159,7 @@ final class HubSourceSync: ObservableObject {
     /// could not be asked.
     func follow(_ status: HubClient.Status) async {
         let hubHasSources = status.patient.nightscoutHost != nil || status.patient.dexcom == true
-        let memberDiffers = isActive && client.isConnected && !client.sendsOwnSources && hubHasSources && differsFromHub
+        let memberDiffers = isActive && client.isConnected && !client.isAdmin && hubHasSources && differsFromHub
         guard Self.needsSources(hubRevision: status.patient.sourceRevision, applied: appliedRevision.value)
             || memberDiffers,
             !busy
@@ -201,17 +218,41 @@ final class HubSourceSync: ObservableObject {
     /// Checks this app's settings again and sends them to the hub; for an admin after a
     /// failed check or a refused change.
     func retry() async {
-        await settingsChanged()
+        await settingsChanged(confirmed: true)
     }
 
-    /// An admin starts changing the settings here; `state` follows the coming change.
+    /// Puts the hub's sources back in this app's settings; for an admin whose change did
+    /// not reach the hub.
+    func undo() async {
+        do {
+            try take(await client.sources())
+            state = .idle
+            LogManager.shared.log(category: .hub, message: "Data source change undone; the hub's sources are back")
+        } catch {
+            state = .failed("LF Hub could not be reached to bring back its data source. \(HubClient.userMessage(for: error))")
+            LogManager.shared.log(category: .hub, message: "Hub data sources not taken for undo: \(error.localizedDescription)")
+        }
+    }
+
+    /// An admin confirmed changing the settings here; `state` follows the coming change.
     func beginEditing() {
         state = .idle
+        changeConfirmed = true
+        editingSession += 1
     }
 
-    /// The settings changed in this app: an admin that did not join with an invite sends
-    /// them to the hub, any other phone gets the hub's back.
-    private func settingsChanged() async {
+    /// The admin left the settings: a change made from now on is not a confirmed one.
+    func endEditing() {
+        let session = editingSession
+        Task {
+            try? await Task.sleep(nanoseconds: Self.confirmedChangeGrace * 1_000_000_000)
+            if editingSession == session { changeConfirmed = false }
+        }
+    }
+
+    /// The settings changed in this app: they go to the hub as `sendsChange` says;
+    /// otherwise the hub's come back.
+    private func settingsChanged(confirmed: Bool? = nil) async {
         guard isActive, differsFromHub else { return }
         guard !busy else {
             changedWhileBusy = true
@@ -219,10 +260,11 @@ final class HubSourceSync: ObservableObject {
         }
         busy = true
         defer { done() }
-        if client.sendsOwnSources {
-            await send(LocalSources.stored())
+        let confirmed = confirmed ?? changeConfirmed
+        if Self.sendsChange(isAdmin: client.isAdmin, joinedWithInvite: client.joinedWithInvite.value, confirmed: confirmed) {
+            await send(LocalSources.stored(), confirmed: confirmed)
         } else {
-            LogManager.shared.log(category: .hub, message: "Data sources changed on a member phone; taking the hub's back")
+            LogManager.shared.log(category: .hub, message: "Data sources changed without a change this phone sends; taking the hub's back")
             do {
                 try take(await client.sources())
             } catch {
@@ -240,7 +282,7 @@ final class HubSourceSync: ObservableObject {
     }
 
     /// Sends the settings to the hub once the app's own check of them succeeds.
-    private func send(_ sources: LocalSources) async {
+    private func send(_ sources: LocalSources, confirmed: Bool) async {
         state = .checking
         if let problem = await Self.check(sources) {
             // A newer change is checked on its own.
@@ -258,7 +300,7 @@ final class HubSourceSync: ObservableObject {
         }
         do {
             let before = appliedRevision.value
-            try await client.sendSources(sources)
+            try await client.sendSources(sources, confirmed: confirmed)
             syncedDigest.value = sources.digest
             state = .sent
             LogManager.shared.log(category: .hub, message: "Data source change sent to the hub")
@@ -273,10 +315,9 @@ final class HubSourceSync: ObservableObject {
         }
     }
 
-    /// The hub's own words for a refusal.
+    /// A refusal in plain words.
     private static func reason(_ error: Error) -> String {
-        if case let HubClient.HubError.http(_, message) = error { return message }
-        return error.localizedDescription
+        HubClient.userMessage(for: error)
     }
 
     /// Why the settings cannot go to the hub, from the same checks the Nightscout and

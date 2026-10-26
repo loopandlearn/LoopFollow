@@ -69,14 +69,21 @@ final class NotificationService: UNNotificationServiceExtension {
 
         let receipt = userInfo["lfhubReceipt"] as? String
         let ringsSystemAlarm = delivery == .systemAlarm
-        let sound = userInfo["lfhubSound"] as? String
+        let named = userInfo["lfhubSound"] as? String
+        // A sound the app has not put in the App Group rings as the default sound.
+        let sound = named.flatMap { Self.soundExists($0) ? $0 : nil }
+        if let named, sound == nil {
+            Self.log("alarm \(alarmID.uuidString.prefix(8)) sound \(named) missing, ringing the default sound")
+        }
+        let acknowledge = request.content.categoryIdentifier == HubAppGroup.acknowledgeCategory
         let symbol = userInfo["lfhubIcon"] as? String ?? "moon.zzz"
         let ringOnce = (userInfo["lfhubRingOnce"] as? Int) == 1
         let started = Date()
         Task {
             async let receiptSent: Void = Self.sendReceipt(receipt, alarmID: alarmID)
             if ringsSystemAlarm {
-                let (ringing, firesAt) = await Self.ring(alarmID: alarmID, title: content.title, sound: sound, symbol: symbol)
+                let (ringing, firesAt) = await Self.ring(alarmID: alarmID, title: content.title, sound: sound,
+                                                         symbol: symbol, acknowledge: acknowledge)
                 if ringing {
                     // The system alarm is the alert; the notification goes quietly to the list.
                     content.sound = nil
@@ -93,11 +100,14 @@ final class NotificationService: UNNotificationServiceExtension {
 
     /// Rings the hub alarm as an AlarmKit alarm: whether it rings, and when it starts if
     /// this push scheduled it.
-    private static func ring(alarmID: UUID, title: String, sound: String?, symbol: String) async -> (Bool, Date?) {
+    private static func ring(alarmID: UUID, title: String, sound: String?, symbol: String,
+                             acknowledge: Bool) async -> (Bool, Date?)
+    {
         #if canImport(AlarmKit)
             if #available(iOS 26, *) {
-                let result = await HubAlarmKit.ring(alarmID: alarmID, title: title, soundName: sound, symbol: symbol)
-                log("alarm \(alarmID.uuidString.prefix(8)) sound=\(sound ?? "default") soundFile=\(soundExists(sound)) -> \(result.detail)")
+                let result = await HubAlarmKit.ring(alarmID: alarmID, title: title, soundName: sound, symbol: symbol,
+                                                    acknowledge: acknowledge)
+                log("alarm \(alarmID.uuidString.prefix(8)) sound=\(sound ?? "default") button=\(HubAlarmKit.buttonTitle(acknowledge: acknowledge)) -> \(result.detail)")
                 return (result.ringing, result.firesAt)
             }
         #endif

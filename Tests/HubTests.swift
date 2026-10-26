@@ -340,8 +340,23 @@ final class HubUnauthorizedProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
-@Suite(.serialized)
+/// These tests change HubClient.shared's connection. Notices go nowhere, and the work
+/// leaving a hub starts in the background (the bundle's long poll, removal retries)
+/// stops after each test, so none reaches into the next.
+@Suite(.serialized, .timeLimit(.minutes(1)))
 struct HubForgottenTests {
+    init() async {
+        await MainActor.run { HubClient.shared.postNotification = { _ in } }
+    }
+
+    /// Stops what leaving or joining a hub left running.
+    static func stopBackgroundWork() async {
+        await MainActor.run {
+            HubBundle.shared.stopListening()
+            HubClient.shared.stopUnregistrationRetries()
+        }
+    }
+
     @Test("a hub that no longer knows the device disconnects it and Hub mode falls back to Silent Tune")
     func forgotten() async throws {
         let storage = Storage.shared
@@ -364,9 +379,13 @@ struct HubForgottenTests {
 
         await HubClient.shared.sync()
 
-        #expect(deviceKey.value.isEmpty)
-        #expect(storage.backgroundRefreshType.value == .silentTune)
-        #expect(!HubClient.shared.hubConfirmed.value)
+        // Leaving the hub runs on the main actor, also when the app's own fetch met the 401 first.
+        await MainActor.run {
+            #expect(deviceKey.value.isEmpty)
+            #expect(storage.backgroundRefreshType.value == .silentTune)
+            #expect(!HubClient.shared.hubConfirmed.value)
+        }
+        await Self.stopBackgroundWork()
     }
 }
 
@@ -434,6 +453,7 @@ extension HubForgottenTests {
         client.pendingUnregistration.keep(key: "lfh_left", hubURL: "https://\(HubUnauthorizedProtocol.host)")
         await client.unregisterPending()
         #expect(client.pendingUnregistration.current == nil)
+        await Self.stopBackgroundWork()
     }
 
     @Test("a phone that joined with an invite does not send its own data sources, whatever its role")
@@ -1079,5 +1099,327 @@ struct HubRemoteSecretTests {
         let saved = storage.sharedSecret.value
         HubClient.applyClientSettings(Dictionary(uniqueKeysWithValues: remoteValues.map { ($0, "from the hub") }))
         #expect(storage.sharedSecret.value == saved)
+    }
+}
+
+/// Answers GET /v1/patient/source on `host` with the hub's sources, and 404 otherwise.
+final class HubSourcesProtocol: URLProtocol {
+    static let host = "sources.lfhub-tests.invalid"
+    static let sources = #"{"nightscoutUrl":"https://ns.lfhub-tests.invalid","token":"hub-token","dexcom":null}"#
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        request.url?.host == host
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        let found = request.url?.path == "/v1/patient/source"
+        let response = HTTPURLResponse(url: request.url!, statusCode: found ? 200 : 404, httpVersion: nil,
+                                       headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data((found ? Self.sources : "{}").utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
+extension HubForgottenTests {
+    @Test("any call the hub answers 401 leaves the hub at once, falls back to the app's alarms and tells the user")
+    func unauthorizedCall() async throws {
+        let storage = Storage.shared
+        let client = HubClient.shared
+        let saved = (storage.hubURL.value, client.deviceKey.store, storage.backgroundRefreshType.value,
+                     client.removedFromHub.value)
+        client.deviceKey.store = MemoryKeyStore()
+        URLProtocol.registerClass(HubUnauthorizedProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(HubUnauthorizedProtocol.self)
+            storage.hubURL.value = saved.0
+            client.deviceKey.store = saved.1
+            client.deviceKey.reload()
+            storage.backgroundRefreshType.value = saved.2
+            client.removedFromHub.value = saved.3
+        }
+        for call in ["health check", "bundle"] {
+            try await MainActor.run {
+                storage.hubURL.value = "https://\(HubUnauthorizedProtocol.host)"
+                try client.deviceKey.set("lfh_replaced")
+                storage.backgroundRefreshType.value = .hub
+                client.removedFromHub.value = false
+            }
+
+            if call == "bundle" {
+                _ = try? await client.bundle(since: 0, wait: 0)
+            } else {
+                let (health, cause) = await client.healthCheck()
+                // Not a hub outage: the watchdog does not count it.
+                #expect(health == .unknown)
+                #expect(cause == nil)
+            }
+
+            await MainActor.run {
+                #expect(!client.isConnected, "\(call)")
+                #expect(client.removedFromHub.value, "\(call)")
+                #expect(storage.backgroundRefreshType.value == .silentTune, "\(call)")
+            }
+        }
+        await Self.stopBackgroundWork()
+    }
+
+    @Test("Undo puts the hub's data source back in this app's settings")
+    @MainActor func undoSourceChange() async throws {
+        let storage = Storage.shared
+        let client = HubClient.shared
+        let saved = (storage.hubURL.value, client.deviceKey.store, storage.url.value, storage.token.value,
+                     storage.shareUserName.value, storage.sharePassword.value)
+        client.deviceKey.store = MemoryKeyStore()
+        URLProtocol.registerClass(HubSourcesProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(HubSourcesProtocol.self)
+            storage.hubURL.value = saved.0
+            client.deviceKey.store = saved.1
+            client.deviceKey.reload()
+            storage.url.value = saved.2
+            storage.token.value = saved.3
+            storage.shareUserName.value = saved.4
+            storage.sharePassword.value = saved.5
+            HubSourceSync.shared.forget()
+        }
+        storage.hubURL.value = "https://\(HubSourcesProtocol.host)"
+        try client.deviceKey.set("lfh_admin")
+        storage.url.value = "https://wrong.example.com"
+        storage.token.value = "wrong"
+        storage.shareUserName.value = ""
+        storage.sharePassword.value = ""
+
+        await HubSourceSync.shared.undo()
+
+        #expect(storage.url.value == "https://ns.lfhub-tests.invalid")
+        #expect(storage.token.value == "hub-token")
+        #expect(!HubSourceSync.shared.differsFromHub)
+        #expect(HubSourceSync.shared.state == .idle)
+        await Self.stopBackgroundWork()
+    }
+}
+
+struct HubPushFailureTests {
+    private let now = ISO8601DateFormatter().date(from: "2026-01-01T12:00:00Z")!
+
+    private func status(lastPushStatus: String?, pushFailingSince: String? = "2026-01-01T11:59:00Z",
+                        lastPushOkAt: String? = "2026-01-01T11:58:00Z", alarmCount: Int? = nil) throws -> HubClient.Status
+    {
+        var device: [String: Any] = [
+            "name": "Phone", "apnsConfigured": true, "apnsKeyShared": true, "alarmsReceived": true, "settings": ["alarms": true],
+            "liveActivity": ["registered": true, "pushToStartRegistered": true, "renewalFailed": false],
+        ]
+        if let lastPushStatus { device["lastPushStatus"] = lastPushStatus }
+        if let pushFailingSince { device["pushFailingSince"] = pushFailingSince }
+        if let lastPushOkAt { device["lastPushOkAt"] = lastPushOkAt }
+        if let alarmCount { device["alarmCount"] = alarmCount }
+        let json: [String: Any] = [
+            "hub": ["version": "0.2.0", "api": 1, "features": ["receipts"]],
+            "device": device,
+            "patient": ["name": "Patient", "nightscoutHost": "ns.example.com", "followed": true, "hasData": true],
+            "live": ["connected": true, "staleAfterSeconds": 600],
+        ]
+        return try HubClient.decoder.decode(HubClient.Status.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+
+    private func problems(_ status: HubClient.Status, exportedAlarms: Int? = nil, alarmsPending: Bool = false) -> [String] {
+        HubClient.confirmationProblems(status, alarmsPending: alarmsPending, alarmKitAuthorized: true,
+                                       notificationsAllowed: true, now: now, exportedAlarms: exportedAlarms)
+    }
+
+    @Test("Apple rejecting the APN key or the phone's registration makes the app alarm itself at once")
+    func rejectedAtOnce() throws {
+        let key = try status(lastPushStatus: "403 InvalidProviderToken")
+        #expect(HubClient.unhealthiness(of: key, now: now) == .keyRejected)
+        #expect(HubClient.health(of: key, now: now) == .unhealthy)
+        #expect(problems(key) == [HubClient.Problem.apnKeyRejected])
+
+        let neverReached = try status(lastPushStatus: "403 InvalidProviderToken", lastPushOkAt: nil)
+        #expect(HubClient.unhealthiness(of: neverReached, now: now) == .keyRejected)
+
+        let registration = try status(lastPushStatus: "400 BadDeviceToken")
+        #expect(HubClient.unhealthiness(of: registration, now: now) == .registrationRejected)
+        #expect(problems(registration) == [HubClient.Problem.pushFailing])
+        #expect(try HubClient.unhealthiness(of: status(lastPushStatus: "410 Unregistered"), now: now) == .registrationRejected)
+    }
+
+    @Test("a failure that may pass is tolerated for a while, and an accepted push clears it")
+    func passingFailure() throws {
+        #expect(try HubClient.unhealthiness(of: status(lastPushStatus: "503 ServiceUnavailable"), now: now) == nil)
+        #expect(try HubClient.unhealthiness(of: status(lastPushStatus: "503 ServiceUnavailable",
+                                                       pushFailingSince: "2026-01-01T11:45:00Z"), now: now) == .pushFailing)
+        #expect(try HubClient.unhealthiness(of: status(lastPushStatus: "403 InvalidProviderToken",
+                                                       pushFailingSince: nil), now: now) == nil)
+    }
+
+    @Test("the Ready list names the rejected key and sends the fix where the key was added")
+    func checklist() throws {
+        func push(_ status: HubClient.Status, ownApnKey: Bool) -> HubChecklist.Item? {
+            var facts = HubChecklist.Facts()
+            facts.notifications = .allowed
+            facts.ownApnKey = ownApnKey
+            facts.hubSharesKeys = true
+            return HubChecklist.items(status: status, error: nil, facts: facts, now: now).first { $0.id == .push }
+        }
+        let key = try status(lastPushStatus: "403 InvalidProviderToken")
+        #expect(push(key, ownApnKey: true)?.fix == .goToAPN)
+        #expect(push(key, ownApnKey: true)?.problem?.hasPrefix(HubClient.Problem.apnKeyRejected) == true)
+        #expect(push(key, ownApnKey: false)?.fix == .askAdmin)
+        #expect(try push(status(lastPushStatus: "400 BadDeviceToken"), ownApnKey: true)?.fix == .registerAgain)
+        #expect(try push(status(lastPushStatus: nil, pushFailingSince: nil), ownApnKey: true)?.isReady == true)
+    }
+
+    @Test("the watchdog's alert names the real cause")
+    func watchdogAlert() {
+        #expect(HubWatchdog.alert(for: .noAnswer, minutes: 20).title == "⚠️ LF Hub not responding")
+        #expect(HubWatchdog.alert(for: nil, minutes: 20).title == "⚠️ LF Hub not responding")
+        #expect(HubWatchdog.alert(for: .keyRejected, minutes: 20).title.contains("APN key"))
+        #expect(HubWatchdog.alert(for: .pushFailing, minutes: 20).title == "⚠️ LF Hub can't reach this phone")
+        #expect(HubWatchdog.alert(for: .registrationRejected, minutes: 20).body.contains("20 minutes"))
+    }
+
+    @Test("fewer alarms at the hub than this app exported leaves the alarms unconfirmed")
+    func skippedAlarms() throws {
+        let fine = try status(lastPushStatus: nil, pushFailingSince: nil, alarmCount: 3)
+        #expect(problems(fine, exportedAlarms: 3).isEmpty)
+        #expect(problems(fine, exportedAlarms: 2).isEmpty)
+        #expect(problems(fine, exportedAlarms: 4) == [HubClient.Problem.alarmsSkipped])
+        #expect(!HubClient.confirms(fine, hubMode: true, alarmsPending: false, alarmKitAuthorized: true,
+                                    notificationsAllowed: true, now: now, exportedAlarms: 4))
+        // An upload on its way is reported as that, and a hub without the count is not judged.
+        #expect(problems(fine, exportedAlarms: 4, alarmsPending: true) == [HubClient.Problem.alarmsNotReceived])
+        #expect(try problems(status(lastPushStatus: nil, pushFailingSince: nil), exportedAlarms: 4).isEmpty)
+        #expect(HubClient.alarmCountForHub([], hubAPI: 1) == 0)
+    }
+}
+
+struct HubClientBehaviourTests {
+    private enum Step: Equatable { case upload, handled }
+
+    private final class Recorder: @unchecked Sendable {
+        var steps: [Step] = []
+    }
+
+    @Test("a snooze reaches the hub before the alarm is reported handled")
+    func handledAfterUpload() async throws {
+        let recorder = Recorder()
+        try await HubClient.reportHandled(upload: { recorder.steps.append(.upload) },
+                                          handled: { recorder.steps.append(.handled) })
+        #expect(recorder.steps == [.upload, .handled])
+
+        // An upload the hub refuses for good does not hold back the report.
+        let refused = Recorder()
+        try await HubClient.reportHandled(upload: { throw HubClient.HubError.http(400, "bad") },
+                                          handled: { refused.steps.append(.handled) })
+        #expect(refused.steps == [.handled])
+
+        // One that may pass fails the step, so it is retried before the report.
+        let offline = Recorder()
+        await #expect(throws: URLError.self) {
+            try await HubClient.reportHandled(upload: { throw URLError(.timedOut) },
+                                              handled: { offline.steps.append(.handled) })
+        }
+        #expect(offline.steps.isEmpty)
+    }
+
+    @Test("errors read in plain words, never as the hub's raw answer")
+    func errorMessages() {
+        func message(_ code: Int, _ detail: String) -> String {
+            HubClient.userMessage(for: HubClient.HubError.http(code, detail))
+        }
+        #expect(message(403, "unknown, used or expired invite") == HubClient.HubError.inviteNotValid.errorDescription)
+        #expect(message(409, "the patient must keep an admin device").contains("at least one admin"))
+        #expect(message(502, "APNs: 403 InvalidProviderToken")
+            .hasPrefix("Apple rejected the push: it does not accept the APN key"))
+        #expect(message(502, "APNs: 500 InternalServerError") == "Apple rejected the push: 500 InternalServerError")
+        #expect(message(429, "too many claims") == HubClient.HubError.tooManyTries.errorDescription)
+        #expect(message(403, "only an admin device can invite") == "Only an admin can do this.")
+        #expect(message(403, "an invite cannot take over an admin device").contains("cannot replace an admin's phone"))
+        #expect(message(503, "the patient is not followed yet").hasPrefix("LF Hub had a problem"))
+        for code in [400, 401, 403, 404, 409, 429, 500, 502, 503] {
+            #expect(!message(code, "detail").contains("Hub responded"))
+        }
+        #expect(HubClient.userMessage(for: URLError(.notConnectedToInternet)).contains("offline"))
+    }
+
+    @Test("an invite is looked up when pasted or submitted, never while it is typed")
+    func inviteLookup() {
+        let link = "https://hub.example.com/join#abcdefghijklmnopqrstuvwxyz012345"
+        #expect(HubClient.Invite.pasted(from: "", to: link) == HubClient.Invite(link: link))
+        #expect(HubClient.Invite.pasted(from: String(link.dropLast()), to: link) == nil)
+        #expect(HubClient.Invite.pasted(from: "", to: "https://hub.example.com/join#abc") == nil)
+        #expect(HubClient.Invite.pasted(from: "https://hub", to: "https://hub.example.com") == nil)
+    }
+
+    @Test("the same upload right after the last is skipped, whatever the order of its keys")
+    func repeatedUploads() throws {
+        let uploads = RecentUploads()
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let first = try #require(RecentUploads.digest(body: ["a": 1, "b": [true]], rawBody: nil))
+        let reordered = try #require(RecentUploads.digest(body: nil, rawBody: Data(#"{"b":[true],"a":1}"#.utf8)))
+        let other = try #require(RecentUploads.digest(body: ["a": 2, "b": [true]], rawBody: nil))
+        #expect(first == reordered)
+
+        #expect(!uploads.isRepeat("/v1/device/alarms", first, now: now))
+        uploads.record("/v1/device/alarms", first, now: now)
+        #expect(uploads.isRepeat("/v1/device/alarms", reordered, now: now.addingTimeInterval(1)))
+        #expect(!uploads.isRepeat("/v1/device/alarms", other, now: now.addingTimeInterval(1)))
+        #expect(!uploads.isRepeat("/v1/device/settings", first, now: now.addingTimeInterval(1)))
+        #expect(!uploads.isRepeat("/v1/device/alarms", first, now: now.addingTimeInterval(RecentUploads.window)))
+        uploads.forget()
+        #expect(!uploads.isRepeat("/v1/device/alarms", first, now: now.addingTimeInterval(1)))
+    }
+
+    @Test("replacing a phone used in the last 15 minutes asks first")
+    func recentUse() throws {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        func device(lastSeen: TimeInterval?) throws -> HubClient.Device {
+            var json: [String: Any] = ["id": UUID().uuidString, "name": "Old iPhone", "createdAt": "2026-01-01T10:00:00Z"]
+            if let lastSeen {
+                json["lastSeenAt"] = ISO8601DateFormatter().string(from: now.addingTimeInterval(-lastSeen))
+            }
+            return try HubClient.decoder.decode(HubClient.Device.self, from: JSONSerialization.data(withJSONObject: json))
+        }
+        #expect(try HubClient.recentUseWarning(device(lastSeen: 120), now: now)
+            == "Old iPhone was used 2 minutes ago. Replace it anyway?")
+        #expect(try HubClient.recentUseWarning(device(lastSeen: 10), now: now)
+            == "Old iPhone was used just now. Replace it anyway?")
+        #expect(try HubClient.recentUseWarning(device(lastSeen: HubClient.recentUse), now: now) == nil)
+        #expect(try HubClient.recentUseWarning(device(lastSeen: nil), now: now) == nil)
+    }
+
+    @Test("the devices offered when joining carry the patient's name when the hub sends it")
+    func joinPatientName() throws {
+        let named = #"{"patientName":"Nils","devices":[]}"#
+        #expect(try HubClient.decoder.decode(HubClient.DeviceList.self, from: Data(named.utf8)).patientName == "Nils")
+        #expect(try HubClient.decoder.decode(HubClient.DeviceList.self, from: Data(#"{"devices":[]}"#.utf8)).patientName == nil)
+    }
+
+    @Test("an admin that joined with an invite sends a data source change only when the user confirmed it")
+    func confirmedSourceChange() {
+        #expect(HubSourceSync.sendsChange(isAdmin: true, joinedWithInvite: false, confirmed: false))
+        #expect(!HubSourceSync.sendsChange(isAdmin: true, joinedWithInvite: true, confirmed: false))
+        #expect(HubSourceSync.sendsChange(isAdmin: true, joinedWithInvite: true, confirmed: true))
+        #expect(!HubSourceSync.sendsChange(isAdmin: false, joinedWithInvite: true, confirmed: true))
+    }
+
+    @Test("times within a minute of now read as just now")
+    func relativeTimes() {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        #expect(HubSettingsView.relative(now.addingTimeInterval(-5), now: now) == "just now")
+        #expect(HubSettingsView.relative(now, now: now) == "just now")
+        #expect(HubSettingsView.relative(now.addingTimeInterval(-600), now: now) != "just now")
+    }
+
+    @Test("an alarm whose snooze is 0 is acknowledged, as the app's own action for it reads")
+    func acknowledgeCategory() {
+        #expect(HubAppGroup.acknowledgeCategory == "lfhub-ack")
     }
 }

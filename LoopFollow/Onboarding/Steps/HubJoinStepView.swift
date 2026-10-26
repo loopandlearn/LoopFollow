@@ -19,7 +19,11 @@ struct HubJoinStepView: View {
     @State private var page = Page.invite
     @State private var invite: HubClient.Invite?
     @State private var devices: [HubClient.Device] = []
+    /// The patient's name the hub gave with the devices; absent on an older hub.
+    @State private var invitePatientName: String?
     @State private var join = HubClient.Join.new
+    /// A recently used device about to be replaced, with the question to ask first.
+    @State private var replaceWarning: (device: HubClient.Device, warning: String)?
     @State private var deviceName = UIDevice.current.model
     @State private var inviteLink = ""
     @State private var scanning = false
@@ -74,6 +78,16 @@ struct HubJoinStepView: View {
         }
         .onAppear { reportProgress() }
         .onChange(of: page) { reportProgress() }
+        .alert(replaceWarning.map { "Replace \($0.device.name)?" } ?? "",
+               isPresented: Binding(get: { replaceWarning != nil }, set: { if !$0 { replaceWarning = nil } }))
+        {
+            Button("Cancel", role: .cancel) {}
+            Button("Replace", role: .destructive) {
+                if let device = replaceWarning?.device { join = .replace(device.id) }
+            }
+        } message: {
+            Text(replaceWarning?.warning ?? "")
+        }
     }
 
     // MARK: - Pages
@@ -108,6 +122,7 @@ struct HubJoinStepView: View {
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
+                .onChange(of: inviteLink) { if inviteLink.isEmpty { errorText = nil } }
             if busy {
                 HStack {
                     ProgressView()
@@ -127,8 +142,16 @@ struct HubJoinStepView: View {
                     Spacer()
                     Text(HubSettingsView.host(invite)).foregroundColor(.secondary)
                 }
+                if let invitePatientName {
+                    HStack {
+                        Text("Patient")
+                        Spacer()
+                        Text(invitePatientName).foregroundColor(.secondary)
+                    }
+                }
             } footer: {
-                Text("Join \(HubSettingsView.host(invite))? Only join a hub you know.")
+                Text(invitePatientName.map { "Join \(HubSettingsView.host(invite)) to follow \($0)? Only join a hub you know." }
+                    ?? "Join \(HubSettingsView.host(invite))? Only join a hub you know.")
             }
         }
     }
@@ -146,6 +169,13 @@ struct HubJoinStepView: View {
             ForEach(devices.filter { $0.role != .admin }) { device in
                 choiceRow("Replace \(device.name)",
                           detail: "This replaces my old phone. It takes over its alarms and settings.", .replace(device.id))
+                {
+                    if let warning = HubClient.recentUseWarning(device, now: Date()) {
+                        replaceWarning = (device, warning)
+                    } else {
+                        join = .replace(device.id)
+                    }
+                }
             }
             choiceRow("Start fresh", detail: "A new phone with its own alarms.", .new)
         }
@@ -174,9 +204,11 @@ struct HubJoinStepView: View {
                    + (viewModel.hubJoin == .new ? "" : " Its alarms and settings came along."))
     }
 
-    private func choiceRow(_ title: String, detail: String, _ choice: HubClient.Join) -> some View {
+    private func choiceRow(_ title: String, detail: String, _ choice: HubClient.Join,
+                           onSelect: (() -> Void)? = nil) -> some View
+    {
         Button {
-            join = choice
+            if let onSelect { onSelect() } else { join = choice }
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -252,7 +284,8 @@ struct HubJoinStepView: View {
 
     /// Shows why a step failed; an invite the hub does not take sends the user back to scan another.
     private func failed(_ error: Error) {
-        errorText = error.localizedDescription
+        LogManager.shared.log(category: .hub, message: "Joining with an invite failed: \(error.localizedDescription)")
+        errorText = HubClient.userMessage(for: error)
         switch error {
         case HubClient.HubError.inviteNotValid:
             canRetry = false
@@ -273,7 +306,9 @@ struct HubJoinStepView: View {
         busy = true
         defer { busy = false }
         do {
-            devices = try await HubClient.shared.joinableDevices(invite: invite)
+            let list = try await HubClient.shared.joinableDevices(invite: invite)
+            devices = list.devices
+            invitePatientName = list.patientName
             self.invite = invite
             inviteLink = invite.link
             join = .new

@@ -38,7 +38,9 @@ struct DexcomSettingsView: View {
                 }
             }
 
-            importSection
+            if !HubSourceSync.shared.hidesImport {
+                importSection
+            }
         }
         .navigationDestination(isPresented: $showUnitsSetup) {
             UnitsOnboardingView {

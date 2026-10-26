@@ -153,6 +153,10 @@ final class HubBundle {
             let changed = apply(data)
             if !changed.isEmpty { rerunTasks(for: changed) }
             return changed
+        } catch is CancellationError {
+            return nil
+        } catch let error as URLError where error.code == .cancelled {
+            return nil
         } catch {
             LogManager.shared.log(category: .hub, message: "Hub bundle fetch failed: \(error.localizedDescription)", isDebug: true)
             return nil

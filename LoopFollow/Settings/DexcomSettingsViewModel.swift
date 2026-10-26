@@ -79,6 +79,21 @@ class DexcomSettingsViewModel: ObservableObject {
             .store(in: &cancellables)
 
         scheduleVerification()
+
+        // A change made elsewhere while the screen is open, such as LF Hub putting its
+        // data source back, shows in the fields.
+        Storage.shared.shareUserName.$value
+            .merge(with: Storage.shared.sharePassword.$value, Storage.shared.shareServer.$value)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.followStorage() }
+            .store(in: &cancellables)
+    }
+
+    private func followStorage() {
+        let storage = Storage.shared
+        if storage.shareUserName.value != userName { userName = storage.shareUserName.value }
+        if storage.sharePassword.value != password { password = storage.sharePassword.value }
+        if storage.shareServer.value != server { server = storage.shareServer.value }
     }
 
     /// Resets status to "checking" and queues a debounced verification.

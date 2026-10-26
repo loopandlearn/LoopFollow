@@ -6,9 +6,14 @@ import UIKit
 
 struct SettingsMenuView: View {
     @ObservedObject private var nightscoutURL = Storage.shared.url
+    @ObservedObject private var backgroundRefreshType = Storage.shared.backgroundRefreshType
+    @ObservedObject private var hubConfirmed = HubClient.shared.hubConfirmed
 
     var body: some View {
         List {
+            if HubModeWarning.isShown {
+                Section { HubModeWarning() }
+            }
             ForEach(SettingsRoute.menuSections(nightscoutConfigured: !nightscoutURL.value.isEmpty), id: \.0) { section, routes in
                 Section(section.rawValue) {
                     ForEach(routes) { route in
@@ -27,7 +32,7 @@ struct SettingsMenuView: View {
 // MARK: – Sheet routing
 
 enum SettingsSection: String, CaseIterable, Hashable {
-    case hub = "LoopFollow Hub"
+    case hub = "LF Hub"
     case data = "Data Settings"
     case display = "Display Settings"
     case app = "App Settings"
