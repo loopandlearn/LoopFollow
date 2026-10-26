@@ -8,10 +8,10 @@ class TIRCalculator {
         guard !bgData.isEmpty else { return [] }
 
         let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-        let veryLowThreshold = 54.0
+        let veryLowThreshold = GlucoseThresholds.veryLow
         let lowThreshold = thresholds.low
         let highThreshold = thresholds.high
-        let veryHighThreshold = 250.0
+        let veryHighThreshold = GlucoseThresholds.veryHigh
         var periodData: [TIRPeriod: [Double]] = [:]
         let calendar = dateTimeUtils.displayCalendar()
 

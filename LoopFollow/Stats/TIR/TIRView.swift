@@ -87,14 +87,7 @@ struct TIRView: View {
     }
 
     private var tirTitle: String {
-        switch UnitSettingsStore.shared.timeInRangeMode {
-        case .tir:
-            return "Time in Range"
-        case .titr:
-            return "Time in Tight Range"
-        case .custom:
-            return "Custom Range"
-        }
+        UnitSettingsStore.shared.timeInRangeMode.title
     }
 
     private func formatRange(_: Double) -> String {
@@ -116,11 +109,11 @@ struct TIRView: View {
     }
 
     private var veryLowThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(54.0)
+        UnitSettingsStore.shared.convertMgdlToDisplay(GlucoseThresholds.veryLow)
     }
 
     private var veryHighThreshold: Double {
-        UnitSettingsStore.shared.convertMgdlToDisplay(250.0)
+        UnitSettingsStore.shared.convertMgdlToDisplay(GlucoseThresholds.veryHigh)
     }
 
     private var veryLowCutoffText: String {

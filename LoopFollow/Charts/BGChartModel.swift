@@ -415,8 +415,8 @@ final class BGChartModel: ObservableObject {
         let maxBGValue = Double(vc.calculateMaxBgGraphValue())
         maxBG = max(maxBGValue, Storage.shared.minBGScale.value)
 
-        // Same thresholds the stats and main header use: fixed 70–180 / 70–140
-        // for the TIR/TITR range modes, the user's lines for custom mode.
+        // Same thresholds the stats and main header use: the range mode's fixed
+        // cut-offs, or the user's lines for custom mode.
         let thresholds = UnitSettingsStore.shared.effectiveThresholds()
         lowLine = thresholds.low
         highLine = thresholds.high
