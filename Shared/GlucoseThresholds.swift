@@ -15,4 +15,7 @@ enum GlucoseThresholds {
     /// Time in Tight Range.
     static let titrLow = 70.0
     static let titrHigh = 140.0
+    /// Extended Tight Range (TING, Time in Normoglycemia).
+    static let tingLow = 63.0
+    static let tingHigh = 140.0
 }

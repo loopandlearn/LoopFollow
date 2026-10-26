@@ -25,12 +25,14 @@ enum GlucoseDisplayUnit: String, Codable, CaseIterable {
 enum TimeInRangeDisplayMode: String, Codable, CaseIterable {
     case tir = "TIR"
     case titr = "TITR"
+    case ting = "TING"
     case custom = "Custom"
 
     var title: String {
         switch self {
         case .tir: return "Time in Range"
         case .titr: return "Time in Tight Range"
+        case .ting: return "Extended Tight Range"
         case .custom: return "Custom Range"
         }
     }
@@ -40,6 +42,7 @@ enum TimeInRangeDisplayMode: String, Codable, CaseIterable {
         switch self {
         case .tir: return (GlucoseThresholds.tirLow, GlucoseThresholds.tirHigh)
         case .titr: return (GlucoseThresholds.titrLow, GlucoseThresholds.titrHigh)
+        case .ting: return (GlucoseThresholds.tingLow, GlucoseThresholds.tingHigh)
         case .custom: return nil
         }
     }
