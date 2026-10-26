@@ -163,6 +163,8 @@ struct AmountField: View {
             nudge("plus", by: 1)
                 .disabled(steps.wrappedValue >= maxSteps)
         }
+        // Keeps − clear of the left edge, where watchOS takes swipes for going back.
+        .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(RoundedRectangle(cornerRadius: 8).stroke(isHighlighted ? Color.green : Color.gray.opacity(0.4), lineWidth: 1.5))
         .focusable()
@@ -175,7 +177,8 @@ struct AmountField: View {
         } label: {
             Image(systemName: symbol)
                 .font(.footnote.weight(.semibold))
-                .frame(width: 28, height: 28)
+                .frame(width: 36, height: 36)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(.tint)
