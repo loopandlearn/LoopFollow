@@ -659,6 +659,7 @@ final class LiveActivityManager {
             DispatchQueue.main.async { self.refreshFromCurrentState(reason: reason) }
             return
         }
+        WatchSessionManager.shared.requestUpdate(reason: reason)
         refreshCoalescer.request(reason: reason)
     }
 
@@ -1064,10 +1065,9 @@ final class LiveActivityManager {
         let snapshotUnchanged = GlucoseSnapshotStore.shared.load() == snapshot
         let thresholdsChanged = LAAppGroupSettings.thresholdsMgdl() != UnitSettingsStore.shared.effectiveThresholds()
 
-        // Store + Watch: always update, independent of LA state.
+        // Store: always update, independent of LA state.
         writeThresholds()
         GlucoseSnapshotStore.shared.save(snapshot)
-        // WatchConnectivityManager.shared.send(snapshot: snapshot)
 
         // LA update: gated on LA being active, snapshot having changed, and activities enabled.
         if !Storage.shared.laEnabled.value {
