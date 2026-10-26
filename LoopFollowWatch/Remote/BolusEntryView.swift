@@ -90,7 +90,7 @@ struct BolusAmountView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, format: WatchFormat.insulin)
+                AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, sensitivity: .low, format: WatchFormat.insulin)
                     .focused($amountFocused)
                 Text("Max \(WatchFormat.insulin(remote.maxBolus)) U")
                     .font(.footnote)
@@ -121,7 +121,7 @@ struct BolusAmountView: View {
     }
 }
 
-/// A value edited with the Digital Crown, in fixed steps between a minimum and a maximum.
+/// A value edited with the Digital Crown or the − and + buttons, in fixed steps between a minimum and a maximum.
 struct AmountField: View {
     @Binding var value: Double
     let unit: String
@@ -130,25 +130,54 @@ struct AmountField: View {
     let maximum: Double
     /// The caller owns focus; this only draws the highlight.
     let isHighlighted: Bool
+    var sensitivity: DigitalCrownRotationalSensitivity = .medium
     let format: (Double) -> String
 
+    private var maxSteps: Double { max(((maximum - minimum) / step + 1e-10).rounded(.down), 0) }
+
+    /// The crown works on whole step counts, so every detent is exactly one step.
+    private var steps: Binding<Double> {
+        Binding(
+            get: { ((value - minimum) / step).rounded() },
+            set: { newSteps in
+                let clamped = min(max(newSteps.rounded(), 0), maxSteps)
+                value = ((minimum + clamped * step) * 1000).rounded() / 1000
+            }
+        )
+    }
+
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(format(value))
-                .font(.system(size: 34, weight: .bold))
-                .monospacedDigit()
-            Text(unit)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 2) {
+            nudge("minus", by: -1)
+                .disabled(steps.wrappedValue <= 0)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(format(value))
+                    .font(.system(size: 34, weight: .bold))
+                    .monospacedDigit()
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                Text(unit)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            nudge("plus", by: 1)
+                .disabled(steps.wrappedValue >= maxSteps)
         }
-        .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
         .background(RoundedRectangle(cornerRadius: 8).stroke(isHighlighted ? Color.green : Color.gray.opacity(0.4), lineWidth: 1.5))
         .focusable()
-        .digitalCrownRotation($value, from: minimum, through: max(maximum, minimum + step), by: step, sensitivity: .medium, isContinuous: false, isHapticFeedbackEnabled: true)
-        .onChange(of: value) { _, newValue in
-            let nearest = ((newValue / step).rounded() * step * 1000).rounded() / 1000
-            let clamped = min(max(minimum, nearest), maximum)
-            if clamped != newValue { value = clamped }
+        .digitalCrownRotation(detent: steps, from: 0, through: max(maxSteps, 1), by: 1, sensitivity: sensitivity, isContinuous: false, isHapticFeedbackEnabled: true)
+    }
+
+    private func nudge(_ symbol: String, by delta: Double) -> some View {
+        Button {
+            steps.wrappedValue += delta
+        } label: {
+            Image(systemName: symbol)
+                .font(.footnote.weight(.semibold))
+                .frame(width: 28, height: 28)
         }
+        .buttonStyle(.plain)
+        .foregroundStyle(.tint)
     }
 }
