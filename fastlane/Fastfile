@@ -44,6 +44,9 @@ APP_SUFFIX = loopfollow_app_suffix
 APP_IDENTIFIER = "com.#{TEAMID}.LoopFollow#{APP_SUFFIX}"
 LA_IDENTIFIER = "#{APP_IDENTIFIER}.LoopFollowLAExtension"
 NOTIFICATION_SERVICE_IDENTIFIER = "#{APP_IDENTIFIER}.LoopFollowNotificationService"
+WATCH_IDENTIFIER = "#{APP_IDENTIFIER}.watchkitapp"
+WATCH_WIDGETS_IDENTIFIER = "#{WATCH_IDENTIFIER}.widgets"
+WATCH_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-for-the-apple-watch-app"
 
 # The notification service extension, which rings LF Hub alarms, needs its own
 # identifier with the LoopFollow App Group, which existing browser builders add once
@@ -56,12 +59,28 @@ def notification_service_setup_error!
   )
 end
 
+# The watch app needs two identifiers with the LoopFollow App Group, which
+# existing browser builders have to add once by hand.
+def watch_setup_error!
+  UI.user_error!(
+    "The Apple Watch app identifiers are not set up yet. Run the Add Identifiers action, " \
+    "add the LoopFollow App Group to the LoopFollow Watch App and LoopFollow Watch Complications identifiers, " \
+    "then build again. Instructions: #{WATCH_SETUP_DOCS}"
+  )
+end
+
 # Stops before match, whose read-only failure does not name the missing profile.
 def ensure_notification_service_identifier_exists
   notification_service_setup_error! unless Spaceship::ConnectAPI::BundleId.find(NOTIFICATION_SERVICE_IDENTIFIER)
 end
 
-# Turns a signing failure that names the notification service extension into the steps that fix it.
+def ensure_watch_identifiers_exist
+  missing = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER].reject { |id| Spaceship::ConnectAPI::BundleId.find(id) }
+  watch_setup_error! unless missing.empty?
+end
+
+# Turns a signing failure that names the notification service extension, or a watch
+# identifier without the App Group, into the steps that fix it.
 def explain_signing_failure(error, log_dir = nil)
   text = error.message.to_s
   if log_dir
@@ -71,6 +90,10 @@ def explain_signing_failure(error, log_dir = nil)
     end
   end
   notification_service_setup_error! if [NOTIFICATION_SERVICE_IDENTIFIER, "LoopFollowNotificationService"].any? { |id| text.include?(id) }
+
+  mentions_watch = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER, "LoopFollowWatch"].any? { |id| text.include?(id) }
+  missing_app_group = text.match?(/App Groups capability|com\.apple\.security\.application-groups/i)
+  watch_setup_error! if mentions_watch && missing_app_group
 end
 
 platform :ios do
@@ -102,6 +125,7 @@ platform :ios do
     )      
     
     ensure_notification_service_identifier_exists
+    ensure_watch_identifiers_exist
 
     begin
       match(
@@ -110,7 +134,9 @@ platform :ios do
         app_identifier: [
           APP_IDENTIFIER,
           LA_IDENTIFIER,
-          NOTIFICATION_SERVICE_IDENTIFIER
+          NOTIFICATION_SERVICE_IDENTIFIER,
+          WATCH_IDENTIFIER,
+          WATCH_WIDGETS_IDENTIFIER
         ]
       )
     rescue => e
@@ -143,6 +169,20 @@ platform :ios do
       targets: ["LoopFollowNotificationService"]
     )
 
+    update_code_signing_settings(
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
+      profile_name: mapping[WATCH_IDENTIFIER],
+      code_sign_identity: "iPhone Distribution",
+      targets: ["LoopFollowWatch"]
+    )
+
+    update_code_signing_settings(
+      path: "#{GITHUB_WORKSPACE}/LoopFollow.xcodeproj",
+      profile_name: mapping[WATCH_WIDGETS_IDENTIFIER],
+      code_sign_identity: "iPhone Distribution",
+      targets: ["LoopFollowWatchWidgets"]
+    )
+
     begin
       gym(
         export_method: "app-store",
@@ -155,7 +195,9 @@ platform :ios do
           provisioningProfiles: {
             APP_IDENTIFIER => mapping[APP_IDENTIFIER],
             LA_IDENTIFIER => mapping[LA_IDENTIFIER],
-            NOTIFICATION_SERVICE_IDENTIFIER => mapping[NOTIFICATION_SERVICE_IDENTIFIER]
+            NOTIFICATION_SERVICE_IDENTIFIER => mapping[NOTIFICATION_SERVICE_IDENTIFIER],
+            WATCH_IDENTIFIER => mapping[WATCH_IDENTIFIER],
+            WATCH_WIDGETS_IDENTIFIER => mapping[WATCH_WIDGETS_IDENTIFIER]
           }
         }
       )
@@ -222,6 +264,14 @@ platform :ios do
       Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
     ])
 
+    configure_bundle_id("LoopFollow Watch App", WATCH_IDENTIFIER, [
+      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
+    ])
+
+    configure_bundle_id("LoopFollow Watch Complications", WATCH_WIDGETS_IDENTIFIER, [
+      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
+    ])
+
   end
 
   desc "Provision Certificates"
@@ -243,7 +293,9 @@ platform :ios do
       app_identifier: [
         APP_IDENTIFIER,
         LA_IDENTIFIER,
-        NOTIFICATION_SERVICE_IDENTIFIER
+        NOTIFICATION_SERVICE_IDENTIFIER,
+        WATCH_IDENTIFIER,
+        WATCH_WIDGETS_IDENTIFIER
       ]
     )
   end

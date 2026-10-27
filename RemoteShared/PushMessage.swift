@@ -54,24 +54,6 @@ struct CommandPayload: Encodable {
         return commandType.rawValue
     }
 
-    struct ReturnNotificationInfo: Encodable {
-        let productionEnvironment: Bool
-        let deviceToken: String
-        let bundleId: String
-        let teamId: String
-        let keyId: String
-        let apnsKey: String
-
-        enum CodingKeys: String, CodingKey {
-            case productionEnvironment = "production_environment"
-            case deviceToken = "device_token"
-            case bundleId = "bundle_id"
-            case teamId = "team_id"
-            case keyId = "key_id"
-            case apnsKey = "apns_key"
-        }
-    }
-
     enum CodingKeys: String, CodingKey {
         case user
         case commandType = "command_type"

@@ -12,7 +12,7 @@ struct LoopAPNSCommandPayloadTests {
     @Test("carbs payload carries the loop.js keys")
     func carbsKeys() {
         let payload = LoopAPNSPayload(type: .carbs, carbsAmount: 30, absorptionTime: 3, consumedDate: now.addingTimeInterval(-600), otp: "123456")
-        let json = LoopAPNSService.carbsCommandPayload(payload, now: now)
+        let json = LoopAPNSCommands.carbsCommandPayload(payload, now: now)
         #expect(Set(json.keys) == headerKeys.union(["carbs-entry", "absorption-time", "start-time"]))
         #expect(json["carbs-entry"] as? Double == 30)
         #expect(json["absorption-time"] as? Double == 3)
@@ -28,7 +28,7 @@ struct LoopAPNSCommandPayloadTests {
 
     @Test("bolus payload carries the loop.js keys")
     func bolusKeys() {
-        let json = LoopAPNSService.bolusCommandPayload(LoopAPNSPayload(type: .bolus, bolusAmount: 1.25, otp: "123456"), now: now)
+        let json = LoopAPNSCommands.bolusCommandPayload(LoopAPNSPayload(type: .bolus, bolusAmount: 1.25, otp: "123456"), now: now)
         #expect(Set(json.keys) == headerKeys.union(["bolus-entry"]))
         #expect(json["bolus-entry"] as? Double == 1.25)
         #expect(json["alert"] as? String == "Remote Bolus Entry: 1.25 U")
@@ -36,7 +36,7 @@ struct LoopAPNSCommandPayloadTests {
 
     @Test("carbs delete addresses the entry by sync identifier")
     func deleteKeys() {
-        let json = LoopAPNSService.carbsDeleteCommandPayload(syncIdentifier: "SYNC-1", otp: "123456", now: now)
+        let json = LoopAPNSCommands.carbsDeleteCommandPayload(syncIdentifier: "SYNC-1", otp: "123456", now: now)
         #expect(Set(json.keys) == headerKeys.union(["carbs-delete"]))
         #expect(json["carbs-delete"] as? String == "SYNC-1")
         #expect(json["carbs-entry"] == nil)
@@ -44,7 +44,7 @@ struct LoopAPNSCommandPayloadTests {
 
     @Test("carbs edit always sends amount, absorption and start time; food type only when set")
     func editKeys() {
-        let json = LoopAPNSService.carbsEditCommandPayload(
+        let json = LoopAPNSCommands.carbsEditCommandPayload(
             syncIdentifier: "SYNC-1",
             carbsAmount: 45,
             absorptionTimeHours: 2.5,
@@ -61,7 +61,7 @@ struct LoopAPNSCommandPayloadTests {
         #expect(json["carbs-entry"] == nil)
         #expect(json["start-time"] == nil)
 
-        let withFood = LoopAPNSService.carbsEditCommandPayload(
+        let withFood = LoopAPNSCommands.carbsEditCommandPayload(
             syncIdentifier: "SYNC-1", carbsAmount: 45, absorptionTimeHours: 2.5, foodType: "🍕", consumedDate: now, otp: "123456", now: now
         )
         #expect(withFood["carbs-edit-food-type"] as? String == "🍕")

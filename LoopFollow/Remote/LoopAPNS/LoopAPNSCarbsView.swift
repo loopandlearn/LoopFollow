@@ -623,29 +623,3 @@ struct LoopAPNSCarbsView: View {
         min(max(date, oldestAcceptedDate), latestAcceptedDate)
     }
 }
-
-// APNS Payload structure for carbs
-struct LoopAPNSPayload {
-    enum PayloadType {
-        case carbs
-        case bolus
-    }
-
-    let type: PayloadType
-    let carbsAmount: Double?
-    let absorptionTime: Double?
-    let foodType: String?
-    let bolusAmount: Double?
-    let consumedDate: Date?
-    let otp: String
-
-    init(type: PayloadType, carbsAmount: Double? = nil, absorptionTime: Double? = nil, foodType: String? = nil, bolusAmount: Double? = nil, consumedDate: Date? = nil, otp: String) {
-        self.type = type
-        self.carbsAmount = carbsAmount
-        self.absorptionTime = absorptionTime
-        self.foodType = foodType
-        self.bolusAmount = bolusAmount
-        self.consumedDate = consumedDate
-        self.otp = otp
-    }
-}

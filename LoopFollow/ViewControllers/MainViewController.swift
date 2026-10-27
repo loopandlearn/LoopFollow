@@ -153,6 +153,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         view.backgroundColor = .systemBackground
 
         infoManager = InfoManager()
+        WatchSessionManager.shared.observe(infoManager, stats: statsDisplayModel)
 
         let mainView = MainHomeView(
             chartModel: chartModel,
@@ -279,7 +280,12 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.useIFCC.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.showGMI.$value.map { _ in () }.eraseToAnyPublisher(),
-            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher()
+            Storage.shared.showStdDev.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.statsSinceMidnight.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.lowLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.highLine.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.graphTimeZoneEnabled.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.graphTimeZoneIdentifier.$value.map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
@@ -293,6 +299,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
                 self?.updateBGGraphSettings()
                 self?.updateBGGraph()
                 LiveActivityManager.shared.refreshFromCurrentState(reason: "range mode changed")
+                self?.updateStats()
             }
             .store(in: &cancellables)
 
