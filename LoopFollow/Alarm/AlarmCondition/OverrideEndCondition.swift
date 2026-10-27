@@ -3,18 +3,23 @@
 
 import Foundation
 
-struct OverrideEndCondition: AlarmCondition {
+/// Fires once when the active override ends and, with `predictiveMinutes`
+/// set, once that many minutes before the scheduled end.
+final class OverrideEndCondition: AlarmCondition {
     static let type: AlarmType = .overrideEnd
+    private(set) var firedTitle: String?
     init() {}
 
-    func evaluate(alarm _: Alarm, data: AlarmData, now: Date) -> Bool {
-        guard let endTS = data.latestOverrideEnd, endTS > 0 else { return false }
-        guard now.timeIntervalSince1970 - endTS <= 15 * 60 else { return false }
-
-        let last = Storage.shared.lastOverrideEndNotified.value ?? 0
-        guard endTS > last else { return false }
-
-        Storage.shared.lastOverrideEndNotified.value = endTS
-        return true
+    func evaluate(alarm: Alarm, data: AlarmData, now: Date) -> Bool {
+        let phase = EndAlarmPhases(
+            latestStart: data.latestOverrideStart,
+            latestEnd: data.latestOverrideEnd,
+            activeEnd: data.activeOverrideEnd,
+            leadMinutes: alarm.predictiveMinutes,
+            endedMarker: Storage.shared.lastOverrideEndNotified,
+            warnedMarker: Storage.shared.lastOverridePreEndNotified
+        ).fire(now: now)
+        firedTitle = phase == .endingSoon ? "Override Ending Soon" : nil
+        return phase != nil
     }
 }

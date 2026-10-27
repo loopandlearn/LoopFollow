@@ -98,6 +98,19 @@ final class UnitSettingsStore {
         timeInRangeMode.fixedThresholds ?? (Storage.shared.lowLine.value, Storage.shared.highLine.value)
     }
 
+    /// Returns the very low, low, high and very high thresholds (in mg/dL) for
+    /// the current range mode. Very low and very high come from `GlucoseThresholds`,
+    /// or the range's own bounds when a custom range extends past them.
+    func effectiveBandThresholds() -> (veryLow: Double, low: Double, high: Double, veryHigh: Double) {
+        let range = effectiveThresholds()
+        return (
+            min(GlucoseThresholds.veryLow, range.low),
+            range.low,
+            range.high,
+            max(GlucoseThresholds.veryHigh, range.high)
+        )
+    }
+
     var glycemicMetricMode: GlycemicMetricMode {
         get {
             Storage.shared.showGMI.value ? .gmi : .ehba1c
