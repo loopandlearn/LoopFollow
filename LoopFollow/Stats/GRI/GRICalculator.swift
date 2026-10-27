@@ -15,10 +15,10 @@ class GRICalculator {
     static func calculate(bgData: [ShareGlucoseData]) -> GRICalculationResult {
         guard !bgData.isEmpty else { return GRICalculationResult(gri: 0.0, hypoComponent: 0.0, hyperComponent: 0.0) }
 
-        let vLowThreshold = 54.0
-        let lowThreshold = 70.0
-        let highThreshold = 180.0
-        let vHighThreshold = 250.0
+        let vLowThreshold = GlucoseThresholds.veryLow
+        let lowThreshold = GlucoseThresholds.tirLow
+        let highThreshold = GlucoseThresholds.tirHigh
+        let vHighThreshold = GlucoseThresholds.veryHigh
 
         var vLowCount = 0
         var lowCount = 0
