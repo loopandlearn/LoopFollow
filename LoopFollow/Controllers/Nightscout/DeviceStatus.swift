@@ -92,7 +92,7 @@ extension MainViewController {
 
         Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
 
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as? [String: AnyObject] {
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
                 Storage.shared.bolusIncrementDetected.value = true
@@ -182,7 +182,7 @@ extension MainViewController {
         }
 
         // Loop - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as? [String: AnyObject] {
             // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
             // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
             if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
@@ -223,7 +223,7 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as? [String: AnyObject] {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 
