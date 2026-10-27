@@ -226,9 +226,10 @@ class SimpleStatsViewModel: ObservableObject {
 
         var currentTime = startTime
         while currentTime < endTime {
-            let currentDate = Date(timeIntervalSince1970: currentTime)
-            let dayStart = calendar.startOfDay(for: currentDate).timeIntervalSince1970
-            let nextDayStart = dayStart + 24 * 60 * 60
+            let dayStartDate = calendar.startOfDay(for: Date(timeIntervalSince1970: currentTime))
+            guard let nextDayStartDate = calendar.date(byAdding: .day, value: 1, to: dayStartDate) else { break }
+            let dayStart = dayStartDate.timeIntervalSince1970
+            let nextDayStart = nextDayStartDate.timeIntervalSince1970
 
             // Process each profile segment for this day
             for i in 0 ..< sortedProfile.count {
