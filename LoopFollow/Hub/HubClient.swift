@@ -1100,6 +1100,7 @@ final class HubClient {
         guard drivesAlarms, Observable.shared.currentAlarm.value == alarmID else { return }
         LogManager.shared.log(category: .hub, message: "Hub alarm \(alarmID.uuidString.prefix(8)) stopped at the hub")
         Observable.shared.currentAlarm.value = nil
+        Observable.shared.currentAlarmTitleOverride.value = nil
     }
 
     /// The hub's view of this device, recorded as a sync records it.
