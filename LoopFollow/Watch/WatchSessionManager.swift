@@ -81,6 +81,11 @@ final class WatchSessionManager: NSObject {
             Storage.shared.sharedSecret.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.loopAPNSQrCodeURL.$value.map { _ in () }.eraseToAnyPublisher(),
             Observable.shared.loopFollowDeviceToken.$value.map { _ in () }.eraseToAnyPublisher(),
+            // What decides whether the hub drives the alarms (`BackgroundRefreshType.inEffect`).
+            Storage.shared.backgroundRefreshType.$value.map { _ in () }.eraseToAnyPublisher(),
+            HubClient.shared.hubConfirmed.$value.map { _ in () }.eraseToAnyPublisher(),
+            HubClient.shared.notificationsAllowed.$value.map { _ in () }.eraseToAnyPublisher(),
+            HubWatchdog.looksHealthy.$value.map { _ in () }.eraseToAnyPublisher(),
         ]
         Publishers.MergeMany(credentialTriggers)
             .debounce(for: .seconds(2), scheduler: DispatchQueue.main)

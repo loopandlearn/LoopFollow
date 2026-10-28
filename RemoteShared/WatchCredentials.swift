@@ -20,6 +20,10 @@ struct WatchCredentials: Codable, Equatable {
     var dexcomServer: String
     /// Present only when remote commands from the watch are allowed.
     var remote: Remote?
+    /// The phone runs in LoopFollow Hub mode with the hub driving the alarms, so it
+    /// may be suspended and its data goes stale: the watch fetches on its own
+    /// without asking the phone first.
+    var phoneSleeps: Bool? = nil
 
     struct Remote: Codable, Equatable {
         var kind: WatchRemoteConfig.Kind
