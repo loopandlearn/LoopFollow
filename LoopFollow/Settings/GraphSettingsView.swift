@@ -18,6 +18,7 @@ struct GraphSettingsView: View {
     @ObservedObject private var showIOBGraph = Storage.shared.showIOBGraph
     @ObservedObject private var showCOBGraph = Storage.shared.showCOBGraph
     @ObservedObject private var showSensitivityRatioGraph = Storage.shared.showSensitivityRatioGraph
+    @ObservedObject private var showInsulinActivityGraph = Storage.shared.showInsulinActivityGraph
     @ObservedObject private var showSmoothedBG = Storage.shared.showSmoothedBG
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var historyCurvePlacement = Storage.shared.historyCurvePlacement
@@ -83,8 +84,11 @@ struct GraphSettingsView: View {
                     if device.value != "Loop" {
                         Toggle("Show Smoothed BG", isOn: $showSmoothedBG.value)
                         Toggle("Show Sensitivity Ratio Graph", isOn: $showSensitivityRatioGraph.value)
+                        Toggle("Show Insulin Activity Graph", isOn: $showInsulinActivityGraph.value)
                     }
-                    if showIOBGraph.value || showCOBGraph.value || showSensitivityRatioGraph.value {
+                    if showIOBGraph.value || showCOBGraph.value || showSensitivityRatioGraph.value
+                        || showInsulinActivityGraph.value
+                    {
                         Picker("Curve Placement", selection: $historyCurvePlacement.value) {
                             ForEach(HistoryCurvePlacement.allCases, id: \.self) { placement in
                                 Text(placement.displayName).tag(placement)

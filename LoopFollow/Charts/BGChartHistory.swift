@@ -20,11 +20,12 @@ enum BGChartHistory {
     }
 
     enum PaneKind: Int, CaseIterable {
-        case iob, cob, sensitivityRatio
+        case iob, insulinActivity, cob, sensitivityRatio
 
         var title: String {
             switch self {
             case .iob: return "IOB"
+            case .insulinActivity: return "Activity"
             case .cob: return "COB"
             case .sensitivityRatio: return "Sens. Ratio"
             }
@@ -33,18 +34,20 @@ enum BGChartHistory {
         var color: Color {
             switch self {
             case .iob: return Color("Insulin")
+            case .insulinActivity: return Color(.systemTeal)
             case .cob: return Color(.systemOrange)
             case .sensitivityRatio: return Color(.systemIndigo)
             }
         }
 
         var fillsArea: Bool {
-            self == .iob || self == .cob
+            self == .iob || self == .insulinActivity || self == .cob
         }
 
         var isEnabled: Bool {
             switch self {
             case .iob: return Storage.shared.showIOBGraph.value
+            case .insulinActivity: return Storage.shared.showInsulinActivityGraph.value && Storage.shared.device.value != "Loop"
             case .cob: return Storage.shared.showCOBGraph.value
             case .sensitivityRatio: return Storage.shared.showSensitivityRatioGraph.value && Storage.shared.device.value != "Loop"
             }
@@ -53,6 +56,7 @@ enum BGChartHistory {
         func value(of sample: DeviceStatusHistorySample) -> Double? {
             switch self {
             case .iob: return sample.iob
+            case .insulinActivity: return sample.insulinActivity
             case .cob: return sample.cob
             case .sensitivityRatio: return sample.sensitivityRatio
             }
@@ -62,6 +66,8 @@ enum BGChartHistory {
             switch self {
             case .iob:
                 return Localizer.formatToLocalizedString(value, maxFractionDigits: 2) + "U"
+            case .insulinActivity:
+                return Localizer.formatToLocalizedString(value, maxFractionDigits: 2) + "U/h"
             case .cob:
                 return Localizer.formatToLocalizedString(value, maxFractionDigits: 0) + "g"
             case .sensitivityRatio:
@@ -73,6 +79,8 @@ enum BGChartHistory {
             switch self {
             case .iob:
                 return Localizer.formatToLocalizedString(value, maxFractionDigits: 1) + "U"
+            case .insulinActivity:
+                return Localizer.formatToLocalizedString(value, maxFractionDigits: 1) + "U/h"
             default:
                 return format(value)
             }
@@ -130,6 +138,9 @@ enum BGChartHistory {
             let lower: Double
             let upper: Double
             switch kind {
+            case .insulinActivity:
+                lower = min(0, minValue)
+                upper = max(1, maxValue.rounded(.up))
             case .cob:
                 lower = 0
                 upper = max(10, (maxValue / 10).rounded(.up) * 10)
@@ -233,7 +244,7 @@ enum BGChartHistory {
         let upper: Double
         var ticks: [Double]
         switch kind {
-        case .iob:
+        case .iob, .insulinActivity:
             lower = min(0, minValue)
             upper = max(1, maxValue.rounded(.up))
             ticks = [0, upper]
@@ -254,7 +265,7 @@ enum BGChartHistory {
             points: points,
             yDomain: (lower - pad) ... (upper + pad),
             ticks: ticks,
-            baseline: kind == .iob || kind == .cob ? 0 : lower - pad
+            baseline: kind.fillsArea ? 0 : lower - pad
         )
     }
 

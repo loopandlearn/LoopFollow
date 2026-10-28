@@ -24,18 +24,19 @@ struct DeviceStatusHistoryParserTests {
         #expect(sample.date == DeviceStatusHistoryParser.parseDate("2026-09-27T10:00:05Z")!.timeIntervalSince1970)
         #expect(createdAt == DeviceStatusHistoryParser.parseDate("2026-09-27T10:00:30.000Z"))
         #expect(sample.iob == 1.25)
+        #expect(sample.insulinActivity == nil)
         #expect(sample.cob == 20)
         #expect(sample.smoothedBG == nil)
         #expect(sample.forecast?.curves["main"] == [110, 113, 115])
         #expect(sample.forecast?.start == DeviceStatusHistoryParser.parseDate("2026-09-27T09:59:00Z")!.timeIntervalSince1970)
     }
 
-    @Test("Trio record yields smoothed BG, ISF, ratio and the four forecast curves")
+    @Test("Trio record yields insulin activity, smoothed BG, ISF, ratio and the forecast curves")
     func trioRecord() throws {
         let record = json("""
         {"created_at": "2026-09-27T10:00:30.000Z", "device": "Trio",
          "pump": {"reservoir": 120.5, "battery": {"percent": 80}}, "uploader": {"battery": 55},
-         "openaps": {"iob": {"iob": 2.5, "time": "2026-09-27T10:00:00Z"},
+         "openaps": {"iob": {"iob": 2.5, "activity": 0.0425, "time": "2026-09-27T10:00:00Z"},
                      "suggested": {"deliverAt": "2026-09-27T10:00:10.123Z", "bg": 142, "COB": 12.5,
                                    "ISF": 45.2, "sensitivityRatio": 1.15, "eventualBG": 130,
                                    "current_target": 5.5, "CR": 9, "TDD": 42.1,
@@ -44,6 +45,7 @@ struct DeviceStatusHistoryParserTests {
         let (sample, _) = try #require(DeviceStatusHistoryParser.parse(record))
         #expect(sample.date == DeviceStatusHistoryParser.parseDate("2026-09-27T10:00:10.123Z")!.timeIntervalSince1970)
         #expect(sample.iob == 2.5)
+        #expect(abs((sample.insulinActivity ?? 0) - 2.55) < 1e-9)
         #expect(sample.cob == 12.5)
         #expect(sample.smoothedBG == 142)
         #expect(sample.isf == 45.2)
@@ -75,7 +77,7 @@ struct DeviceStatusHistoryParserTests {
     func openAPSFallbacks() throws {
         let record = json("""
         {"created_at": "2026-09-27T10:00:30Z",
-         "openaps": {"iob": [{"iob": 0.8}, {"iob": 0.6}],
+         "openaps": {"iob": [{"iob": 0.8, "activity": -0.01}, {"iob": 0.6, "activity": 0.02}],
                      "enacted": {"timestamp": "2026-09-27T10:00:00Z", "ISF": 0,
                                  "reason": "maxCOB: 120, COB: 7.5, Dev: 3, ISF: 54"}}}
         """)
@@ -83,6 +85,7 @@ struct DeviceStatusHistoryParserTests {
         #expect(sample.isf == nil)
         #expect(sample.cob == 7.5)
         #expect(sample.iob == 0.8)
+        #expect(abs((sample.insulinActivity ?? 0) + 0.6) < 1e-9)
     }
 
     @Test("Out-of-range forecast values are clamped")
