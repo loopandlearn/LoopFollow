@@ -47,7 +47,7 @@ enum BGChartHistory {
         var isEnabled: Bool {
             switch self {
             case .iob: return Storage.shared.showIOBGraph.value
-            case .insulinActivity: return Storage.shared.showInsulinActivityGraph.value && Storage.shared.device.value != "Loop"
+            case .insulinActivity: return Storage.shared.showInsulinActivityGraph.value
             case .cob: return Storage.shared.showCOBGraph.value
             case .sensitivityRatio: return Storage.shared.showSensitivityRatioGraph.value && Storage.shared.device.value != "Loop"
             }

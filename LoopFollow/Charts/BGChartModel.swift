@@ -662,9 +662,18 @@ final class BGChartModel: ObservableObject {
         let enabledKinds = BGChartHistory.PaneKind.allCases.filter(\.isEnabled)
         let showSmoothed = Storage.shared.showSmoothedBG.value && Storage.shared.device.value != "Loop"
         let startTime = start.timeIntervalSince1970
-        let samples = enabledKinds.isEmpty && !showSmoothed
+        var samples = enabledKinds.isEmpty && !showSmoothed
             ? []
             : DeviceStatusHistory.shared.state.samples.filter { $0.date >= startTime }
+        // Loop's activity is computed from treatments, not read from devicestatus.
+        if enabledKinds.contains(.insulinActivity), let vc = MainViewController.shared, !vc.loopInsulinActivity.isEmpty {
+            samples += vc.loopInsulinActivity.filter { $0.date >= startTime }.map {
+                var sample = DeviceStatusHistorySample(date: $0.date)
+                sample.insulinActivity = $0.value
+                return sample
+            }
+            samples.sort { $0.date < $1.date }
+        }
 
         if Storage.shared.historyCurvePlacement.value == .mainGraph {
             historyPanes = []
