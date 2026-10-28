@@ -32,7 +32,7 @@ extension MainViewController {
         Storage.shared.lastIOB.value = latestIOB?.value
         Storage.shared.lastCOB.value = latestCOB?.value
 
-        if lastLoopRecord["failureReason"] != nil {
+        if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {

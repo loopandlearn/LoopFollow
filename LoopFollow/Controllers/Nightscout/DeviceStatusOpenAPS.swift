@@ -7,7 +7,7 @@ import HealthKit
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
         Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
-        if lastLoopRecord["failureReason"] != nil {
+        if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {

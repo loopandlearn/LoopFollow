@@ -6,13 +6,13 @@ import Foundation
 import Testing
 
 struct DeviceStatusHistoryParserTests {
-    private func json(_ text: String) -> [String: Any] {
-        try! JSONSerialization.jsonObject(with: Data(text.utf8)) as! [String: Any]
+    private func json(_ text: String) throws -> [String: Any] {
+        try #require(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])
     }
 
     @Test("Loop record yields IOB, COB and the forecast from its start date")
     func loopRecord() throws {
-        let record = json("""
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30.000Z",
          "loop": {"timestamp": "2026-09-27T10:00:05Z",
                   "iob": {"iob": 1.25, "timestamp": "2026-09-27T10:00:00Z"},
@@ -33,7 +33,7 @@ struct DeviceStatusHistoryParserTests {
 
     @Test("Trio record yields insulin activity, smoothed BG, ISF, ratio and the forecast curves")
     func trioRecord() throws {
-        let record = json("""
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30.000Z", "device": "Trio",
          "pump": {"reservoir": 120.5, "battery": {"percent": 80}}, "uploader": {"battery": 55},
          "openaps": {"iob": {"iob": 2.5, "activity": 0.0425, "time": "2026-09-27T10:00:00Z"},
@@ -63,7 +63,7 @@ struct DeviceStatusHistoryParserTests {
 
     @Test("Loop's active override is kept")
     func loopOverride() throws {
-        let record = json("""
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30Z",
          "override": {"active": true, "multiplier": 1.5, "currentCorrectionRange": {"minValue": 90, "maxValue": 100}},
          "loop": {"timestamp": "2026-09-27T10:00:05Z", "recommendedBolus": 0.4}}
@@ -75,7 +75,7 @@ struct DeviceStatusHistoryParserTests {
 
     @Test("A zero ISF is a placeholder, COB falls back to the reason string")
     func openAPSFallbacks() throws {
-        let record = json("""
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30Z",
          "openaps": {"iob": [{"iob": 0.8, "activity": -0.01}, {"iob": 0.6, "activity": 0.02}],
                      "enacted": {"timestamp": "2026-09-27T10:00:00Z", "ISF": 0,
@@ -90,7 +90,7 @@ struct DeviceStatusHistoryParserTests {
 
     @Test("Out-of-range forecast values are clamped")
     func hugeForecastValue() throws {
-        let record = json("""
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30Z",
          "loop": {"timestamp": "2026-09-27T10:00:05Z", "predicted": {"values": [1e30, -5, 120]}}}
         """)
@@ -99,11 +99,24 @@ struct DeviceStatusHistoryParserTests {
     }
 
     @Test("Uploader-only records carry nothing to graph")
-    func uploaderOnly() {
-        let record = json("""
+    func uploaderOnly() throws {
+        let record = try json("""
         {"created_at": "2026-09-27T10:00:30Z", "uploader": {"battery": 80}}
         """)
         #expect(DeviceStatusHistoryParser.parse(record) == nil)
+    }
+
+    @Test("Explicit nulls are treated as missing fields")
+    func explicitNulls() throws {
+        let record = try json("""
+        {"created_at": "2026-09-27T10:00:30Z", "loop": null, "override": null, "pump": {"clock": null},
+         "openaps": {"iob": [{"iob": 0.8}], "suggested": null,
+                     "enacted": {"timestamp": "2026-09-27T10:00:00Z", "COB": 12, "ISF": null}}}
+        """)
+        let (sample, _) = try #require(DeviceStatusHistoryParser.parse(record))
+        #expect(sample.iob == 0.8)
+        #expect(sample.cob == 12)
+        #expect(sample.isf == nil)
     }
 
     @Test("Offsets are honored")
