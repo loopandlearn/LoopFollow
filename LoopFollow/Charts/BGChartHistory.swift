@@ -40,6 +40,15 @@ enum BGChartHistory {
             }
         }
 
+        /// Values below zero, drawn mirrored above the overlay baseline.
+        var negativeColor: Color? {
+            switch self {
+            case .iob: return Color(.systemPink)
+            case .insulinActivity: return Color(.systemBrown)
+            case .cob, .sensitivityRatio: return nil
+            }
+        }
+
         var fillsArea: Bool {
             self == .iob || self == .insulinActivity || self == .cob
         }
@@ -114,19 +123,17 @@ enum BGChartHistory {
     struct Overlay {
         struct Series: Identifiable {
             let kind: PaneKind
-            /// Negative IOB, drawn mirrored above the baseline.
+            /// Values below zero, drawn mirrored above the baseline.
             let isNegative: Bool
             let points: [Point]
             /// Insulin forecast, drawn dashed.
             var isForecast = false
             var id: String { "\(kind.rawValue)-\(isNegative)-\(isForecast)" }
-            var color: Color { isNegative ? BGChartHistory.negativeIOBColor : kind.color }
+            var color: Color { isNegative ? kind.negativeColor ?? kind.color : kind.color }
         }
 
         let series: [Series]
     }
-
-    static let negativeIOBColor = Color(.systemPink)
 
     static func overlay(
         kinds: [PaneKind],
@@ -142,8 +149,8 @@ enum BGChartHistory {
             let values = (points + forecastPoints).map(\.value)
             guard let minValue = values.min(), let maxValue = values.max() else { continue }
 
-            if kind == .iob {
-                // Magnitude scale: negative IOB is mirrored upward in its own color.
+            if kind.negativeColor != nil {
+                // Magnitude scale: negative values are mirrored upward in their own color.
                 let magnitude = max(abs(minValue), maxValue, 1).rounded(.up)
                 for (curve, isForecast) in [(points, false), (forecastPoints, true)] where !curve.isEmpty {
                     let (positive, negative) = splitAtZero(curve)
@@ -160,9 +167,6 @@ enum BGChartHistory {
             let lower: Double
             let upper: Double
             switch kind {
-            case .insulinActivity:
-                lower = min(0, minValue)
-                upper = max(1, maxValue.rounded(.up))
             case .cob:
                 lower = 0
                 upper = max(10, (maxValue / 10).rounded(.up) * 10)
@@ -170,7 +174,7 @@ enum BGChartHistory {
                 // Same range as the ratio graph, so a flat curve sits mid-band.
                 lower = min(minValue, 0.9)
                 upper = max(maxValue, 1.1)
-            case .iob:
+            case .iob, .insulinActivity:
                 continue
             }
             let span = max(upper - lower, .ulpOfOne)

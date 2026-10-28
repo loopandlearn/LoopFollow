@@ -281,6 +281,19 @@ struct BGChartHistoryTests {
         #expect(overlay.series.flatMap(\.points).allSatisfy { $0.value >= 0 })
     }
 
+    @Test("The overlay mirrors negative insulin activity in its own color")
+    func overlayNegativeActivity() throws {
+        let values = [(0.0, 1.5), (5.0, -0.8)].map {
+            var s = DeviceStatusHistorySample(date: t0 + $0.0 * 60)
+            s.insulinActivity = $0.1
+            return s
+        }
+        let overlay = try #require(BGChartHistory.overlay(kinds: [.iob, .insulinActivity], samples: values, bandTop: 60))
+        #expect(overlay.series.map(\.isNegative) == [false, true])
+        #expect(overlay.series.flatMap(\.points).allSatisfy { $0.value >= 0 && $0.value <= 60 })
+        #expect(BGChartHistory.PaneKind.insulinActivity.negativeColor != BGChartHistory.PaneKind.iob.negativeColor)
+    }
+
     @Test("A pane without values is not shown")
     func emptyPane() {
         #expect(BGChartHistory.pane(kind: .cob, samples: samples([(0, 1)])) == nil)
