@@ -101,8 +101,10 @@ struct BolusPresetsView: View {
 }
 
 /// Any amount, set with the Digital Crown or − and +, starting at the AID's
-/// recommendation while it is under 5 minutes old and following newer ones
-/// until the amount is changed; presets one tap away when the phone has any.
+/// recommendation while it is under 5 minutes old. Until the amount is changed
+/// by hand, a newer recommendation that is lower or the same replaces it, and a
+/// higher one is offered with a tap. Presets are one tap away when the phone
+/// has any.
 struct BolusAmountView: View {
     let remote: WatchRemoteConfig
 
@@ -112,6 +114,8 @@ struct BolusAmountView: View {
     /// Seeded once, so coming back from the confirmation keeps the user's amount.
     @State private var seeded = false
     @State private var seededRecommendation: BolusRecommendation?
+    /// A newer, higher recommendation, only applied when tapped.
+    @State private var higherRecommendation: BolusRecommendation?
     @State private var showOldCalculationWarning = false
     @FocusState private var amountFocused: Bool
 
@@ -120,7 +124,20 @@ struct BolusAmountView: View {
             VStack(spacing: 8) {
                 AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, sensitivity: .low, format: WatchFormat.insulin)
                     .focused($amountFocused)
-                if let rec = seededRecommendation {
+                if let higher = higherRecommendation, higher.units != units {
+                    Button {
+                        units = higher.units
+                        seededRecommendation = higher
+                        higherRecommendation = nil
+                        amountFocused = true
+                    } label: {
+                        Label("New \(WatchFormat.insulin(higher.units)) U, tap to use", systemImage: "wand.and.stars")
+                            .font(.footnote)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.tint)
+                    .accessibilityLabel("Use the new, higher recommendation, \(WatchFormat.insulin(higher.units)) U")
+                } else if let rec = seededRecommendation {
                     // Redrawn every few seconds so the age keeps counting while the screen stays open.
                     TimelineView(.periodic(from: .now, by: 10)) { context in
                         let age = context.date.timeIntervalSince(rec.at)
@@ -159,7 +176,11 @@ struct BolusAmountView: View {
         }
         .onAppear {
             amountFocused = true
-            guard !seeded else { return }
+            guard !seeded else {
+                // Catches up on a cycle that came in while the confirmation was showing.
+                followNewerRecommendation()
+                return
+            }
             seeded = true
             // The phone also sends new loop cycles as they come; this covers one it has not sent yet.
             session.requestState()
@@ -173,22 +194,31 @@ struct BolusAmountView: View {
         }
     }
 
-    /// An amount still at the starting recommendation moves to a newer one.
+    /// An amount still at the starting recommendation moves down to a newer,
+    /// lower one; a higher one is only offered, so insulin is never raised
+    /// without a tap.
     private func followNewerRecommendation() {
         guard let seededRecommendation, units == seededRecommendation.units,
               let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation),
-              latest.at > seededRecommendation.at
+              latest.at > seededRecommendation.at,
+              latest != higherRecommendation
         else { return }
-        if latest.units != units {
+        if latest.units > units {
+            higherRecommendation = latest
+        } else {
+            units = latest.units
+            self.seededRecommendation = latest
+            higherRecommendation = nil
+        }
+        if latest.units != seededRecommendation.units {
             WKInterfaceDevice.current().play(.notification)
         }
-        units = latest.units
-        self.seededRecommendation = latest
     }
 
     /// The amount is still the starting recommendation, which has since passed 5 minutes.
+    /// A newer, higher recommendation means the old one no longer risks too much insulin.
     private var isStaleRecommendation: Bool {
-        guard let rec = seededRecommendation, units == rec.units else { return false }
+        guard let rec = seededRecommendation, units == rec.units, higherRecommendation == nil else { return false }
         return Date().timeIntervalSince(rec.at) >= BolusPresetsView.recommendationWarnAge
     }
 
