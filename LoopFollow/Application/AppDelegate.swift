@@ -14,7 +14,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ExitDiagnostics.shared.start()
         HubClient.shared.observeChanges()
         HubAlarmSnoozeBridge.shared.setHandler { @MainActor alarmID in
-            guard Storage.shared.alarms.value.contains(where: { $0.id == alarmID }) else { return }
+            let known = Storage.shared.alarms.value.contains(where: { $0.id == alarmID })
+            LogManager.shared.log(category: .alarm, message: "System alarm snooze tapped for \(alarmID) (known=\(known), current=\(Observable.shared.currentAlarm.value?.uuidString ?? "nil"))")
+            guard known else { return }
             Observable.shared.currentAlarm.value = alarmID
             AlarmManager.shared.performSnooze()
         }

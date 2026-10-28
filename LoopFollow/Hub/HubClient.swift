@@ -1060,9 +1060,11 @@ final class HubClient {
     /// never takes the alarm as handled without its snooze.
     func alarmHandled(_ alarmID: UUID) {
         guard isHubMode else { return }
+        LogManager.shared.log(category: .hub, message: "Alarm \(alarmID) handled here (connected=\(isConnected)), reporting to the hub")
         uploadSoon { client in
             try await Self.reportHandled(upload: { try await client.uploadAlarms() },
                                          handled: { _ = try await client.send("POST", "/v1/device/alarm/\(alarmID.uuidString)/handled") })
+            LogManager.shared.log(category: .hub, message: "Alarm \(alarmID) reported handled to the hub")
         }
     }
 
