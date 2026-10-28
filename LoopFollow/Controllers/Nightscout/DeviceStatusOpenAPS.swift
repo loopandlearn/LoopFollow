@@ -77,6 +77,7 @@ extension MainViewController {
                 latestIOB = iobMetric
                 Observable.shared.iobText.value = iobMetric.formattedValue()
             }
+            insulinForecast = InsulinForecast.parseOpenAPS(lastLoopRecord)
             if let activity = (lastLoopRecord["iob"] as? [String: AnyObject])?["activity"] as? Double {
                 infoManager.updateInsulinActivity(activity * 60)
             } else {

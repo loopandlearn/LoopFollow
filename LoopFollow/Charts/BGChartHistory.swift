@@ -62,6 +62,15 @@ enum BGChartHistory {
             }
         }
 
+        /// The value this kind takes from an insulin forecast, for the kinds it covers.
+        func forecastValue(of point: InsulinForecast.Point) -> Double? {
+            switch self {
+            case .iob: return point.iob
+            case .insulinActivity: return point.activity
+            case .cob, .sensitivityRatio: return nil
+            }
+        }
+
         func format(_ value: Double) -> String {
             switch self {
             case .iob:
@@ -95,6 +104,8 @@ enum BGChartHistory {
         let ticks: [Double]
         /// Bottom of the area fill.
         let baseline: Double
+        /// Insulin forecast ahead of the history, drawn dashed.
+        var forecast: [Point] = []
         var id: Int { kind.rawValue }
     }
 
@@ -106,7 +117,9 @@ enum BGChartHistory {
             /// Negative IOB, drawn mirrored above the baseline.
             let isNegative: Bool
             let points: [Point]
-            var id: String { "\(kind.rawValue)-\(isNegative)" }
+            /// Insulin forecast, drawn dashed.
+            var isForecast = false
+            var id: String { "\(kind.rawValue)-\(isNegative)-\(isForecast)" }
             var color: Color { isNegative ? BGChartHistory.negativeIOBColor : kind.color }
         }
 
@@ -115,22 +128,31 @@ enum BGChartHistory {
 
     static let negativeIOBColor = Color(.systemPink)
 
-    static func overlay(kinds: [PaneKind], samples: [DeviceStatusHistorySample], bandTop: Double) -> Overlay? {
+    static func overlay(
+        kinds: [PaneKind],
+        samples: [DeviceStatusHistorySample],
+        forecast: InsulinForecast? = nil,
+        bandTop: Double
+    ) -> Overlay? {
         var series: [Overlay.Series] = []
 
         for kind in kinds {
             let points = points(from: samples, value: kind.value(of:))
-            guard let minValue = points.map(\.value).min(),
-                  let maxValue = points.map(\.value).max()
-            else { continue }
+            let forecastPoints = forecastPoints(kind: kind, forecast: forecast)
+            let values = (points + forecastPoints).map(\.value)
+            guard let minValue = values.min(), let maxValue = values.max() else { continue }
 
             if kind == .iob {
                 // Magnitude scale: negative IOB is mirrored upward in its own color.
                 let magnitude = max(abs(minValue), maxValue, 1).rounded(.up)
-                let (positive, negative) = splitAtZero(points)
-                series.append(.init(kind: kind, isNegative: false, points: positive.map { scaled($0, abs($0.value) / magnitude * bandTop) }))
-                if !negative.isEmpty {
-                    series.append(.init(kind: kind, isNegative: true, points: negative.map { scaled($0, abs($0.value) / magnitude * bandTop) }))
+                for (curve, isForecast) in [(points, false), (forecastPoints, true)] where !curve.isEmpty {
+                    let (positive, negative) = splitAtZero(curve)
+                    if !positive.isEmpty {
+                        series.append(.init(kind: kind, isNegative: false, points: positive.map { scaled($0, abs($0.value) / magnitude * bandTop) }, isForecast: isForecast))
+                    }
+                    if !negative.isEmpty {
+                        series.append(.init(kind: kind, isNegative: true, points: negative.map { scaled($0, abs($0.value) / magnitude * bandTop) }, isForecast: isForecast))
+                    }
                 }
                 continue
             }
@@ -152,7 +174,9 @@ enum BGChartHistory {
                 continue
             }
             let span = max(upper - lower, .ulpOfOne)
-            series.append(.init(kind: kind, isNegative: false, points: points.map { scaled($0, ($0.value - lower) / span * bandTop) }))
+            for (curve, isForecast) in [(points, false), (forecastPoints, true)] where !curve.isEmpty {
+                series.append(.init(kind: kind, isNegative: false, points: curve.map { scaled($0, ($0.value - lower) / span * bandTop) }, isForecast: isForecast))
+            }
         }
 
         guard !series.isEmpty else { return nil }
@@ -234,11 +258,19 @@ enum BGChartHistory {
         return points
     }
 
-    static func pane(kind: PaneKind, samples: [DeviceStatusHistorySample]) -> Pane? {
+    /// The forecast's values for `kind` as one unbroken curve.
+    static func forecastPoints(kind: PaneKind, forecast: InsulinForecast?) -> [Point] {
+        guard let forecast else { return [] }
+        return forecast.points.compactMap { point in
+            kind.forecastValue(of: point).map { Point(date: Date(timeIntervalSince1970: point.date), value: $0, segment: 0) }
+        }
+    }
+
+    static func pane(kind: PaneKind, samples: [DeviceStatusHistorySample], forecast: InsulinForecast? = nil) -> Pane? {
         let points = points(from: samples, value: kind.value(of:))
-        guard let minValue = points.map(\.value).min(),
-              let maxValue = points.map(\.value).max()
-        else { return nil }
+        let forecastPoints = forecastPoints(kind: kind, forecast: forecast)
+        let values = (points + forecastPoints).map(\.value)
+        guard let minValue = values.min(), let maxValue = values.max() else { return nil }
 
         let lower: Double
         let upper: Double
@@ -265,7 +297,8 @@ enum BGChartHistory {
             points: points,
             yDomain: (lower - pad) ... (upper + pad),
             ticks: ticks,
-            baseline: kind.fillsArea ? 0 : lower - pad
+            baseline: kind.fillsArea ? 0 : lower - pad,
+            forecast: forecastPoints
         )
     }
 

@@ -78,6 +78,7 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var smbData: [bolusGraphStruct] = []
     /// Loop only; see `updateLoopInsulinActivity()`.
     var loopInsulinActivity: [LoopInsulinActivity.Point] = []
+    var insulinForecast: InsulinForecast?
     var carbData: [carbGraphStruct] = []
 
     // Stats-specific data storage (can hold up to 30 days)

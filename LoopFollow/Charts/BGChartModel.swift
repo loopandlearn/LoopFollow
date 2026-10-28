@@ -675,12 +675,16 @@ final class BGChartModel: ObservableObject {
             samples.sort { $0.date < $1.date }
         }
 
+        // Same reach as the BG forecast lines.
+        let forecastEnd = now.timeIntervalSince1970 + Storage.shared.predictionToLoad.value * 3600
+        let forecast = MainViewController.shared?.insulinForecast?.clipped(to: forecastEnd)
+
         if Storage.shared.historyCurvePlacement.value == .mainGraph {
             historyPanes = []
             // The band stays below the low line so it does not cover in-range readings.
-            historyOverlay = BGChartHistory.overlay(kinds: enabledKinds, samples: samples, bandTop: min(maxBG * 0.22, lowLine * 0.9))
+            historyOverlay = BGChartHistory.overlay(kinds: enabledKinds, samples: samples, forecast: forecast, bandTop: min(maxBG * 0.22, lowLine * 0.9))
         } else {
-            historyPanes = enabledKinds.compactMap { BGChartHistory.pane(kind: $0, samples: samples) }
+            historyPanes = enabledKinds.compactMap { BGChartHistory.pane(kind: $0, samples: samples, forecast: forecast) }
             historyOverlay = nil
         }
         smoothedBG = showSmoothed ? BGChartHistory.points(from: samples) { $0.smoothedBG } : []

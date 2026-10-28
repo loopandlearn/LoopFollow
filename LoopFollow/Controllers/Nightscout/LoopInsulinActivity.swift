@@ -66,22 +66,30 @@ enum LoopInsulinActivity {
         return doses
     }
 
-    /// Activity at each of `times` (ascending), from `doses` (any order).
-    static func activity(at times: [TimeInterval], doses: [Dose], model: LoopInsulinModel) -> [Point] {
+    /// IOB and activity at each of `times` (ascending), from `doses` (any order).
+    static func evaluate(at times: [TimeInterval], doses: [Dose], model: LoopInsulinModel) -> [InsulinForecast.Point] {
         let sorted = doses.sorted { $0.date < $1.date }
         var first = 0
         return times.map { time in
             while first < sorted.count, sorted[first].date <= time - model.effectDuration {
                 first += 1
             }
-            var value = 0.0
+            var iob = 0.0
+            var activity = 0.0
             var index = first
             while index < sorted.count, sorted[index].date <= time {
-                value += sorted[index].units * model.activity(at: time - sorted[index].date)
+                let age = time - sorted[index].date
+                iob += sorted[index].units * model.percentEffectRemaining(at: age)
+                activity += sorted[index].units * model.activity(at: age)
                 index += 1
             }
-            return Point(date: time, value: value)
+            return InsulinForecast.Point(date: time, iob: iob, activity: activity)
         }
+    }
+
+    /// Activity at each of `times` (ascending), from `doses` (any order).
+    static func activity(at times: [TimeInterval], doses: [Dose], model: LoopInsulinModel) -> [Point] {
+        evaluate(at: times, doses: doses, model: model).map { Point(date: $0.date, value: $0.activity) }
     }
 
     /// Five-minute steps from `start` to `end`, ending exactly at `end`.
@@ -94,12 +102,13 @@ enum LoopInsulinActivity {
 }
 
 extension MainViewController {
-    /// Recomputes Loop's insulin activity after the treatments, the basal
-    /// schedule or the insulin model changed.
+    /// Recomputes Loop's insulin activity and insulin forecast after the
+    /// treatments, the basal schedule or the insulin model changed.
     func updateLoopInsulinActivity() {
         guard Storage.shared.device.value == "Loop" else {
             if !loopInsulinActivity.isEmpty {
                 loopInsulinActivity = []
+                insulinForecast = nil
                 chartModel.rebuild()
             }
             return
@@ -110,13 +119,24 @@ extension MainViewController {
         // Treatments are fetched from this time on; earlier doses are unknown,
         // so values start once those would have stopped acting.
         let fetchStart = now - TimeInterval(Storage.shared.downloadDays.value) * 24 * 3600
-        let boluses = (bolusData + smbData).map { LoopInsulinActivity.Dose(date: $0.date, units: $0.value) }
+        let boluses = (bolusData + smbData).filter { $0.date <= now }.map { LoopInsulinActivity.Dose(date: $0.date, units: $0.value) }
         let overrides = overrideGraphData.map {
             LoopInsulinActivity.Override(start: $0.date, end: $0.endDate, insulinNeedsScaleFactor: $0.insulNeedsScaleFactor)
         }
-        let basal = LoopInsulinActivity.netBasalDoses(delivered: basalData, scheduled: basalScheduleData, overrides: overrides, until: now)
+        // The running temp basal counts until its set end.
+        let basalEnd = max(now, basalData.last?.date ?? now)
+        let basal = LoopInsulinActivity.netBasalDoses(delivered: basalData, scheduled: basalScheduleData, overrides: overrides, until: basalEnd)
+        let doses = boluses + basal
+
         let times = LoopInsulinActivity.times(from: fetchStart + model.effectDuration, to: now)
-        loopInsulinActivity = LoopInsulinActivity.activity(at: times, doses: boluses + basal, model: model)
+        loopInsulinActivity = LoopInsulinActivity.activity(at: times, doses: doses, model: model)
+
+        if loopInsulinActivity.isEmpty {
+            insulinForecast = nil
+        } else {
+            let forecastTimes = Array(stride(from: now, through: now + model.effectDuration, by: InsulinForecast.step))
+            insulinForecast = InsulinForecast(points: LoopInsulinActivity.evaluate(at: forecastTimes, doses: doses, model: model))
+        }
 
         if let latest = loopInsulinActivity.last {
             infoManager.updateInsulinActivity(latest.value)
