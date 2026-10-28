@@ -119,7 +119,7 @@ extension MainViewController {
         loopInsulinActivity = LoopInsulinActivity.activity(at: times, doses: boluses + basal, model: model)
 
         if let latest = loopInsulinActivity.last {
-            infoManager.updateInfoData(type: .insulinActivity, value: BGChartHistory.PaneKind.insulinActivity.format(latest.value))
+            infoManager.updateInsulinActivity(latest.value)
         } else {
             infoManager.clearInfoData(type: .insulinActivity)
         }

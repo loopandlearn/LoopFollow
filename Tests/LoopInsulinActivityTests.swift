@@ -87,6 +87,13 @@ struct LoopInsulinActivityTests {
         #expect(abs(points[2].value - (-0.5 * model.activity(at: model.effectDuration))) < 1e-12)
     }
 
+    @Test("The info row rounds to one decimal and never shows minus zero")
+    func infoText() {
+        #expect(InfoManager.insulinActivityText(-0.04) == InfoManager.insulinActivityText(0))
+        #expect(InfoManager.insulinActivityText(1.37) == InfoManager.insulinActivityText(1.4))
+        #expect(InfoManager.insulinActivityText(0).hasSuffix("U/h"))
+    }
+
     @Test("Times step every five minutes and end at the end time")
     func timeGrid() {
         #expect(LoopInsulinActivity.times(from: 100, to: 700) == [300, 600, 700])

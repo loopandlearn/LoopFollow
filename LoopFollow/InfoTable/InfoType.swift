@@ -30,7 +30,7 @@ enum InfoType: Int, CaseIterable, Codable {
         case .iage: return "IAGE"
         case .dbSize: return "DB Size"
         case .smoothedBG: return "Smoothed BG"
-        case .insulinActivity: return "Insulin Activity"
+        case .insulinActivity: return "Ins. Activity"
         }
     }
 
@@ -62,6 +62,8 @@ enum InfoType: Int, CaseIterable, Codable {
             return InfoColorConfig(direction: .below, unit: "%", range: 0 ... 100, step: 5, defaultWarning: 30, defaultUrgent: 15)
         case .pump:
             return InfoColorConfig(direction: .below, unit: "U", range: 0 ... 50, step: 1, defaultWarning: 20, defaultUrgent: 10)
+        case .insulinActivity:
+            return InfoColorConfig(direction: .above, unit: "U/h", range: 0 ... 10, step: 0.1, defaultWarning: 2, defaultUrgent: 4)
         case .tdd:
             return InfoColorConfig(direction: .above, unit: "U", range: 0 ... 200, step: 1, defaultWarning: 60, defaultUrgent: 80)
         case .recBolus:

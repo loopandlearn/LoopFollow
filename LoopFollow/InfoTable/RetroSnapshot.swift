@@ -162,7 +162,7 @@ extension MainViewController {
             set(.pump, sample.reservoir.map { String(format: "%.0f", $0) + "U" }, sample.reservoir)
             set(.autosens, sample.sensitivityRatio.map { String(format: "%.0f", $0 * 100) + "%" })
             set(.smoothedBG, sample.smoothedBG.map { Localizer.formatQuantity($0) })
-            set(.insulinActivity, sample.insulinActivity.map { BGChartHistory.PaneKind.insulinActivity.format($0) })
+            set(.insulinActivity, sample.insulinActivity.map { InfoManager.insulinActivityText($0) }, sample.insulinActivity)
             set(.updated, Localizer.formatTimestampToLocalString(sample.date))
             set(.minMax, retroMinMax(sample.forecast))
             if let override = sample.loopOverride {
@@ -172,7 +172,7 @@ extension MainViewController {
         }
 
         if isLoop, let point = loopInsulinActivity.last(where: { abs($0.date - time) <= LoopInsulinActivity.step / 2 }) {
-            set(.insulinActivity, BGChartHistory.PaneKind.insulinActivity.format(point.value))
+            set(.insulinActivity, InfoManager.insulinActivityText(point.value), point.value)
         }
 
         // Profile-based rows, from the loaded profile's schedule at that time

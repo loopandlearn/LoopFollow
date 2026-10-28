@@ -78,7 +78,7 @@ extension MainViewController {
                 Observable.shared.iobText.value = iobMetric.formattedValue()
             }
             if let activity = (lastLoopRecord["iob"] as? [String: AnyObject])?["activity"] as? Double {
-                infoManager.updateInfoData(type: .insulinActivity, value: BGChartHistory.PaneKind.insulinActivity.format(activity * 60))
+                infoManager.updateInsulinActivity(activity * 60)
             } else {
                 infoManager.clearInfoData(type: .insulinActivity)
             }
