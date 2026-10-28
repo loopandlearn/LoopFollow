@@ -12,9 +12,10 @@ struct BolusPresetsView: View {
     @EnvironmentObject private var navigator: WatchNavigator
     @State private var staleRecommendation: Double?
 
-    /// Same cut-offs as the phone's bolus screens.
+    /// Same cut-offs and warning as the phone's bolus screens.
     private static let recommendationMaxAge: TimeInterval = 12 * 60
     static let recommendationWarnAge: TimeInterval = 5 * 60
+    static let oldCalculationWarning = "This recommended bolus was calculated more than 5 minutes ago. New treatments may have occurred since then. Proceed with caution."
 
     static func quickPicks(_ remote: WatchRemoteConfig) -> [Double] {
         remote.quickPickBoluses.filter { $0 > 0 && $0 <= remote.maxBolus }
@@ -29,8 +30,15 @@ struct BolusPresetsView: View {
         return (stepped, age)
     }
 
+    /// Under 5 minutes old the recommendation is already the starting amount,
+    /// so it is only listed here once it needs the warning.
+    static func presetRecommendation(_ remote: WatchRemoteConfig) -> (units: Double, age: TimeInterval)? {
+        guard let rec = freshRecommendation(remote), rec.age >= recommendationWarnAge else { return nil }
+        return rec
+    }
+
     static func hasPresets(_ remote: WatchRemoteConfig) -> Bool {
-        freshRecommendation(remote) != nil || !quickPicks(remote).isEmpty
+        presetRecommendation(remote) != nil || !quickPicks(remote).isEmpty
     }
 
     var body: some View {
@@ -54,26 +62,22 @@ struct BolusPresetsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This recommended bolus was calculated more than 5 minutes ago. New treatments may have occurred since then. Proceed with caution.")
+            Text(Self.oldCalculationWarning)
         }
     }
 
     @ViewBuilder
     private var recommendation: some View {
-        if let rec = Self.freshRecommendation(remote) {
+        if let rec = Self.presetRecommendation(remote) {
             Section {
                 Button {
-                    if rec.age >= Self.recommendationWarnAge {
-                        staleRecommendation = rec.units
-                    } else {
-                        confirm(rec.units)
-                    }
+                    staleRecommendation = rec.units
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Recommended \(WatchFormat.insulin(rec.units)) U")
                         Text("Calculated \(Int(rec.age / 60)) min ago")
                             .font(.caption2)
-                            .foregroundStyle(rec.age >= Self.recommendationWarnAge ? .red : .secondary)
+                            .foregroundStyle(.red)
                     }
                 }
             }
@@ -95,7 +99,8 @@ struct BolusAmountView: View {
     @State private var units = 0.0
     /// Seeded once, so coming back from the confirmation keeps the user's amount.
     @State private var seeded = false
-    @State private var seededRecommendation: (units: Double, age: TimeInterval)?
+    @State private var seededRecommendation: (units: Double, at: Date)?
+    @State private var showOldCalculationWarning = false
     @FocusState private var amountFocused: Bool
 
     var body: some View {
@@ -104,13 +109,21 @@ struct BolusAmountView: View {
                 AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, sensitivity: .low, format: WatchFormat.insulin)
                     .focused($amountFocused)
                 if let rec = seededRecommendation {
-                    Label("\(WatchFormat.insulin(rec.units)) U, \(Int(rec.age / 60)) min ago", systemImage: "wand.and.stars")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .accessibilityLabel("Recommended \(WatchFormat.insulin(rec.units)) U, \(Int(rec.age / 60)) min ago")
+                    // Redrawn every few seconds so the age keeps counting while the screen stays open.
+                    TimelineView(.periodic(from: .now, by: 10)) { context in
+                        let age = context.date.timeIntervalSince(rec.at)
+                        Label("\(WatchFormat.insulin(rec.units)) U, \(Int(age / 60)) min ago", systemImage: "wand.and.stars")
+                            .font(.footnote)
+                            .foregroundStyle(age >= BolusPresetsView.recommendationWarnAge ? .red : .secondary)
+                            .accessibilityLabel("Recommended \(WatchFormat.insulin(rec.units)) U, \(Int(age / 60)) min ago")
+                    }
                 }
                 Button("Continue") {
-                    navigator.push(.confirm(Self.request(units)))
+                    if isStaleRecommendation {
+                        showOldCalculationWarning = true
+                    } else {
+                        navigator.push(.confirm(Self.request(units)))
+                    }
                 }
                 .buttonStyle(CompactButtonStyle(prominent: true))
                 .tint(.blue)
@@ -124,15 +137,29 @@ struct BolusAmountView: View {
             }
         }
         .navigationTitle("Bolus")
+        .alert("Old Calculation Warning", isPresented: $showOldCalculationWarning) {
+            Button("Use Anyway") {
+                navigator.push(.confirm(Self.request(units)))
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(BolusPresetsView.oldCalculationWarning)
+        }
         .onAppear {
             amountFocused = true
             guard !seeded else { return }
             seeded = true
             if let rec = BolusPresetsView.freshRecommendation(remote), rec.age < BolusPresetsView.recommendationWarnAge {
                 units = rec.units
-                seededRecommendation = rec
+                seededRecommendation = (rec.units, Date().addingTimeInterval(-rec.age))
             }
         }
+    }
+
+    /// The amount is still the starting recommendation, which has since passed 5 minutes.
+    private var isStaleRecommendation: Bool {
+        guard let rec = seededRecommendation, units == rec.units else { return false }
+        return Date().timeIntervalSince(rec.at) >= BolusPresetsView.recommendationWarnAge
     }
 
     static func step(_ remote: WatchRemoteConfig) -> Double {
