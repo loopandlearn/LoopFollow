@@ -4,13 +4,21 @@
 import SwiftUI
 import WatchKit
 
+/// The AID's recommendation at the watch's bolus step.
+struct BolusRecommendation: Hashable {
+    let units: Double
+    let at: Date
+
+    var age: TimeInterval { Date().timeIntervalSince(at) }
+}
+
 /// The AID's recommendation and the phone's Quick-Pick boluses, opened from the
 /// amount screen. Every choice still needs the crown confirmation.
 struct BolusPresetsView: View {
     let remote: WatchRemoteConfig
 
     @EnvironmentObject private var navigator: WatchNavigator
-    @State private var staleRecommendation: Double?
+    @State private var staleRecommendation: BolusRecommendation?
 
     /// Same cut-offs and warning as the phone's bolus screens.
     private static let recommendationMaxAge: TimeInterval = 12 * 60
@@ -21,18 +29,23 @@ struct BolusPresetsView: View {
         remote.quickPickBoluses.filter { $0 > 0 && $0 <= remote.maxBolus }
     }
 
-    /// A recommendation recent enough to offer, rounded down to the watch's step.
-    static func freshRecommendation(_ remote: WatchRemoteConfig) -> (units: Double, age: TimeInterval)? {
-        guard let rec = remote.recommendedBolus, rec > 0, let at = remote.recommendedBolusAt else { return nil }
-        let age = Date().timeIntervalSince(at)
-        let stepped = BolusAmountView.roundedDown(min(rec, remote.maxBolus), step: BolusAmountView.step(remote))
-        guard age < recommendationMaxAge, stepped > 0 else { return nil }
-        return (stepped, age)
+    /// The latest recommendation whatever its age, rounded down to the watch's
+    /// step; 0 U when the AID recommends nothing.
+    static func latestRecommendation(_ remote: WatchRemoteConfig) -> BolusRecommendation? {
+        guard let at = remote.recommendedBolusAt else { return nil }
+        let rec = max(remote.recommendedBolus ?? 0, 0)
+        return BolusRecommendation(units: BolusAmountView.roundedDown(min(rec, remote.maxBolus), step: BolusAmountView.step(remote)), at: at)
+    }
+
+    /// A recommendation recent enough to offer.
+    static func freshRecommendation(_ remote: WatchRemoteConfig) -> BolusRecommendation? {
+        guard let rec = latestRecommendation(remote), rec.units > 0, rec.age < recommendationMaxAge else { return nil }
+        return rec
     }
 
     /// Under 5 minutes old the recommendation is already the starting amount,
     /// so it is only listed here once it needs the warning.
-    static func presetRecommendation(_ remote: WatchRemoteConfig) -> (units: Double, age: TimeInterval)? {
+    static func presetRecommendation(_ remote: WatchRemoteConfig) -> BolusRecommendation? {
         guard let rec = freshRecommendation(remote), rec.age >= recommendationWarnAge else { return nil }
         return rec
     }
@@ -46,7 +59,7 @@ struct BolusPresetsView: View {
             recommendation
             ForEach(Self.quickPicks(remote), id: \.self) { units in
                 Button {
-                    confirm(units)
+                    navigator.push(.confirm(BolusAmountView.request(units)))
                 } label: {
                     Text("\(WatchFormat.insulin(units)) U")
                 }
@@ -58,7 +71,9 @@ struct BolusPresetsView: View {
             isPresented: Binding(get: { staleRecommendation != nil }, set: { if !$0 { staleRecommendation = nil } })
         ) {
             Button("Use Anyway") {
-                if let staleRecommendation { confirm(staleRecommendation) }
+                if let staleRecommendation {
+                    navigator.push(.confirm(BolusAmountView.request(staleRecommendation.units, recommendation: staleRecommendation)))
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -71,7 +86,7 @@ struct BolusPresetsView: View {
         if let rec = Self.presetRecommendation(remote) {
             Section {
                 Button {
-                    staleRecommendation = rec.units
+                    staleRecommendation = rec
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Recommended \(WatchFormat.insulin(rec.units)) U")
@@ -83,23 +98,20 @@ struct BolusPresetsView: View {
             }
         }
     }
-
-    private func confirm(_ units: Double) {
-        navigator.push(.confirm(BolusAmountView.request(units)))
-    }
 }
 
 /// Any amount, set with the Digital Crown or − and +, starting at the AID's
-/// recommendation while it is under 5 minutes old; presets one tap away when
-/// the phone has any.
+/// recommendation while it is under 5 minutes old and following newer ones
+/// until the amount is changed; presets one tap away when the phone has any.
 struct BolusAmountView: View {
     let remote: WatchRemoteConfig
 
+    @EnvironmentObject private var session: WatchSession
     @EnvironmentObject private var navigator: WatchNavigator
     @State private var units = 0.0
     /// Seeded once, so coming back from the confirmation keeps the user's amount.
     @State private var seeded = false
-    @State private var seededRecommendation: (units: Double, at: Date)?
+    @State private var seededRecommendation: BolusRecommendation?
     @State private var showOldCalculationWarning = false
     @FocusState private var amountFocused: Bool
 
@@ -122,7 +134,7 @@ struct BolusAmountView: View {
                     if isStaleRecommendation {
                         showOldCalculationWarning = true
                     } else {
-                        navigator.push(.confirm(Self.request(units)))
+                        continueToConfirm()
                     }
                 }
                 .buttonStyle(CompactButtonStyle(prominent: true))
@@ -139,7 +151,7 @@ struct BolusAmountView: View {
         .navigationTitle("Bolus")
         .alert("Old Calculation Warning", isPresented: $showOldCalculationWarning) {
             Button("Use Anyway") {
-                navigator.push(.confirm(Self.request(units)))
+                continueToConfirm()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -149,11 +161,29 @@ struct BolusAmountView: View {
             amountFocused = true
             guard !seeded else { return }
             seeded = true
+            // The phone also sends new loop cycles as they come; this covers one it has not sent yet.
+            session.requestState()
             if let rec = BolusPresetsView.freshRecommendation(remote), rec.age < BolusPresetsView.recommendationWarnAge {
                 units = rec.units
-                seededRecommendation = (rec.units, Date().addingTimeInterval(-rec.age))
+                seededRecommendation = rec
             }
         }
+        .onChange(of: session.state?.remote?.recommendedBolusAt) { _, _ in
+            followNewerRecommendation()
+        }
+    }
+
+    /// An amount still at the starting recommendation moves to a newer one.
+    private func followNewerRecommendation() {
+        guard let seededRecommendation, units == seededRecommendation.units,
+              let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation),
+              latest.at > seededRecommendation.at
+        else { return }
+        if latest.units != units {
+            WKInterfaceDevice.current().play(.notification)
+        }
+        units = latest.units
+        self.seededRecommendation = latest
     }
 
     /// The amount is still the starting recommendation, which has since passed 5 minutes.
@@ -166,8 +196,14 @@ struct BolusAmountView: View {
         max(remote.bolusIncrement, 0.025)
     }
 
-    static func request(_ units: Double) -> CommandRequest {
-        CommandRequest(title: "Bolus", lines: ["\(WatchFormat.insulin(units)) U"], action: .bolus(units: units), deliversInsulin: true)
+    /// The recommendation goes along only while the amount is still the recommendation.
+    private func continueToConfirm() {
+        let basis = seededRecommendation.flatMap { $0.units == units ? $0 : nil }
+        navigator.push(.confirm(Self.request(units, recommendation: basis)))
+    }
+
+    static func request(_ units: Double, recommendation: BolusRecommendation? = nil) -> CommandRequest {
+        CommandRequest(title: "Bolus", lines: ["\(WatchFormat.insulin(units)) U"], action: .bolus(units: units), deliversInsulin: true, recommendation: recommendation)
     }
 
     static func roundedDown(_ value: Double, step: Double) -> Double {

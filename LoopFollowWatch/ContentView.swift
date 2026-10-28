@@ -21,6 +21,8 @@ struct CommandRequest: Hashable {
     let lines: [String]
     let action: WatchCommand.Action
     let deliversInsulin: Bool
+    /// Set when a bolus amount is the AID's recommendation, so it can be checked again before sending.
+    var recommendation: BolusRecommendation? = nil
 }
 
 /// Owns the navigation path so a finished command can return to the glucose page.
