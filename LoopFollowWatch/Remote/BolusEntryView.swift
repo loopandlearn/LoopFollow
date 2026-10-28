@@ -101,9 +101,8 @@ struct BolusPresetsView: View {
 }
 
 /// Any amount, set with the Digital Crown or − and +, starting at the AID's
-/// recommendation while it is under 5 minutes old. A newer recommendation is
-/// offered with a tap, never applied on its own. Presets are one tap away when
-/// the phone has any.
+/// recommendation while it is under 5 minutes old and following newer ones
+/// until the amount is changed; presets one tap away when the phone has any.
 struct BolusAmountView: View {
     let remote: WatchRemoteConfig
 
@@ -121,19 +120,7 @@ struct BolusAmountView: View {
             VStack(spacing: 8) {
                 AmountField(value: $units, unit: "U", step: Self.step(remote), maximum: remote.maxBolus, isHighlighted: amountFocused, sensitivity: .low, format: WatchFormat.insulin)
                     .focused($amountFocused)
-                if let newer = newerRecommendation {
-                    Button {
-                        units = newer.units
-                        seededRecommendation = newer
-                        amountFocused = true
-                    } label: {
-                        Label("New \(WatchFormat.insulin(newer.units)) U, tap to use", systemImage: "wand.and.stars")
-                            .font(.footnote)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.tint)
-                    .accessibilityLabel("Use the new recommendation, \(WatchFormat.insulin(newer.units)) U")
-                } else if let rec = seededRecommendation {
+                if let rec = seededRecommendation {
                     // Redrawn every few seconds so the age keeps counting while the screen stays open.
                     TimelineView(.periodic(from: .now, by: 10)) { context in
                         let age = context.date.timeIntervalSince(rec.at)
@@ -182,27 +169,21 @@ struct BolusAmountView: View {
             }
         }
         .onChange(of: session.state?.remote?.recommendedBolusAt) { _, _ in
-            if newerRecommendation != nil {
-                WKInterfaceDevice.current().play(.notification)
-            } else if let rec = seededRecommendation, units == rec.units,
-                      let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation),
-                      latest.at > rec.at, latest.units == rec.units
-            {
-                // Same amount from a newer cycle: only the age is refreshed.
-                seededRecommendation = latest
-            }
+            followNewerRecommendation()
         }
     }
 
-    /// A recommendation from a newer loop cycle than the one the amount started
-    /// from, under 5 minutes old and different from the amount.
-    private var newerRecommendation: BolusRecommendation? {
-        guard let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation),
-              latest.at > (seededRecommendation?.at ?? .distantPast),
-              latest.age < BolusPresetsView.recommendationWarnAge,
-              latest.units != units
-        else { return nil }
-        return latest
+    /// An amount still at the starting recommendation moves to a newer one.
+    private func followNewerRecommendation() {
+        guard let seededRecommendation, units == seededRecommendation.units,
+              let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation),
+              latest.at > seededRecommendation.at
+        else { return }
+        if latest.units != units {
+            WKInterfaceDevice.current().play(.notification)
+        }
+        units = latest.units
+        self.seededRecommendation = latest
     }
 
     /// The amount is still the starting recommendation, which has since passed 5 minutes.
