@@ -169,7 +169,7 @@ struct LoopProfilePreviewView: View {
                 return Alert(
                     title: Text("Activate \(profile.name) in Loop?"),
                     message: Text("Loop replaces its correction range, carb ratios, basal rates and insulin sensitivities with these values and writes the basal rates to the pump."),
-                    primaryButton: .default(Text("Activate"), action: send),
+                    primaryButton: .default(Text("Activate"), action: authenticateAndSend),
                     secondaryButton: .cancel()
                 )
             case let .result(success, message):
@@ -188,9 +188,28 @@ struct LoopProfilePreviewView: View {
     private func showResult(_ state: RemoteCommandTracker.State?) {
         guard case let .done(success, message) = state else { return }
         tracker.consume(key: commandKey)
-        // A send that fails at once finishes while the confirmation alert is still closing.
+        presentResult(success: success, message: message)
+    }
+
+    /// A result that arrives at once comes while the confirmation alert is still closing.
+    private func presentResult(success: Bool, message: String) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             alertType = .result(success: success, message: message)
+        }
+    }
+
+    private func authenticateAndSend() {
+        AuthService.authenticate(reason: "Confirm your identity to activate \(profile.name) in Loop.") { result in
+            switch result {
+            case .success:
+                send()
+            case let .unavailable(message):
+                presentResult(success: false, message: message)
+            case .failed:
+                presentResult(success: false, message: "Authentication failed")
+            case .canceled:
+                break
+            }
         }
     }
 
