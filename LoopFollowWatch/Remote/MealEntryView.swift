@@ -87,7 +87,6 @@ struct MealEntryView: View {
                     navigator.push(.confirm(request(carbs: pick.carbs, fat: fat, protein: protein, bolus: bolus, offsetMinutes: 0)))
                 } label: {
                     Text(pickTitle(carbs: pick.carbs, fat: fat, protein: protein, bolus: bolus))
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(CompactButtonStyle())
             }
