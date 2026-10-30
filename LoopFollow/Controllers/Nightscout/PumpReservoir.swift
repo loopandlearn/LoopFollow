@@ -74,10 +74,11 @@ enum PumpReservoirResolver {
 
         let pumpID = pumpID?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-        // Loop reports an Omnipod as "Unknown" while no pod is paired, so a volume in the
-        // record is the previous pod's. Medtrum is always "Unknown" on Loop.
+        // Loop reports an Omnipod as "Unknown" while no pod is paired, so there is no volume
+        // to show and one in the record is the previous pod's. Medtrum is always "Unknown"
+        // on Loop.
         if pumpID == "Unknown", onlyWhenLow {
-            return Resolution(state: withoutReading, cache: storedCache)
+            return Resolution(state: .unknown, cache: storedCache)
         }
 
         // A reading is carried between records only when the uploader names the pump it

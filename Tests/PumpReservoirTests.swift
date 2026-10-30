@@ -161,11 +161,11 @@ struct PumpReservoirTests {
         #expect(withoutVolume.cache == nil)
     }
 
-    @Test("an Omnipod with no pod paired reads as 50+ and keeps the stored pump")
+    @Test("an Omnipod with no pod paired shows no volume and keeps the stored pump")
     func unknownPumpID() {
         let stored = cache(units: 9.9, readingAge: 5 * 60)
         let result = resolve(pumpID: "Unknown", cache: stored)
-        #expect(result.state == .aboveReportingLimit)
+        #expect(result.state == .unknown)
         #expect(result.cache == stored)
     }
 
@@ -173,7 +173,7 @@ struct PumpReservoirTests {
     func unknownPumpIDWithVolume() {
         let stored = cache(units: 12.6, readingAge: 5 * 60)
         let result = resolve(reservoir: 12.5, pumpID: "Unknown", cache: stored)
-        #expect(result.state == .aboveReportingLimit)
+        #expect(result.state == .unknown)
         #expect(result.cache == stored)
     }
 
