@@ -151,45 +151,57 @@ private struct SnoozeOptionsView: View {
     }
 }
 
-/// Snoozes until a time picked with the Digital Crown, like the phone's snooze date and time:
-/// the next time the clock shows it, so 07:00 picked at 22:00 means tomorrow morning.
+/// Snoozes until a time set with the Digital Crown (or − and +), in quarter hours: like the
+/// phone's snooze date and time, so 07:00 set in the evening means tomorrow morning. Turning
+/// on past midnight goes on into the next day, up to 24 hours ahead.
 private struct SnoozeUntilTimeView: View {
     var onSnooze: (Date) -> Void
-    @State private var time: Date
+    /// The quarter hour the choices count from: now, rounded up.
+    private let base: Date
+    /// Minutes after `base`, in steps of 15.
+    @State private var minutes: Double
+    @FocusState private var focused: Bool
 
     init(current: Date?, onSnooze: @escaping (Date) -> Void) {
         self.onSnooze = onSnooze
-        // A running snooze's end, or an hour from now rounded up to the quarter hour.
-        let start = current.flatMap { $0 > Date() ? $0 : nil } ?? Self.roundedUpToQuarter(Date().addingTimeInterval(3600))
-        _time = State(initialValue: start)
+        let base = Self.roundedUpToQuarter(Date())
+        self.base = base
+        // A running snooze's end, or an hour from now.
+        let start = current.map { $0.timeIntervalSince(base) / 60 } ?? 60
+        _minutes = State(initialValue: min(max((start / 15).rounded() * 15, Self.minimum), Self.maximum))
     }
 
+    private static let minimum = 15.0
+    private static let maximum = 24.0 * 60 - 15
+
+    private var end: Date { base.addingTimeInterval(minutes * 60) }
+
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 30)) { context in
-            let now = max(context.date, Date())
-            let end = Self.nextOccurrence(of: time, after: now)
-            ScrollView {
-                VStack(spacing: 6) {
-                    DatePicker("Until", selection: $time, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
-                    Text(Self.describe(end, now: now))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    Button("Snooze") { onSnooze(Self.nextOccurrence(of: time, after: Date())) }
-                        .buttonStyle(.borderedProminent)
-                }
+        ScrollView {
+            VStack(spacing: 6) {
+                AmountField(
+                    value: $minutes,
+                    unit: "",
+                    step: 15,
+                    minimum: Self.minimum,
+                    maximum: Self.maximum,
+                    isHighlighted: focused,
+                    format: { base.addingTimeInterval($0 * 60).formatted(date: .omitted, time: .shortened) }
+                )
+                .focused($focused)
+                Text(Self.describe(end, now: Date()))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Label("Turn to change", systemImage: CrownSymbol.increase)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Button("Snooze") { onSnooze(end) }
+                    .buttonStyle(.borderedProminent)
             }
         }
         .navigationTitle("Until")
-    }
-
-    /// The first time after `now` the clock shows the picked hour and minute: today, or tomorrow
-    /// once that has passed. Always within 24 hours, as the phone requires.
-    static func nextOccurrence(of picked: Date, after now: Date) -> Date {
-        let calendar = Calendar.current
-        let clock = calendar.dateComponents([.hour, .minute], from: picked)
-        return calendar.nextDate(after: now, matching: clock, matchingPolicy: .nextTime) ?? picked
+        .onAppear { focused = true }
     }
 
     /// "Today 23:30 · in 1 h 15" or "Tomorrow 07:00 · in 8 h 30".
