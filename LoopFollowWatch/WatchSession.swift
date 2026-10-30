@@ -85,7 +85,7 @@ final class WatchSession: NSObject, ObservableObject {
         }
     }
 
-    nonisolated private static let lastInsulinSentKey = "lastInsulinSentAt"
+    private nonisolated static let lastInsulinSentKey = "lastInsulinSentAt"
 
     /// When insulin was last sent from the watch, through the phone or directly.
     /// Set before sending, since a command without a clear reply may still have
