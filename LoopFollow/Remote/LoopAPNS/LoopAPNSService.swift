@@ -92,7 +92,7 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
-    private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
+    private static let returnNotificationRequiredMessage = "This command needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
 
     /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
     private func encryptedReturnNotification(otp: String) -> String? {
@@ -159,6 +159,12 @@ class LoopAPNSService {
             otp: otp
         )
         sendConfirmedCommand(payload, otp: otp, completion: completion)
+    }
+
+    /// Switches Loop to the saved profile `name`. Requires the Loop remote profile patch.
+    func sendProfileSwitch(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending profile switch to \(name) fingerprint=\(fingerprint)")
+        sendConfirmedCommand(LoopAPNSCommands.profileSwitchCommandPayload(name: name, fingerprint: fingerprint, otp: otp), otp: otp, completion: completion)
     }
 
     /// Sends carbs via APNS push notification

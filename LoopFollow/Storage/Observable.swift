@@ -58,6 +58,9 @@ class Observable {
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
 
+    /// Saved profiles from the latest Loop profile upload; nil until one is loaded.
+    var loopProfiles = ObservableValue<LoopProfileSet?>(default: nil)
+
     var isNotLooping = ObservableValue<Bool>(default: false)
 
     /// CGM state reported after the newest reading; nil while readings flow.

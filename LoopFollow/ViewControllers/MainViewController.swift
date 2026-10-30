@@ -698,8 +698,13 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         runMigrationsIfNeeded()
     }
 
-    @objc func handleRemoteMealCommandDidComplete() {
-        TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+    @objc func handleRemoteMealCommandDidComplete(_ notification: Notification) {
+        if (notification.userInfo?["key"] as? String)?.hasPrefix(LoopProfileAckAdapter.keyPrefix) == true {
+            // Loop uploads the switched profile right after it confirms the command.
+            TaskScheduler.shared.rescheduleTask(id: .profile, to: Date().addingTimeInterval(10))
+        } else {
+            TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+        }
     }
 
     @objc func handleBFUReloadCompleted() {
