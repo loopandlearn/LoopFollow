@@ -72,7 +72,9 @@ extension MainViewController {
             }
 
             // IOB
-            if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+            if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob")
+                ?? InsulinMetric(from: enactedOrSuggested, key: "IOB")
+            {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
                 Observable.shared.iobText.value = iobMetric.formattedValue()
@@ -224,7 +226,11 @@ extension MainViewController {
                 openAPSPredUpdatedTime = nil
             }
 
-            if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
+            // Trio uploads dosingMode "open" while Closed Loop is off
+            if lastLoopRecord["dosingMode"] as? String == "open" {
+                Observable.shared.loopStatusText.value = "⏀"
+                latestLoopStatusString = "⏀"
+            } else if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                 if let tempBasalString = loopStatus["timestamp"] as? String,
                    let tempBasalTime = formatter.date(from: tempBasalString)?.timeIntervalSince1970
                 {
