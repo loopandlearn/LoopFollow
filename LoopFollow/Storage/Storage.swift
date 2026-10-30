@@ -20,6 +20,8 @@ class Storage {
 
     var lfApnsKey = StorageValue<String>(key: "lfApnsKey", defaultValue: "")
     var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
+
+    var hubURL = StorageValue<String>(key: "hubURL", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
     /// Remote command types the AID app advertises in its Nightscout profile.
@@ -128,6 +130,8 @@ class Storage {
     // Live Activity
     var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
+    /// The activity `laRenewBy` belongs to.
+    var laBoundActivityId = StorageValue<String>(key: "laBoundActivityId", defaultValue: "")
     var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
     var laPushToStartToken = StorageValue<String>(key: "laPushToStartToken", defaultValue: "")
     var laLastPushToStartAt = StorageValue<TimeInterval>(key: "laLastPushToStartAt", defaultValue: 0)

@@ -176,7 +176,7 @@ class TaskScheduler {
         // Silent Tune is the only mode whose invariant is continuous runtime, which is
         // what this measures. `.none` is meant to be suspended and the Bluetooth modes
         // tick at heartbeat cadence, so for both a gap is normal.
-        guard Storage.shared.backgroundRefreshType.value == .silentTune else { return }
+        guard BackgroundRefreshType.inEffect == .silentTune else { return }
         let alerts = BackgroundAlertDuration.allCases
             .filter { gap >= $0.rawValue }
             .map { "\(Int($0.rawValue / 60))" }

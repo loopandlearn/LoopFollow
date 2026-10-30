@@ -8,7 +8,7 @@ import SwiftUI
 extension MainViewController {
     func webLoadNSDeviceStatus() {
         let parameters = ["count": "1"]
-        NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
+        NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters, hubPart: .devicestatus) { result in
             switch result {
             case let .success(json):
                 if let jsonDeviceStatus = json as? [[String: AnyObject]] {
@@ -274,7 +274,7 @@ extension MainViewController {
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
 
-        if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off,
+        if Storage.shared.contactEnabled.value, !HubClient.shared.isHubMode, Storage.shared.contactIOB.value != .off,
            Observable.shared.iobText.value != previousIOBText
         {
             contactImageUpdater.updateContactImage(

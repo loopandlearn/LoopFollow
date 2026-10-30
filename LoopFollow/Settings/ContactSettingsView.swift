@@ -19,8 +19,15 @@ struct ContactSettingsView: View {
                     .foregroundColor(.secondary)
                     .padding(.vertical, 4)
 
+                if HubClient.shared.isHubMode {
+                    Label(HubModeLimits.contactNote, systemImage: "xmark.circle")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+
                 Toggle("Enable Contact BG Updates", isOn: $viewModel.contactEnabled)
                     .toggleStyle(SwitchToggleStyle())
+                    .disabled(HubClient.shared.isHubMode)
                     .onChange(of: viewModel.contactEnabled) { isEnabled in
                         if isEnabled {
                             requestContactAccess()

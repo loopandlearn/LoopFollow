@@ -32,6 +32,7 @@ class LogManager {
         case remote = "Remote"
         case websocket = "WebSocket"
         case telemetry = "Telemetry"
+        case hub = "Hub"
     }
 
     init() {

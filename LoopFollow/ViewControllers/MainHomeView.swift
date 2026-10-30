@@ -22,6 +22,7 @@ struct MainHomeView: View {
 
     var onRefresh: (() -> Void)?
     var onStatsTap: (() -> Void)?
+    var onHubBannerTap: (() -> Void)?
 
     private var timeZoneOverride: String? {
         guard graphTimeZoneEnabled.value,
@@ -35,6 +36,14 @@ struct MainHomeView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            HubStatusBanner { onHubBannerTap?() }
+
+            homeContent
+        }
+    }
+
+    private var homeContent: some View {
         VStack(spacing: 8) {
             // Top section: BG display + info table
             HStack(spacing: 10) {

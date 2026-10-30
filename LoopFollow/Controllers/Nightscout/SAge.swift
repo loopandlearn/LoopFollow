@@ -16,7 +16,7 @@ extension MainViewController {
             "count": "1",
         ]
 
-        NightscoutUtils.executeRequest(eventType: .sage, parameters: parameters) { (result: Result<[sageData], Error>) in
+        NightscoutUtils.executeRequest(eventType: .sage, parameters: parameters, hubPart: .sage) { (result: Result<[sageData], Error>) in
             switch result {
             case let .success(data):
                 DispatchQueue.main.async {

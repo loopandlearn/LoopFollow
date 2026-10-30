@@ -61,10 +61,11 @@ final class WatchSession: NSObject, ObservableObject {
         }, errorHandler: nil)
     }
 
-    /// Fetches from Nightscout or Dexcom when the phone's data is stale and the phone does not answer.
+    /// Fetches from Nightscout or Dexcom when the phone's data is stale and the phone does not answer
+    /// or sleeps in LoopFollow Hub mode.
     func refreshIfNeeded() async {
         guard !isPhoneDataFresh else { return }
-        if session.activationState == .activated, session.isReachable {
+        if credentials?.phoneSleeps != true, session.activationState == .activated, session.isReachable {
             requestState()
             try? await Task.sleep(nanoseconds: 8_000_000_000)
             guard !isPhoneDataFresh else { return }

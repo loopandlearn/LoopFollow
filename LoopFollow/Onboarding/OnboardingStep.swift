@@ -12,8 +12,9 @@ import Foundation
 /// within-phase position through `OnboardingViewModel.phaseProgress`, so the
 /// overall progress bar stays smooth no matter how many pages a phase has.
 ///
-/// `connect` renders the Nightscout, Dexcom, or import view depending on the data
-/// source the user picks in `dataSource`.
+/// `connect` renders the Nightscout, Dexcom, import, or LF Hub join view depending on
+/// the data source the user picks in `dataSource`. `hubPermissions` follows joining a
+/// family hub, in place of the notifications phase.
 enum OnboardingStep: CaseIterable, Hashable {
     case welcome
     case overview
@@ -25,6 +26,7 @@ enum OnboardingStep: CaseIterable, Hashable {
     case tabOrder
     case notifications
     case telemetry
+    case hubPermissions
     case completion
 
     /// Steps that show the progress bar + phase label + Skip at the top. The
@@ -64,6 +66,7 @@ enum OnboardingStep: CaseIterable, Hashable {
         case .tabOrder: return "Tabs"
         case .notifications: return "Notifications"
         case .telemetry: return "Privacy"
+        case .hubPermissions: return "Permissions"
         }
     }
 }
