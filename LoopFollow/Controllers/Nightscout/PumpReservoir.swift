@@ -60,8 +60,33 @@ enum PumpReservoirResolver {
         let cache: PumpReservoirCache?
     }
 
-    /// - Parameter date: When the record was made, from the pump clock it carries.
+    /// - Parameters:
+    ///   - displayOverride: The status Loop shows in place of the reservoir, such as
+    ///     "Finish Setup" or "No Pod", in the uploader's language.
+    ///   - date: When the record was made, from the pump clock it carries.
     static func resolve(
+        reservoir: Double?,
+        pumpID: String?,
+        manufacturer: String?,
+        model: String?,
+        displayOverride: String? = nil,
+        cache storedCache: PumpReservoirCache?,
+        date: Date
+    ) -> Resolution {
+        let resolution = resolveVolume(
+            reservoir: reservoir,
+            pumpID: pumpID,
+            manufacturer: manufacturer,
+            model: model,
+            cache: storedCache,
+            date: date
+        )
+        // The pump keeps being tracked while its status replaces the volume.
+        let hasOverride = !(displayOverride?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        return hasOverride ? Resolution(state: .unknown, cache: resolution.cache) : resolution
+    }
+
+    private static func resolveVolume(
         reservoir: Double?,
         pumpID: String?,
         manufacturer: String?,

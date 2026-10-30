@@ -14,6 +14,7 @@ struct PumpReservoirTests {
         pumpID: String? = "17CB71F7",
         manufacturer: String? = "Insulet",
         model: String? = "Omnipod DASH",
+        displayOverride: String? = nil,
         cache: PumpReservoirCache? = nil,
         at date: Date? = nil
     ) -> PumpReservoirResolver.Resolution {
@@ -22,6 +23,7 @@ struct PumpReservoirTests {
             pumpID: pumpID,
             manufacturer: manufacturer,
             model: model,
+            displayOverride: displayOverride,
             cache: cache,
             date: date ?? now
         )
@@ -175,6 +177,24 @@ struct PumpReservoirTests {
         let result = resolve(reservoir: 12.5, pumpID: "Unknown", cache: stored)
         #expect(result.state == .unknown)
         #expect(result.cache == stored)
+    }
+
+    @Test("a status Loop shows in place of the reservoir shows no volume")
+    func displayOverride() {
+        let stored = cache(units: 9.9, readingAge: 5 * 60)
+        let result = resolve(displayOverride: "Signal Loss", cache: stored)
+        #expect(result.state == .unknown)
+        #expect(result.cache == stored)
+    }
+
+    @Test("a new pod finishing setup shows no volume and is still seen as a change")
+    func displayOverrideDuringSetup() {
+        let previousPod = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: .init(units: 21.0, date: now.addingTimeInterval(-5 * 60)))
+        let setup = resolve(reservoir: 21.0, displayOverride: "Finish Setup", cache: previousPod)
+        #expect(setup.state == .unknown)
+        #expect(setup.cache?.pumpID == pump)
+        #expect(setup.cache?.reading == nil)
+        #expect(resolve(reservoir: 21.0, cache: setup.cache, at: now.addingTimeInterval(5 * 60)).state == .aboveReportingLimit)
     }
 
     @Test("a pump Loop names Unknown that reports its volume in every record shows it")

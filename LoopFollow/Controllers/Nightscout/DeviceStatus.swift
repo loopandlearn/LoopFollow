@@ -117,6 +117,7 @@ extension MainViewController {
                     pumpID: lastPumpRecord["pumpID"] as? String,
                     manufacturer: lastPumpRecord["manufacturer"] as? String,
                     model: lastPumpRecord["model"] as? String,
+                    displayOverride: lastPumpRecord["reservoir_display_override"] as? String,
                     cache: Storage.shared.pumpReservoirCache.value,
                     date: Date(timeIntervalSince1970: lastPumpTime)
                 )
