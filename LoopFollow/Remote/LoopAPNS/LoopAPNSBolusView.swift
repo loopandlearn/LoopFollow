@@ -307,8 +307,9 @@ struct LoopAPNSBolusView: View {
 
     private func loadRecommendedBolus() {
         // Load recommended bolus from Observable
-        recommendedBolus = Observable.shared.deviceRecBolus.value
-        lastLoopTime = Observable.shared.alertLastLoopTime.value
+        let recommended = RecommendedBolus.current()
+        recommendedBolus = recommended?.units
+        lastLoopTime = recommended?.at
 
         // Reset warning state when new data is loaded
         showOldCalculationWarning = false

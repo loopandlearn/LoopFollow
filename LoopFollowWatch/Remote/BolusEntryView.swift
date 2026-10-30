@@ -30,9 +30,12 @@ struct BolusPresetsView: View {
     }
 
     /// The latest recommendation whatever its age, rounded down to the watch's
-    /// step; nil when the loop cycle carries none.
+    /// step; nil when the loop cycle carries none, or ran before insulin was
+    /// last sent from the watch and so leaves that insulin out. The phone drops
+    /// one from before any other bolus.
     static func latestRecommendation(_ remote: WatchRemoteConfig) -> BolusRecommendation? {
         guard let at = remote.recommendedBolusAt, let recommended = remote.recommendedBolus else { return nil }
+        if let sent = WatchSession.lastInsulinSentAt, at <= sent { return nil }
         let rec = max(recommended, 0)
         return BolusRecommendation(units: BolusAmountView.roundedDown(min(rec, remote.maxBolus), step: BolusAmountView.step(remote)), at: at)
     }

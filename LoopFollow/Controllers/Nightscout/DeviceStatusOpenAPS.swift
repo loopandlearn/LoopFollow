@@ -121,9 +121,11 @@ extension MainViewController {
             if let rec = lastLoopRecord["recommendedBolus"] as? Double {
                 infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
                 Observable.shared.deviceRecBolus.value = rec
+                Observable.shared.deviceRecBolusAt.value = updatedTime ?? Observable.shared.enactedOrSuggested.value
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+                Observable.shared.deviceRecBolusAt.value = nil
             }
 
             // Eventual BG
