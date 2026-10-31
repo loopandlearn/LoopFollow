@@ -167,7 +167,8 @@ enum StandaloneFetcher {
             let minutes = entry["duration"] as? Double ?? 0
             let indefinite = minutes == 0 || (entry["durationType"] as? String) == "indefinite"
             if start <= now, indefinite || now < start.addingTimeInterval(minutes * 60) {
-                override = entry["reason"] as? String ?? entry["notes"] as? String ?? "Override"
+                // Same order as the phone: Trio keeps the name in "notes", Loop in "reason".
+                override = entry["notes"] as? String ?? entry["reason"] as? String ?? "Override"
             }
         }
 
