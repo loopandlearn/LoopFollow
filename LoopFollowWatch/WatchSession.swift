@@ -96,8 +96,11 @@ final class WatchSession: NSObject, ObservableObject {
             case .notDelivered: break
             }
         }
-        if case .snoozeAlarm = action {
+        switch action {
+        case .snoozeAlarm, .snoozeAll:
             return WatchCommandReply(success: false, message: "Snoozing needs the iPhone, which is not reachable right now.")
+        default:
+            break
         }
         guard let credentials, let config = state?.remote else {
             return WatchCommandReply(success: false, message: "iPhone not reachable. Open LoopFollow on the iPhone and keep it near the watch.")
