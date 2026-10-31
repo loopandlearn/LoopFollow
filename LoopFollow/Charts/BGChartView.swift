@@ -1508,7 +1508,7 @@ private struct BGChartCanvas: View, Equatable {
                         series: .value("series", "overlay-\(series.id)-\(pt.segment)")
                     )
                     .foregroundStyle(series.color)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: series.isForecast ? [4, 3] : []))
                 }
             }
         }

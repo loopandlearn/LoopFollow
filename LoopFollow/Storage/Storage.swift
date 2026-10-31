@@ -148,6 +148,8 @@ class Storage {
     var showIOBGraph = StorageValue<Bool>(key: "showIOBGraph", defaultValue: false)
     var showCOBGraph = StorageValue<Bool>(key: "showCOBGraph", defaultValue: false)
     var showSensitivityRatioGraph = StorageValue<Bool>(key: "showSensitivityRatioGraph", defaultValue: false)
+    var showInsulinActivityGraph = StorageValue<Bool>(key: "showInsulinActivityGraph", defaultValue: false)
+    var loopInsulinModel = StorageValue<LoopInsulinModel>(key: "loopInsulinModel", defaultValue: .rapidActingAdult)
     var showSmoothedBG = StorageValue<Bool>(key: "showSmoothedBG", defaultValue: false)
     var historyCurvePlacement = StorageValue<HistoryCurvePlacement>(key: "historyCurvePlacement", defaultValue: .separate)
 

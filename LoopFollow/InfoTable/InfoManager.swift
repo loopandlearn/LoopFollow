@@ -53,6 +53,16 @@ class InfoManager: ObservableObject {
         updateInfoData(type: type, value: formattedValue, numericValue: value.value)
     }
 
+    /// Insulin activity in U/h.
+    func updateInsulinActivity(_ value: Double) {
+        updateInfoData(type: .insulinActivity, value: Self.insulinActivityText(value), numericValue: value)
+    }
+
+    static func insulinActivityText(_ value: Double) -> String {
+        let rounded = (value * 10).rounded() / 10
+        return Localizer.formatToLocalizedString(rounded == 0 ? 0 : rounded, maxFractionDigits: 1, minFractionDigits: 0) + "U/h"
+    }
+
     func clearInfoData(type: InfoType) {
         tableData[type.rawValue].value = ""
         tableData[type.rawValue].numericValue = nil
