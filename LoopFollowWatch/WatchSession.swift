@@ -85,11 +85,23 @@ final class WatchSession: NSObject, ObservableObject {
         }
     }
 
+    private nonisolated static let lastInsulinSentKey = "lastInsulinSentAt"
+
+    /// When insulin was last sent from the watch, through the phone or directly.
+    /// Set before sending, since a command without a clear reply may still have
+    /// gone through.
+    nonisolated static var lastInsulinSentAt: Date? {
+        UserDefaults.standard.object(forKey: lastInsulinSentKey) as? Date
+    }
+
     /// Sends a command through the phone when it is reachable, otherwise directly.
     /// Falls back to sending directly only when the phone turned out to be out of
     /// reach before the command was delivered; a command that may have reached
     /// the phone is never sent a second time.
     func send(_ action: WatchCommand.Action) async -> WatchCommandReply {
+        if action.deliversInsulin {
+            UserDefaults.standard.set(Date(), forKey: Self.lastInsulinSentKey)
+        }
         if session.activationState == .activated, session.isReachable {
             switch await sendThroughPhone(action) {
             case let .replied(reply): return reply

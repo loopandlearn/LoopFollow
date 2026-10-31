@@ -57,18 +57,16 @@ struct MealEntryView: View {
                     } label: {
                         Label("Time", systemImage: "clock")
                             .font(.footnote)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(CompactButtonStyle())
                 }
 
                 Button {
                     navigator.push(.confirm(request(carbs: carbs, fat: fat, protein: protein, bolus: bolus, offsetMinutes: offsetMinutes)))
                 } label: {
                     Text(logTitle)
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(CompactButtonStyle(prominent: true))
                 .tint(.blue)
                 .disabled(carbs <= 0 && fat <= 0 && protein <= 0)
             }
@@ -89,9 +87,8 @@ struct MealEntryView: View {
                     navigator.push(.confirm(request(carbs: pick.carbs, fat: fat, protein: protein, bolus: bolus, offsetMinutes: 0)))
                 } label: {
                     Text(pickTitle(carbs: pick.carbs, fat: fat, protein: protein, bolus: bolus))
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(CompactButtonStyle())
             }
         }
     }

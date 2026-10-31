@@ -9,7 +9,7 @@ enum WatchRoute: Hashable {
     case treatments
     case meal
     case bolus
-    case bolusAmount
+    case bolusPresets
     case overrides
     case tempTargets
     case confirm(CommandRequest)
@@ -21,6 +21,8 @@ struct CommandRequest: Hashable {
     let lines: [String]
     let action: WatchCommand.Action
     let deliversInsulin: Bool
+    /// Set when a bolus amount is the AID's recommendation, so it can be checked again before sending.
+    var recommendation: BolusRecommendation? = nil
 }
 
 /// Owns the navigation path so a finished command can return to the glucose page.
@@ -75,9 +77,9 @@ struct ContentView: View {
             case .meal:
                 MealEntryView(remote: remote)
             case .bolus:
-                BolusPickerView(remote: remote)
-            case .bolusAmount:
                 BolusAmountView(remote: remote)
+            case .bolusPresets:
+                BolusPresetsView(remote: remote)
             case .overrides:
                 PresetListView(kind: .override, state: state, presets: remote.overridePresets)
             case .tempTargets:
