@@ -98,6 +98,15 @@ enum StandaloneFetcher {
         let latest = glucose.last
         let previous = glucose.dropLast().last
 
+        // As on the phone (RecommendedBolus), a recommendation from a loop cycle
+        // that ran before the latest manual bolus leaves that bolus out, and
+        // offering it could double it. Insulin sent from the watch is left out
+        // on the bolus screen.
+        var recommendedBolus = status?.recommendedBolus
+        if let loopAt = status?.loopAt, let lastBolus = lastManualBolus(treatments), lastBolus >= loopAt {
+            recommendedBolus = nil
+        }
+
         let active = activeAdjustments(treatments, now: now)
         var snapshot: GlucoseSnapshot?
         if let latest {
@@ -112,7 +121,7 @@ enum StandaloneFetcher {
                 projected: nil,
                 override: active.override,
                 tempTargetMgdl: active.tempTargetMgdl,
-                recBolus: status?.recommendedBolus,
+                recBolus: recommendedBolus,
                 unit: base?.snapshot?.unit ?? .mgdl,
                 isNotLooping: loopAge.map { $0 >= 15 * 60 } ?? false
             )
@@ -120,7 +129,7 @@ enum StandaloneFetcher {
 
         var remote = base?.remote
         if remote != nil {
-            remote?.recommendedBolus = status?.recommendedBolus
+            remote?.recommendedBolus = recommendedBolus
             remote?.recommendedBolusAt = status?.loopAt
         }
 
@@ -151,6 +160,24 @@ enum StandaloneFetcher {
               at.timeIntervalSince1970 >= cutoff
         else { return nil }
         return WatchReading(t: at.timeIntervalSince1970, v: value)
+    }
+
+    /// The latest manual bolus, classified as the phone does (Treatments.swift):
+    /// automatic boluses and SMBs are left out, since the cycle that recommends
+    /// a bolus can also give one.
+    private static func lastManualBolus(_ treatments: [[String: Any]]) -> Date? {
+        treatments.compactMap { entry -> Date? in
+            guard let insulin = entry["insulin"] as? Double, insulin > 0 else { return nil }
+            switch entry["eventType"] as? String {
+            case "Correction Bolus", "Bolus", "External Insulin":
+                if entry["automatic"] as? Bool == true { return nil }
+            case "Meal Bolus":
+                break
+            default:
+                return nil
+            }
+            return DeviceStatusSummary.date(entry["timestamp"] ?? entry["created_at"])
+        }.max()
     }
 
     /// The override and temp target that are running now, from the latest of each in the treatments.
