@@ -14,6 +14,7 @@ struct PumpReservoirTests {
         pumpID: String? = "17CB71F7",
         manufacturer: String? = "Insulet",
         model: String? = "Omnipod DASH",
+        displayOverride: String? = nil,
         cache: PumpReservoirCache? = nil,
         at date: Date? = nil
     ) -> PumpReservoirResolver.Resolution {
@@ -22,8 +23,9 @@ struct PumpReservoirTests {
             pumpID: pumpID,
             manufacturer: manufacturer,
             model: model,
+            displayOverride: displayOverride,
             cache: cache,
-            now: date ?? now
+            date: date ?? now
         )
     }
 
@@ -70,17 +72,59 @@ struct PumpReservoirTests {
         #expect(resolve(cache: cache(units: 9.9, readingAge: -60 * 60)).state == .unknown)
     }
 
-    @Test("a volume reported right after a pod change is shown but not trusted once stale")
-    func podChangeCarryoverIsDiscarded() {
+    @Test("a volume reported right after a pod change is the previous pod's and is not shown")
+    func podChangeCarryoverIsIgnored() {
         // Loop's first records for a new pod still carry the previous pod's final volume.
-        let carryover = resolve(reservoir: 9.9, cache: PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: nil))
-        #expect(carryover.state == .units(9.9))
-        #expect(carryover.cache?.pumpID == pump)
+        let previousPod = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: .init(units: 25.6, date: now.addingTimeInterval(-5 * 60)))
+        var result = resolve(reservoir: 25.5, cache: previousPod)
+        #expect(result.state == .aboveReportingLimit)
+        #expect(result.cache?.pumpID == pump)
+        #expect(result.cache?.reading == nil)
 
-        let laterOnTheSamePod = resolve(cache: carryover.cache, at: now.addingTimeInterval(31 * 60))
-        #expect(laterOnTheSamePod.state == .aboveReportingLimit)
-        #expect(laterOnTheSamePod.cache?.pumpID == pump)
-        #expect(laterOnTheSamePod.cache?.reading == nil)
+        result = resolve(reservoir: 25.5, cache: result.cache, at: now.addingTimeInterval(10 * 60))
+        #expect(result.state == .aboveReportingLimit)
+        #expect(result.cache?.reading == nil)
+
+        result = resolve(cache: result.cache, at: now.addingTimeInterval(15 * 60))
+        #expect(result.state == .aboveReportingLimit)
+        #expect(result.cache?.isSettled == true)
+    }
+
+    @Test("a new pod's volumes count once it has uploaded a record without one")
+    func podChangeSettlesOnMissingVolume() {
+        let changed = resolve(reservoir: 25.5, cache: PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60)))
+        let gap = resolve(cache: changed.cache, at: now.addingTimeInterval(5 * 60))
+        let reported = resolve(reservoir: 48.5, cache: gap.cache, at: now.addingTimeInterval(10 * 60))
+        #expect(reported.state == .units(48.5))
+        #expect(reported.cache?.reading?.units == 48.5)
+    }
+
+    @Test("a new pod's volumes count 15 minutes after it appeared")
+    func podChangeSettlesAfterTime() {
+        let changed = resolve(reservoir: 25.5, cache: PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60)))
+        #expect(resolve(reservoir: 25.5, cache: changed.cache, at: now.addingTimeInterval(14 * 60)).state == .aboveReportingLimit)
+        #expect(resolve(reservoir: 48.5, cache: changed.cache, at: now.addingTimeInterval(15 * 60)).state == .units(48.5))
+    }
+
+    @Test("a pump change is seen across records that name no pump")
+    func podChangeAcrossUnknown() {
+        let previousPod = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: .init(units: 43.3, date: now.addingTimeInterval(-10 * 60)))
+        let pairing = resolve(pumpID: "Unknown", cache: previousPod, at: now.addingTimeInterval(-5 * 60))
+        #expect(pairing.cache == previousPod)
+        #expect(resolve(reservoir: 42.9, cache: pairing.cache).state == .aboveReportingLimit)
+    }
+
+    @Test("a pump seen with nothing stored has its volume taken as its own")
+    func firstSeenPumpIsSettled() {
+        let result = resolve(reservoir: 25.5)
+        #expect(result.state == .units(25.5))
+        #expect(result.cache?.isSettled == true)
+    }
+
+    @Test("a pump that reports its volume in every record is used right after a change")
+    func otherPumpChangeIsSettled() {
+        let previous = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60))
+        #expect(resolve(reservoir: 180, manufacturer: "Medtronic", model: "723", cache: previous).state == .units(180))
     }
 
     @Test("a pod change drops the previous pod's reading")
@@ -119,10 +163,49 @@ struct PumpReservoirTests {
         #expect(withoutVolume.cache == nil)
     }
 
-    @Test("a pump with no pod paired is not an identity to cache against")
+    @Test("an Omnipod with no pod paired shows no volume and keeps the stored pump")
     func unknownPumpID() {
-        let result = resolve(pumpID: "Unknown", cache: cache(units: 9.9, readingAge: 5 * 60))
-        #expect(result.state == .aboveReportingLimit)
+        let stored = cache(units: 9.9, readingAge: 5 * 60)
+        let result = resolve(pumpID: "Unknown", cache: stored)
+        #expect(result.state == .unknown)
+        #expect(result.cache == stored)
+    }
+
+    @Test("a volume uploaded while no pod is paired is the previous pod's")
+    func unknownPumpIDWithVolume() {
+        let stored = cache(units: 12.6, readingAge: 5 * 60)
+        let result = resolve(reservoir: 12.5, pumpID: "Unknown", cache: stored)
+        #expect(result.state == .unknown)
+        #expect(result.cache == stored)
+    }
+
+    @Test("a status Loop shows in place of the reservoir is shown instead of a volume")
+    func displayOverride() {
+        let stored = cache(units: 9.9, readingAge: 5 * 60)
+        let result = resolve(displayOverride: " Signal Loss ", cache: stored)
+        #expect(result.state == .status("Signal Loss"))
+        #expect(result.cache == stored)
+    }
+
+    @Test("a new pod finishing setup shows its status and is still seen as a change")
+    func displayOverrideDuringSetup() {
+        let previousPod = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: .init(units: 21.0, date: now.addingTimeInterval(-5 * 60)))
+        let setup = resolve(reservoir: 21.0, displayOverride: "Finish Setup", cache: previousPod)
+        #expect(setup.state == .status("Finish Setup"))
+        #expect(setup.cache?.pumpID == pump)
+        #expect(setup.cache?.reading == nil)
+        #expect(resolve(reservoir: 21.0, cache: setup.cache, at: now.addingTimeInterval(5 * 60)).state == .aboveReportingLimit)
+    }
+
+    @Test("an empty status shows the volume")
+    func emptyDisplayOverride() {
+        #expect(resolve(reservoir: 21.0, displayOverride: "  ", cache: cache(units: 21.0, readingAge: 5 * 60)).state == .units(21.0))
+    }
+
+    @Test("a pump Loop names Unknown that reports its volume in every record shows it")
+    func unknownPumpIDOtherPump() {
+        let result = resolve(reservoir: 185.6, pumpID: "Unknown", manufacturer: "Medtrum", model: "MD8201")
+        #expect(result.state == .units(185.6))
         #expect(result.cache == nil)
     }
 
@@ -147,5 +230,13 @@ struct PumpReservoirTests {
         let original = cache(units: 12.5, readingAge: 5 * 60)
         let decoded = try JSONDecoder().decode(PumpReservoirCache.self, from: JSONEncoder().encode(original))
         #expect(decoded == original)
+    }
+
+    @Test("a cache stored without the settled flag decodes as settled")
+    func cacheDecodesWithoutSettledFlag() throws {
+        let json = #"{"pumpID":"17CB71F7","pumpSince":0}"#
+        let decoded = try JSONDecoder().decode(PumpReservoirCache.self, from: Data(json.utf8))
+        #expect(decoded.isSettled)
+        #expect(decoded.reading == nil)
     }
 }
