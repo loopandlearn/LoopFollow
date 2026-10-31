@@ -15,7 +15,12 @@ final class WatchSessionManager: NSObject {
     /// are only used when a new reading arrives and this long has passed.
     private let complicationTransferInterval: TimeInterval = 15 * 60
 
+    /// A state equal to the last one is still sent this often, well inside the
+    /// watch's 10 minutes before it treats the phone's data as stale.
+    private let unchangedResendInterval: TimeInterval = 5 * 60
+
     private var lastSentState: WatchState?
+    private var lastContextUpdate: Date = .distantPast
     private var lastSentCredentials: WatchCredentials?
     private var lastComplicationTransfer: Date = .distantPast
     private var cancellables = Set<AnyCancellable>()
@@ -121,11 +126,21 @@ final class WatchSessionManager: NSObject {
     private func publish(reason: String) {
         guard let session, session.activationState == .activated else { return }
         let state = WatchStateBuilder.build()
+        // Most refreshes rebuild the chart without changing anything the watch shows;
+        // sending those would only wake the watch.
+        if let lastSentState, Self.sameContent(state, lastSentState),
+           Date().timeIntervalSince(lastContextUpdate) < unchangedResendInterval
+        {
+            LogManager.shared.log(category: .general, message: "[Watch] state unchanged, not sent reason=\(reason)", isDebug: true)
+            return
+        }
         guard let data = state.encoded() else { return }
 
         do {
             try session.updateApplicationContext([WatchState.contextKey: data])
+            lastContextUpdate = Date()
         } catch {
+            lastContextUpdate = .distantPast
             LogManager.shared.log(category: .general, message: "[Watch] context update failed: \(error.localizedDescription)")
         }
 
@@ -142,6 +157,14 @@ final class WatchSessionManager: NSObject {
         lastSentState = state
         LogManager.shared.log(category: .general, message: "[Watch] state sent (\(data.count) bytes) reason=\(reason)", isDebug: true)
     }
+
+    /// Equal apart from when the two states were built.
+    private static func sameContent(_ lhs: WatchState, _ rhs: WatchState) -> Bool {
+        var lhs = lhs
+        lhs.builtAt = rhs.builtAt
+        lhs.phoneBuiltAt = rhs.phoneBuiltAt
+        return lhs == rhs
+    }
 }
 
 // MARK: - WCSessionDelegate
@@ -153,7 +176,7 @@ extension WatchSessionManager: WCSessionDelegate {
             return
         }
         if state == .activated {
-            requestUpdate(reason: "activated")
+            resendFullState(reason: "activated")
             DispatchQueue.main.async { self.sendCredentialsIfChanged(force: false) }
         }
     }
@@ -166,7 +189,16 @@ extension WatchSessionManager: WCSessionDelegate {
     }
 
     func sessionWatchStateDidChange(_: WCSession) {
-        requestUpdate(reason: "watchStateChanged")
+        resendFullState(reason: "watchStateChanged")
+    }
+
+    /// A newly activated session or a newly installed or paired watch may not have
+    /// the last state, so the next one is sent even if it has not changed.
+    private func resendFullState(reason: String) {
+        DispatchQueue.main.async {
+            self.lastContextUpdate = .distantPast
+            self.requestUpdate(reason: reason)
+        }
     }
 
     func session(_: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
