@@ -179,22 +179,27 @@ struct PumpReservoirTests {
         #expect(result.cache == stored)
     }
 
-    @Test("a status Loop shows in place of the reservoir shows no volume")
+    @Test("a status Loop shows in place of the reservoir is shown instead of a volume")
     func displayOverride() {
         let stored = cache(units: 9.9, readingAge: 5 * 60)
-        let result = resolve(displayOverride: "Signal Loss", cache: stored)
-        #expect(result.state == .unknown)
+        let result = resolve(displayOverride: " Signal Loss ", cache: stored)
+        #expect(result.state == .status("Signal Loss"))
         #expect(result.cache == stored)
     }
 
-    @Test("a new pod finishing setup shows no volume and is still seen as a change")
+    @Test("a new pod finishing setup shows its status and is still seen as a change")
     func displayOverrideDuringSetup() {
         let previousPod = PumpReservoirCache(pumpID: "17CB71F6", pumpSince: now.addingTimeInterval(-3 * 24 * 60 * 60), reading: .init(units: 21.0, date: now.addingTimeInterval(-5 * 60)))
         let setup = resolve(reservoir: 21.0, displayOverride: "Finish Setup", cache: previousPod)
-        #expect(setup.state == .unknown)
+        #expect(setup.state == .status("Finish Setup"))
         #expect(setup.cache?.pumpID == pump)
         #expect(setup.cache?.reading == nil)
         #expect(resolve(reservoir: 21.0, cache: setup.cache, at: now.addingTimeInterval(5 * 60)).state == .aboveReportingLimit)
+    }
+
+    @Test("an empty status shows the volume")
+    func emptyDisplayOverride() {
+        #expect(resolve(reservoir: 21.0, displayOverride: "  ", cache: cache(units: 21.0, readingAge: 5 * 60)).state == .units(21.0))
     }
 
     @Test("a pump Loop names Unknown that reports its volume in every record shows it")

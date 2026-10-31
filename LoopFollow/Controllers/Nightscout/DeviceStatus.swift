@@ -134,6 +134,10 @@ extension MainViewController {
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
                     Storage.shared.lastPumpReservoirU.value = nil
+                case let .status(status):
+                    latestPumpVolume = nil
+                    infoManager.updateInfoData(type: .pump, value: status)
+                    Storage.shared.lastPumpReservoirU.value = nil
                 case .unknown:
                     // The row stays cleared, which the info table renders as an em dash.
                     latestPumpVolume = nil

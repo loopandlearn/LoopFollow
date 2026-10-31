@@ -40,6 +40,8 @@ enum PumpReservoirState: Equatable {
     case units(Double)
     /// A pump that reports a volume only once it drops below 50U, and is above it.
     case aboveReportingLimit
+    /// The status the uploader shows in place of the volume, such as "No Pod".
+    case status(String)
     /// No volume to show.
     case unknown
 }
@@ -82,8 +84,10 @@ enum PumpReservoirResolver {
             date: date
         )
         // The pump keeps being tracked while its status replaces the volume.
-        let hasOverride = !(displayOverride?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-        return hasOverride ? Resolution(state: .unknown, cache: resolution.cache) : resolution
+        if let status = displayOverride?.trimmingCharacters(in: .whitespacesAndNewlines), !status.isEmpty {
+            return Resolution(state: .status(status), cache: resolution.cache)
+        }
+        return resolution
     }
 
     private static func resolveVolume(
