@@ -40,7 +40,7 @@ class PushNotificationManager {
             overrideName: override.name,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.override, completion))
     }
 
     func sendCancelOverridePushNotification(completion: @escaping (Bool, String?) -> Void) {
@@ -51,7 +51,7 @@ class PushNotificationManager {
             overrideName: nil,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.override, completion))
     }
 
     func sendBolusPushNotification(bolusAmount: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
@@ -63,7 +63,7 @@ class PushNotificationManager {
             bolusAmount: bolusAmountDecimal,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.bolus(units: bolusAmount.doubleValue(for: .internationalUnit())), completion))
     }
 
     func sendTempTargetPushNotification(target: HKQuantity, duration: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
@@ -77,7 +77,7 @@ class PushNotificationManager {
             duration: durationValue,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.tempTarget, completion))
     }
 
     func sendCancelTempTargetPushNotification(completion: @escaping (Bool, String?) -> Void) {
@@ -87,7 +87,7 @@ class PushNotificationManager {
             timestamp: Date().timeIntervalSince1970,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.tempTarget, completion))
     }
 
     func sendMealPushNotification(
@@ -127,7 +127,10 @@ class PushNotificationManager {
             scheduledTime: scheduledTimeInterval,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
-        sendEncryptedCommand(payload: payload, completion: completion)
+        sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(
+            .meal(grams: Double(carbsValue ?? 0), bolus: bolusAmount.doubleValue(for: .internationalUnit())),
+            completion
+        ))
     }
 
     /// Trio confirms edit/delete through a return notification, so LoopFollow's own APNs credentials are required.
