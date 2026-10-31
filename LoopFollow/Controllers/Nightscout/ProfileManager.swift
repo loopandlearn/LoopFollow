@@ -152,9 +152,46 @@ final class ProfileManager {
     }
 
     func basal(at date: Date) -> String? {
-        value(from: basalSchedule, at: date).map {
+        basalRate(at: date).map {
             Localizer.formatToLocalizedString($0, maxFractionDigits: 2, minFractionDigits: 0)
         }
+    }
+
+    func basalRate(at date: Date) -> Double? {
+        value(from: basalSchedule, at: date)
+    }
+
+    /// Scheduled basal from `start` to `end`, one segment per schedule entry crossed.
+    func scheduledBasalSegments(from start: Date, to end: Date) -> [(start: Date, rate: Double)] {
+        guard start < end, let firstRate = basalRate(at: start) else { return [] }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timezone
+
+        var boundaries: [Date] = []
+        var day = calendar.startOfDay(for: start)
+        while day < end {
+            for entry in basalSchedule {
+                guard let boundary = calendar.date(bySettingHour: entry.timeAsSeconds / 3600,
+                                                   minute: entry.timeAsSeconds % 3600 / 60,
+                                                   second: entry.timeAsSeconds % 60,
+                                                   of: day)
+                else { continue }
+                if boundary > start, boundary < end {
+                    boundaries.append(boundary)
+                }
+            }
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = nextDay
+        }
+
+        var segments = [(start: start, rate: firstRate)]
+        for boundary in boundaries.sorted() {
+            if let rate = basalRate(at: boundary), rate != segments.last?.rate {
+                segments.append((start: boundary, rate: rate))
+            }
+        }
+        return segments
     }
 
     func carbRatio(at date: Date) -> Double? {
