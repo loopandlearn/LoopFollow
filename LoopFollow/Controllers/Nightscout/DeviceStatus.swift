@@ -92,7 +92,7 @@ extension MainViewController {
 
         Observable.shared.previousAlertLastLoopTime.value = Observable.shared.alertLastLoopTime.value
 
-        if let lastPumpRecord = lastDeviceStatus?["pump"] as! [String: AnyObject]? {
+        if let lastPumpRecord = lastDeviceStatus?["pump"] as? [String: AnyObject] {
             if let bolusIncrement = lastPumpRecord["bolusIncrement"] as? Double, bolusIncrement > 0 {
                 Storage.shared.bolusIncrement.value = HKQuantity(unit: .internationalUnit(), doubleValue: bolusIncrement)
                 Storage.shared.bolusIncrementDetected.value = true
@@ -117,8 +117,9 @@ extension MainViewController {
                     pumpID: lastPumpRecord["pumpID"] as? String,
                     manufacturer: lastPumpRecord["manufacturer"] as? String,
                     model: lastPumpRecord["model"] as? String,
+                    displayOverride: lastPumpRecord["reservoir_display_override"] as? String,
                     cache: Storage.shared.pumpReservoirCache.value,
-                    now: Date()
+                    date: Date(timeIntervalSince1970: lastPumpTime)
                 )
                 Storage.shared.pumpReservoirCache.value = reservoir.cache
 
@@ -132,6 +133,10 @@ extension MainViewController {
                     // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
+                    Storage.shared.lastPumpReservoirU.value = nil
+                case let .status(status):
+                    latestPumpVolume = nil
+                    infoManager.updateInfoData(type: .pump, value: status)
                     Storage.shared.lastPumpReservoirU.value = nil
                 case .unknown:
                     // The row stays cleared, which the info table renders as an em dash.
@@ -182,10 +187,10 @@ extension MainViewController {
         }
 
         // Loop - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["loop"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["loop"] as? [String: AnyObject] {
             // Some pumps report no `pump.clock`; without it alertLastLoopTime stays 0
             // and the forecast anchors to epoch 0. Fall back to the loop cycle timestamp.
-            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] == nil,
+            if (lastDeviceStatus?["pump"] as? [String: AnyObject])?["clock"] as? String == nil,
                let loopTimestampString = lastLoopRecord["timestamp"] as? String,
                let loopTimestamp = formatter.date(from: loopTimestampString)?.timeIntervalSince1970,
                loopTimestamp > (Observable.shared.alertLastLoopTime.value ?? 0)
@@ -223,7 +228,7 @@ extension MainViewController {
         }
 
         // OpenAPS - handle new data
-        if let lastLoopRecord = lastDeviceStatus?["openaps"] as! [String: AnyObject]? {
+        if let lastLoopRecord = lastDeviceStatus?["openaps"] as? [String: AnyObject] {
             DeviceStatusOpenAPS(formatter: formatter, lastDeviceStatus: lastDeviceStatus, lastLoopRecord: lastLoopRecord)
         }
 

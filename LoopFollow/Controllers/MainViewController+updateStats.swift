@@ -66,8 +66,8 @@ extension MainViewController {
 
     /// Range distribution for the Time in Range band over the same period as the
     /// statistics box (last 24 hours, or today since midnight).
-    /// Low, in range and high follow the Range Mode chosen in Settings (TIR, TITR
-    /// or Custom). Very low is below 54 mg/dL and very high above 250 mg/dL, or
+    /// Low, in range and high follow the Range Mode chosen in Settings (TIR, TITR,
+    /// TING or Custom). Very low is below 54 mg/dL and very high above 250 mg/dL, or
     /// the range's own bounds when a custom range extends past them.
     func updateTIRBand(periodStart: TimeInterval) {
         let thresholds = UnitSettingsStore.shared.effectiveBandThresholds()
@@ -75,7 +75,7 @@ extension MainViewController {
             .filter { $0.date >= periodStart && $0.sgv > 0 }
             .map { Double($0.sgv) }
 
-        statsDisplayModel.bandTitle = UnitSettingsStore.shared.timeInRangeTitle
+        statsDisplayModel.bandTitle = UnitSettingsStore.shared.timeInRangeMode.title
 
         let percentages = TIRCalculator.calculatePercentages(
             readings: values,

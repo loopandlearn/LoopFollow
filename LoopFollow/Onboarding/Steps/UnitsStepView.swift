@@ -19,29 +19,37 @@ struct UnitsStepView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Form {
-                switch page {
-                case .units:
-                    header(
-                        systemImage: "ruler",
-                        title: "Units",
-                        subtitle: "Choose how glucose values are displayed. You can change this later in Settings."
-                    )
-                    UnitsConfigurationView(sections: .units)
-                case .statistics:
-                    header(
-                        systemImage: "chart.bar.xaxis",
-                        title: "Statistics",
-                        subtitle: "Choose how LoopFollow's statistics are measured and displayed."
-                    )
-                    UnitsConfigurationView(sections: .statistics)
-                }
+            // Lets the range mode row push its list; the bar only shows on that list.
+            NavigationStack {
+                form
+                    .toolbar(.hidden, for: .navigationBar)
             }
 
             footer
         }
         .onAppear { reportProgress() }
         .onChange(of: page) { _ in reportProgress() }
+    }
+
+    private var form: some View {
+        Form {
+            switch page {
+            case .units:
+                header(
+                    systemImage: "ruler",
+                    title: "Units",
+                    subtitle: "Choose how glucose values are displayed. You can change this later in Settings."
+                )
+                UnitsConfigurationView(sections: .units)
+            case .statistics:
+                header(
+                    systemImage: "chart.bar.xaxis",
+                    title: "Statistics",
+                    subtitle: "Choose how LoopFollow's statistics are measured and displayed."
+                )
+                UnitsConfigurationView(sections: .statistics)
+            }
+        }
     }
 
     private func reportProgress() {

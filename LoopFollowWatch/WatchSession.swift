@@ -18,6 +18,9 @@ final class WatchSession: NSObject, ObservableObject {
     static let phoneStaleAfter: TimeInterval = 10 * 60
     /// Minimum time between two fetches made by the watch itself.
     private static let standaloneInterval: TimeInterval = 60
+    /// After a command sent without the phone, the watch fetches this many seconds
+    /// after the send instead of waiting for its regular minute, until the change shows up.
+    private static let directFollowUpDelays: [TimeInterval] = [10, 20, 40, 60]
 
     @Published private(set) var state: WatchState?
     @Published private(set) var isReachable = false
@@ -26,6 +29,7 @@ final class WatchSession: NSObject, ObservableObject {
     private var credentials: WatchCredentials?
     private var lastPhoneBuiltAt: Date
     private var lastStandaloneAttempt: Date = .distantPast
+    private var directFollowUp: Task<Void, Never>?
 
     override private init() {
         let stored = WatchStateStore.load()
@@ -75,15 +79,29 @@ final class WatchSession: NSObject, ObservableObject {
             return
         }
         guard Date().timeIntervalSince(lastStandaloneAttempt) >= Self.standaloneInterval else { return }
+        guard let fetched = await fetchStandalone(credentials), !isPhoneDataFresh else { return }
+        store(fetched)
+    }
+
+    private func fetchStandalone(_ credentials: WatchCredentials) async -> WatchState? {
         lastStandaloneAttempt = Date()
         do {
             let fetched = try await StandaloneFetcher.fetch(credentials: credentials, base: state)
-            guard !isPhoneDataFresh else { return }
-            store(fetched)
             LogManager.shared.log(category: .nightscout, message: "Standalone fetch: \(fetched.readings.count) readings")
+            return fetched
         } catch {
             LogManager.shared.log(category: .nightscout, message: "Standalone fetch failed: \(error.localizedDescription)")
+            return nil
         }
+    }
+
+    private nonisolated static let lastInsulinSentKey = "lastInsulinSentAt"
+
+    /// When insulin was last sent from the watch, through the phone or directly.
+    /// Set before sending, since a command without a clear reply may still have
+    /// gone through.
+    nonisolated static var lastInsulinSentAt: Date? {
+        UserDefaults.standard.object(forKey: lastInsulinSentKey) as? Date
     }
 
     /// Sends a command through the phone when it is reachable, otherwise directly.
@@ -91,6 +109,9 @@ final class WatchSession: NSObject, ObservableObject {
     /// reach before the command was delivered; a command that may have reached
     /// the phone is never sent a second time.
     func send(_ action: WatchCommand.Action) async -> WatchCommandReply {
+        if action.deliversInsulin {
+            UserDefaults.standard.set(Date(), forKey: Self.lastInsulinSentKey)
+        }
         if session.activationState == .activated, session.isReachable {
             switch await sendThroughPhone(action) {
             case let .replied(reply): return reply
@@ -103,7 +124,73 @@ final class WatchSession: NSObject, ObservableObject {
         guard let credentials, let config = state?.remote else {
             return WatchCommandReply(success: false, message: "iPhone not reachable. Open LoopFollow on the iPhone and keep it near the watch.")
         }
-        return await DirectCommandSender.send(action, credentials: credentials, config: config)
+        let reply = await DirectCommandSender.send(action, credentials: credentials, config: config)
+        if reply.success {
+            followUpDirectCommand(action, credentials: credentials, config: config)
+        }
+        return reply
+    }
+
+    /// The phone did not send this command, so it does not fetch early for it.
+    /// The watch fetches a few times itself, even while the phone's last state is
+    /// still fresh, and stops at the first fetch that shows the change.
+    private func followUpDirectCommand(_ action: WatchCommand.Action, credentials: WatchCredentials, config: WatchRemoteConfig) {
+        guard credentials.hasDataSource,
+              let arrived = Self.arrivalCheck(for: action, config: config, sentAt: Date())
+        else { return }
+        let phoneBuiltAtSend = lastPhoneBuiltAt
+        directFollowUp?.cancel()
+        directFollowUp = Task {
+            var elapsed: TimeInterval = 0
+            for delay in Self.directFollowUpDelays {
+                try? await Task.sleep(nanoseconds: UInt64((delay - elapsed) * 1_000_000_000))
+                elapsed = delay
+                guard !Task.isCancelled else { return }
+                guard var fetched = await fetchStandalone(credentials) else { continue }
+                // Once the phone is back, its states take over again; a fetch started
+                // before one arrived would replace it with the watch's own.
+                guard !Task.isCancelled, lastPhoneBuiltAt == phoneBuiltAtSend else { return }
+                // The watch's own fetch has no alarms. While the phone's last state is
+                // still fresh, its alarm stays shown, as it would without this fetch.
+                if isPhoneDataFresh {
+                    fetched.alarm = state?.alarm
+                }
+                store(fetched)
+                if arrived(fetched) {
+                    LogManager.shared.log(category: .nightscout, message: "Direct \(action.name) showed up after \(Int(delay)) s")
+                    return
+                }
+            }
+        }
+    }
+
+    /// True once a fetched state shows what the command changes. A check that never
+    /// matches (a partial bolus, a renamed preset) only means every follow-up fetch runs.
+    private static func arrivalCheck(for action: WatchCommand.Action, config: WatchRemoteConfig, sentAt: Date) -> ((WatchState) -> Bool)? {
+        let sent = sentAt.timeIntervalSince1970
+        switch action {
+        case let .startOverride(presetID):
+            let name = config.overridePresets.first { $0.id == presetID }?.name ?? presetID
+            return { $0.snapshot?.override?.contains(name) == true }
+        case .cancelOverride:
+            return { $0.snapshot.map { $0.override == nil } ?? false }
+        case let .startTempTarget(presetID):
+            let target = config.tempTargetPresets.first { $0.id == presetID }?.targetMgdl
+            return { state in
+                guard let current = state.snapshot?.tempTargetMgdl else { return false }
+                return target.map { abs(current - $0) < 1 } ?? true
+            }
+        case .cancelTempTarget:
+            return { $0.snapshot.map { $0.tempTargetMgdl == nil } ?? false }
+        case let .bolus(units):
+            return { $0.boluses.contains { $0.t >= sent - 60 && abs($0.v - units) < 0.01 } }
+        case let .meal(carbs, _, _, _, consumedAt):
+            guard carbs > 0 else { return { _ in false } }
+            let at = consumedAt.timeIntervalSince1970
+            return { $0.carbs.contains { abs($0.t - at) < 5 * 60 && abs($0.v - carbs) < 0.5 } }
+        case .snoozeAlarm:
+            return nil
+        }
     }
 
     private enum PhoneSendResult {

@@ -18,10 +18,41 @@ enum GlucoseDisplayUnit: String, Codable, CaseIterable {
     }
 }
 
+/// The selectable range modes. To add one, define its low/high in `GlucoseThresholds`,
+/// then add a case here with a title and `fixedThresholds` pointing at those constants;
+/// the settings range list, stats card and toggle pick it up from `allCases`.
+/// The raw value is persisted, so don't change existing ones.
 enum TimeInRangeDisplayMode: String, Codable, CaseIterable {
     case tir = "TIR"
     case titr = "TITR"
+    case ting = "TING"
     case custom = "Custom"
+
+    var title: String {
+        switch self {
+        case .tir: return "Time in Range"
+        case .titr: return "Time in Tight Range"
+        case .ting: return "Extended Tight Range"
+        case .custom: return "Custom Range"
+        }
+    }
+
+    /// Low/high cut-offs in mg/dL from `GlucoseThresholds`, or nil when the user's own low/high lines apply.
+    var fixedThresholds: (low: Double, high: Double)? {
+        switch self {
+        case .tir: return (GlucoseThresholds.tirLow, GlucoseThresholds.tirHigh)
+        case .titr: return (GlucoseThresholds.titrLow, GlucoseThresholds.titrHigh)
+        case .ting: return (GlucoseThresholds.tingLow, GlucoseThresholds.tingHigh)
+        case .custom: return nil
+        }
+    }
+
+    /// The mode after this one in `allCases`, wrapping around.
+    var next: TimeInRangeDisplayMode {
+        let all = Self.allCases
+        let index = all.firstIndex(of: self)!
+        return all[(index + 1) % all.count]
+    }
 }
 
 enum GlycemicMetricMode: String, Codable, CaseIterable {
@@ -64,33 +95,20 @@ final class UnitSettingsStore {
 
     /// Returns the effective low/high thresholds (in mg/dL) for the current range mode.
     func effectiveThresholds() -> (low: Double, high: Double) {
-        switch timeInRangeMode {
-        case .tir:
-            return (70.0, 180.0)
-        case .titr:
-            return (70.0, 140.0)
-        case .custom:
-            return (Storage.shared.lowLine.value, Storage.shared.highLine.value)
-        }
+        timeInRangeMode.fixedThresholds ?? (Storage.shared.lowLine.value, Storage.shared.highLine.value)
     }
 
     /// Returns the very low, low, high and very high thresholds (in mg/dL) for
-    /// the current range mode. Very low is 54 and very high 250, or the range's
-    /// own bounds when a custom range extends past them.
+    /// the current range mode. Very low and very high come from `GlucoseThresholds`,
+    /// or the range's own bounds when a custom range extends past them.
     func effectiveBandThresholds() -> (veryLow: Double, low: Double, high: Double, veryHigh: Double) {
         let range = effectiveThresholds()
-        return (min(54.0, range.low), range.low, range.high, max(250.0, range.high))
-    }
-
-    var timeInRangeTitle: String {
-        switch timeInRangeMode {
-        case .tir:
-            return "Time in Range"
-        case .titr:
-            return "Time in Tight Range"
-        case .custom:
-            return "Custom Range"
-        }
+        return (
+            min(GlucoseThresholds.veryLow, range.low),
+            range.low,
+            range.high,
+            max(GlucoseThresholds.veryHigh, range.high)
+        )
     }
 
     var glycemicMetricMode: GlycemicMetricMode {

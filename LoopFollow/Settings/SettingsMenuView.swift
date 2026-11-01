@@ -204,7 +204,7 @@ enum SettingsRoute: Hashable, Identifiable {
                 + InfoType.allCases.map { SettingsLeaf($0.name) }
         case .units: return [
                 SettingsLeaf("Glucose Unit"),
-                SettingsLeaf("Range Mode", ["tir", "titr", "time in range"]),
+                SettingsLeaf("Range Mode", ["tir", "titr", "ting", "time in range", "extended"]),
                 SettingsLeaf("Glycemic Metrics", ["hba1c", "ehba1c", "gmi"]),
                 SettingsLeaf("Variability", ["standard deviation", "cv"]),
             ]

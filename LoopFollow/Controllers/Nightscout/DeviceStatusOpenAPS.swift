@@ -7,7 +7,7 @@ import HealthKit
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
         Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
-        if lastLoopRecord["failureReason"] != nil {
+        if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
@@ -121,9 +121,11 @@ extension MainViewController {
             if let rec = lastLoopRecord["recommendedBolus"] as? Double {
                 infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
                 Observable.shared.deviceRecBolus.value = rec
+                Observable.shared.deviceRecBolusAt.value = updatedTime ?? Observable.shared.enactedOrSuggested.value
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+                Observable.shared.deviceRecBolusAt.value = nil
             }
 
             // Eventual BG

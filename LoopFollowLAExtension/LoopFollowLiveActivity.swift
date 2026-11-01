@@ -836,7 +836,7 @@ private enum LAColors {
         let high = t.high
 
         if mgdl <= low {
-            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / max(low - 54.0, 1))
+            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / max(low - GlucoseThresholds.veryLow, 1))
             let opacity = min(max(raw, 0.48), 0.85)
             return Color(uiColor: UIColor.systemRed).opacity(opacity)
         } else if mgdl >= high {

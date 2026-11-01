@@ -32,7 +32,7 @@ extension MainViewController {
         Storage.shared.lastIOB.value = latestIOB?.value
         Storage.shared.lastCOB.value = latestCOB?.value
 
-        if lastLoopRecord["failureReason"] != nil {
+        if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
@@ -108,9 +108,12 @@ extension MainViewController {
             if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                 infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(recBolus), numericValue: recBolus)
                 Observable.shared.deviceRecBolus.value = recBolus
+                let cycleTime = (lastLoopRecord["timestamp"] as? String).flatMap { formatter.date(from: $0)?.timeIntervalSince1970 }
+                Observable.shared.deviceRecBolusAt.value = cycleTime ?? lastLoopTime
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+                Observable.shared.deviceRecBolusAt.value = nil
             }
             if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                 if let tempBasalString = loopStatus["timestamp"] as? String,

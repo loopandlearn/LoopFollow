@@ -13,7 +13,7 @@ struct TIRView: View {
             ZStack(alignment: .topTrailing) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text(UnitSettingsStore.shared.timeInRangeTitle)
+                        Text(UnitSettingsStore.shared.timeInRangeMode.title)
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()

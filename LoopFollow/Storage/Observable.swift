@@ -48,6 +48,9 @@ class Observable {
     var alertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
     var previousAlertLastLoopTime = ObservableValue<TimeInterval?>(default: nil)
     var deviceRecBolus = ObservableValue<Double?>(default: nil)
+    /// When the loop cycle behind `deviceRecBolus` ran. Unlike `alertLastLoopTime`,
+    /// a failed cycle, which keeps the previous recommendation, does not move it.
+    var deviceRecBolusAt = ObservableValue<TimeInterval?>(default: nil)
     var deviceBatteryLevel = ObservableValue<Double?>(default: nil)
     var deviceBatteryIsCharging = ObservableValue<Bool?>(default: nil)
     var pumpBatteryLevel = ObservableValue<Double?>(default: nil)
@@ -57,6 +60,9 @@ class Observable {
     var lastSentTOTP = ObservableValue<String?>(default: nil)
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
+
+    /// Saved profiles from the latest Loop profile upload; nil until one is loaded.
+    var loopProfiles = ObservableValue<LoopProfileSet?>(default: nil)
 
     var isNotLooping = ObservableValue<Bool>(default: false)
 

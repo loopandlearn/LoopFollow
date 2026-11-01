@@ -30,13 +30,19 @@ struct UnitsConfigurationView: View {
     @State private var highValue = Storage.shared.highLine.value
 
     /// Formats a mg/dL threshold pair in the currently selected glucose unit,
-    /// e.g. "70–180 mg/dL" or "3.9–10.0 mmol/L".
+    /// e.g. "70–180" or "3.9–10.0".
     private func rangeBounds(_ lowMgdl: Double, _ highMgdl: Double) -> String {
         let factor = glucoseUnit == .mmolL ? GlucoseConversion.mgDlToMmolL : 1.0
         let digits = glucoseUnit.fractionDigits
         let low = Localizer.formatToLocalizedString(lowMgdl * factor, maxFractionDigits: digits, minFractionDigits: digits)
         let high = Localizer.formatToLocalizedString(highMgdl * factor, maxFractionDigits: digits, minFractionDigits: digits)
-        return "\(low)–\(high) \(glucoseUnit.rawValue)"
+        return "\(low)–\(high)"
+    }
+
+    /// The mode's range in the selected unit; custom uses the user's own low and high.
+    private func rangeBounds(for mode: TimeInRangeDisplayMode) -> String {
+        let thresholds = mode.fixedThresholds ?? (lowValue, highValue)
+        return rangeBounds(thresholds.low, thresholds.high)
     }
 
     var body: some View {
@@ -68,43 +74,22 @@ struct UnitsConfigurationView: View {
     private var statisticsSections: some View {
         Group {
             Section {
-                Picker("Range Mode", selection: $rangeMode) {
-                    Text("TIR").tag(TimeInRangeDisplayMode.tir)
-                    Text("TITR").tag(TimeInRangeDisplayMode.titr)
-                    Text("Custom").tag(TimeInRangeDisplayMode.custom)
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: rangeMode) { newValue in
-                    UnitSettingsStore.shared.timeInRangeMode = newValue
-                    Observable.shared.chartSettingsChanged.value = true
-                }
-
-                if rangeMode == .custom {
-                    BGPicker(
-                        title: "Low",
-                        range: 40 ... 120,
-                        value: $lowValue
+                NavigationLink {
+                    RangeModeList(
+                        selection: $rangeMode,
+                        lowValue: $lowValue,
+                        highValue: $highValue,
+                        glucoseUnit: glucoseUnit,
+                        bounds: rangeBounds(for:)
                     )
-                    .id(glucoseUnit)
-                    .onChange(of: lowValue) { newValue in
-                        Storage.shared.lowLine.value = newValue
-                        Observable.shared.chartSettingsChanged.value = true
-                    }
-                    BGPicker(
-                        title: "High",
-                        range: 120 ... 400,
-                        value: $highValue
-                    )
-                    .id(glucoseUnit)
-                    .onChange(of: highValue) { newValue in
-                        Storage.shared.highLine.value = newValue
-                        Observable.shared.chartSettingsChanged.value = true
-                    }
+                } label: {
+                    RangeModeRow(mode: rangeMode, bounds: rangeBounds(for: rangeMode))
                 }
+                .accessibilityLabel("Range Mode, \(rangeMode.title)")
             } header: {
                 Text("Range")
             } footer: {
-                Text("TIR — Time in Range, the share of readings within \(rangeBounds(70, 180)).\nTITR — Time in Tight Range, within \(rangeBounds(70, 140)).\nCustom — set your own low and high.")
+                Text("Cut-offs in \(glucoseUnit.rawValue).")
             }
 
             Section {
@@ -146,6 +131,94 @@ struct UnitsConfigurationView: View {
                 Text("Std Dev — Standard Deviation, how much glucose swings around the average. CV — Coefficient of Variation, that swing relative to the average (Std Dev ÷ mean).")
             }
         }
+    }
+}
+
+/// A range mode's name with its cut-offs trailing, on one line.
+private struct RangeModeRow: View {
+    let mode: TimeInRangeDisplayMode
+    let bounds: String
+
+    var body: some View {
+        HStack {
+            Text(mode.title)
+                .foregroundStyle(Color.primary)
+            Spacer()
+            // Color.secondary, not .secondary, which inside a Button is a shade of the tint.
+            Text(bounds)
+                .foregroundStyle(Color.secondary)
+                .monospacedDigit()
+        }
+        .lineLimit(1)
+    }
+}
+
+/// Full-width list of range modes, so names and cut-offs fit on one line.
+/// Picking a fixed mode goes back; picking custom stays to set its low and high.
+private struct RangeModeList: View {
+    @Binding var selection: TimeInRangeDisplayMode
+    @Binding var lowValue: Double
+    @Binding var highValue: Double
+    let glucoseUnit: GlucoseDisplayUnit
+    let bounds: (TimeInRangeDisplayMode) -> String
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Form {
+            Section {
+                ForEach(TimeInRangeDisplayMode.allCases, id: \.self) { mode in
+                    Button {
+                        selection = mode
+                        if mode != .custom {
+                            dismiss()
+                        }
+                    } label: {
+                        HStack {
+                            RangeModeRow(mode: mode, bounds: bounds(mode))
+                            // Always laid out so the cut-offs line up whichever row is selected.
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                                .opacity(selection == mode ? 1 : 0)
+                        }
+                    }
+                    .accessibilityAddTraits(selection == mode ? .isSelected : [])
+                }
+            } footer: {
+                Text("Cut-offs in \(glucoseUnit.rawValue).")
+            }
+
+            if selection == .custom {
+                Section("Custom Range") {
+                    BGPicker(
+                        title: "Low",
+                        range: 40 ... 120,
+                        value: $lowValue
+                    )
+                    .id(glucoseUnit)
+                    BGPicker(
+                        title: "High",
+                        range: 120 ... 400,
+                        value: $highValue
+                    )
+                    .id(glucoseUnit)
+                }
+            }
+        }
+        .onChange(of: selection) { newValue in
+            UnitSettingsStore.shared.timeInRangeMode = newValue
+            Observable.shared.chartSettingsChanged.value = true
+        }
+        .onChange(of: lowValue) { newValue in
+            Storage.shared.lowLine.value = newValue
+            Observable.shared.chartSettingsChanged.value = true
+        }
+        .onChange(of: highValue) { newValue in
+            Storage.shared.highLine.value = newValue
+            Observable.shared.chartSettingsChanged.value = true
+        }
+        .navigationTitle("Range")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
