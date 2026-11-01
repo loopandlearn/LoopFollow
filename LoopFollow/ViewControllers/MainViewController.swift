@@ -639,12 +639,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
         //   2. Update any other StorageValue defaults in Storage.swift that this new step
         //      mutates, so a fresh install ends up in the same state as a migrated user.
 
-        // Step 2: Released in v3.1.0 (2025-07-21). Can be removed after 2026-07-21.
-        if Storage.shared.migrationStep.value < 2 {
-            Storage.shared.migrateStep2()
-            Storage.shared.migrationStep.value = 2
-        }
-
         // Step 3: Released in v4.5.0 (2026-02-01). Can be removed after 2027-02-01.
         if Storage.shared.migrationStep.value < 3 {
             Storage.shared.migrateStep3()
@@ -665,26 +659,31 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.migrationStep.value = 5
         }
 
+        // Step 6: Released in v6.0.0 (2026-04-25). Can be removed after 2027-04-25.
         if Storage.shared.migrationStep.value < 6 {
             Storage.shared.migrateStep6()
             Storage.shared.migrationStep.value = 6
         }
 
+        // Step 7: Released in v6.0.0 (2026-04-25). Can be removed after 2027-04-25.
         if Storage.shared.migrationStep.value < 7 {
             Storage.shared.migrateStep7()
             Storage.shared.migrationStep.value = 7
         }
 
+        // Step 8: Released in v6.1.0 (2026-05-05). Can be removed after 2027-05-05.
         if Storage.shared.migrationStep.value < 8 {
             Storage.shared.migrateStep8()
             Storage.shared.migrationStep.value = 8
         }
 
+        // Step 9: Released in v7.0.0 (2026-07-25). Can be removed after 2027-07-25.
         if Storage.shared.migrationStep.value < 9 {
             Storage.shared.migrateStep9()
             Storage.shared.migrationStep.value = 9
         }
 
+        // Step 10: Released in v7.0.0 (2026-07-25). Can be removed after 2027-07-25.
         if Storage.shared.migrationStep.value < 10 {
             Storage.shared.migrateStep10()
             Storage.shared.migrationStep.value = 10
