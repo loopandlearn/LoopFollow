@@ -307,8 +307,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // Suppress notifications iOS routes here that we never intended to surface:
         // the Live Activity push-to-start uses interruption-level: passive with empty
         // title/body and must not produce a banner or sound when LF is foregrounded.
+        // The hub's badge push is also silent, so only its badge is applied.
         if content.interruptionLevel == .passive || (content.title.isEmpty && content.body.isEmpty) {
-            completionHandler([])
+            completionHandler(content.badge != nil ? [.badge] : [])
             return
         }
 
