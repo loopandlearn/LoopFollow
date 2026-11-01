@@ -100,6 +100,27 @@ class AlarmSound {
         audioPlayer = nil
 
         restoreSystemOutputVolume()
+        releaseAudioSession()
+    }
+
+    /// Hands the audio session back once LoopFollow has nothing left to play, so
+    /// audio from other apps that was ducked or interrupted returns to full volume.
+    /// While Silent Tune's loop holds the session, it stays active with the
+    /// mixable category that loop uses.
+    static func releaseAudioSession() {
+        guard !isPlaying else { return }
+
+        let session = AVAudioSession.sharedInstance()
+        do {
+            if MainViewController.shared?.backgroundTask.isPlaying == true {
+                try session.setCategory(.playback, mode: .default, options: .mixWithOthers)
+            } else {
+                try session.setActive(false, options: .notifyOthersOnDeactivation)
+            }
+        } catch {
+            let nsError = error as NSError
+            LogManager.shared.log(category: .alarm, message: "AlarmSound - audio session release failed [code \(nsError.code)]: \(error.localizedDescription)")
+        }
     }
 
     static func playTest() {
@@ -318,6 +339,7 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
             AlarmSound.playNextWithDelay()
         } else {
             Observable.shared.alarmSoundPlaying.value = false
+            AlarmSound.releaseAudioSession()
         }
     }
 
