@@ -5,7 +5,7 @@ import Foundation
 
 extension MainViewController {
     // NS Temp Basal Response Processor
-    func processNSBasals(entries: [[String: AnyObject]]) {
+    func processNSBasals(entries: [[String: AnyObject]], suspensions: [DateInterval] = []) {
         infoManager.clearInfoData(type: .basal)
 
         basalData.removeAll()
@@ -134,6 +134,11 @@ extension MainViewController {
                 basalData.append(basalGraphStruct(basalRate: segment.rate, date: segment.start.timeIntervalSince1970))
                 basalData.append(basalGraphStruct(basalRate: segment.rate, date: segmentEnd.timeIntervalSince1970))
             }
+        }
+
+        basalData = PumpSuspension.applying(suspensions, to: basalData)
+        if suspensions.contains(where: { $0.contains(Date()) }) {
+            latestBasal = Localizer.formatToLocalizedString(0.0, maxFractionDigits: 2, minFractionDigits: 0)
         }
 
         if Storage.shared.graphBasal.value {
