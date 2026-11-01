@@ -114,27 +114,26 @@ extension MainViewController {
             lastEndDot = lastDot
         }
 
-        // If last basal was prior to right now, we need to create one last scheduled entry
+        // If last basal was prior to right now, fill up to now with the scheduled basal
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
-            var scheduled = 0.0
-            for b in 0 ..< basalProfile.count {
-                let scheduleTimeToday = basalProfile[b].timeAsSeconds
-                    + dateTimeUtils.getTimeIntervalMidnightToday()
-                if lastEndDot >= scheduleTimeToday {
-                    scheduled = basalProfile[b].value
-                }
-            }
+            let now = Date()
+            let tailStart = Date(timeIntervalSince1970: max(lastEndDot, dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * Storage.shared.downloadDays.value)))
+            let tailEnd = now.addingTimeInterval(60 * 10)
 
-            latestBasal = Localizer.formatToLocalizedString(scheduled,
+            latestBasal = Localizer.formatToLocalizedString(profileManager.basalRate(at: now) ?? 0.0,
                                                             maxFractionDigits: 2,
                                                             minFractionDigits: 0)
 
-            let startDot = basalGraphStruct(basalRate: scheduled, date: lastEndDot)
-            basalData.append(startDot)
+            var segments = profileManager.scheduledBasalSegments(from: tailStart, to: tailEnd)
+            if segments.isEmpty {
+                segments = [(start: tailStart, rate: 0.0)]
+            }
 
-            let endDot = basalGraphStruct(basalRate: scheduled,
-                                          date: Date().timeIntervalSince1970 + (60 * 10))
-            basalData.append(endDot)
+            for (index, segment) in segments.enumerated() {
+                let segmentEnd = index < segments.count - 1 ? segments[index + 1].start : tailEnd
+                basalData.append(basalGraphStruct(basalRate: segment.rate, date: segment.start.timeIntervalSince1970))
+                basalData.append(basalGraphStruct(basalRate: segment.rate, date: segmentEnd.timeIntervalSince1970))
+            }
         }
 
         if Storage.shared.graphBasal.value {
