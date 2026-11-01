@@ -190,7 +190,7 @@ final class WatchSession: NSObject, ObservableObject {
             guard carbs > 0 else { return { _ in false } }
             let at = consumedAt.timeIntervalSince1970
             return { $0.carbs.contains { abs($0.t - at) < 5 * 60 && abs($0.v - carbs) < 0.5 } }
-        case .snoozeAlarm:
+        case .snoozeAlarm, .snoozeAll:
             return nil
         }
     }
