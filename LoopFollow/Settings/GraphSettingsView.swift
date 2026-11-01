@@ -18,6 +18,8 @@ struct GraphSettingsView: View {
     @ObservedObject private var showIOBGraph = Storage.shared.showIOBGraph
     @ObservedObject private var showCOBGraph = Storage.shared.showCOBGraph
     @ObservedObject private var showSensitivityRatioGraph = Storage.shared.showSensitivityRatioGraph
+    @ObservedObject private var showInsulinActivityGraph = Storage.shared.showInsulinActivityGraph
+    @ObservedObject private var loopInsulinModel = Storage.shared.loopInsulinModel
     @ObservedObject private var showSmoothedBG = Storage.shared.showSmoothedBG
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject private var historyCurvePlacement = Storage.shared.historyCurvePlacement
@@ -80,11 +82,20 @@ struct GraphSettingsView: View {
                 Section {
                     Toggle("Show IOB Graph", isOn: $showIOBGraph.value)
                     Toggle("Show COB Graph", isOn: $showCOBGraph.value)
-                    if device.value != "Loop" {
+                    Toggle("Show Insulin Activity Graph", isOn: $showInsulinActivityGraph.value)
+                    if device.value == "Loop" {
+                        Picker("Insulin Model", selection: $loopInsulinModel.value) {
+                            ForEach(LoopInsulinModel.allCases, id: \.self) { model in
+                                Text(model.displayName).tag(model)
+                            }
+                        }
+                    } else {
                         Toggle("Show Smoothed BG", isOn: $showSmoothedBG.value)
                         Toggle("Show Sensitivity Ratio Graph", isOn: $showSensitivityRatioGraph.value)
                     }
-                    if showIOBGraph.value || showCOBGraph.value || showSensitivityRatioGraph.value {
+                    if showIOBGraph.value || showCOBGraph.value || showSensitivityRatioGraph.value
+                        || showInsulinActivityGraph.value
+                    {
                         Picker("Curve Placement", selection: $historyCurvePlacement.value) {
                             ForEach(HistoryCurvePlacement.allCases, id: \.self) { placement in
                                 Text(placement.displayName).tag(placement)
@@ -93,6 +104,10 @@ struct GraphSettingsView: View {
                     }
                 } header: {
                     Text("History Graphs")
+                } footer: {
+                    if device.value == "Loop" {
+                        Text("Loop does not upload insulin activity. LoopFollow computes it from the boluses and temp basals in Nightscout with this insulin model, so choose the model selected in Loop.")
+                    }
                 }
             }
 

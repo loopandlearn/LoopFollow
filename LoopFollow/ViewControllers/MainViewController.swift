@@ -76,6 +76,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var basalScheduleData: [basalGraphStruct] = []
     var bolusData: [bolusGraphStruct] = []
     var smbData: [bolusGraphStruct] = []
+    /// Loop only; see `updateLoopInsulinActivity()`.
+    var loopInsulinActivity: [LoopInsulinActivity.Point] = []
+    var insulinForecast: InsulinForecast?
     var carbData: [carbGraphStruct] = []
 
     // Stats-specific data storage (can hold up to 30 days)
@@ -242,6 +245,14 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             self?.chartModel.rebuild()
         }
         DeviceStatusHistory.shared.start()
+
+        Publishers.MergeMany(
+            Storage.shared.loopInsulinModel.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.device.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] in self?.updateLoopInsulinActivity() }
+        .store(in: &cancellables)
 
         scheduleAllTasks()
         setupNightscoutSocket()

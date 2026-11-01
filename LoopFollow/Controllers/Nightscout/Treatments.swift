@@ -219,5 +219,6 @@ extension MainViewController {
             }
         }
         processCage(entries: pumpSiteChange)
+        updateLoopInsulinActivity()
     }
 }
