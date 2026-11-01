@@ -46,6 +46,11 @@ struct GeneralSettingsView: View {
                         Text(mode.displayName).tag(mode)
                     }
                 }
+                if AppIconManager.shared.isSupported {
+                    NavigationLink("App Icon") {
+                        AppIconSettingsView()
+                    }
+                }
                 Toggle("Display Small Graph", isOn: $showSmallGraph.value)
                 Toggle("Color BG Text", isOn: $colorBGText.value)
                 Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)
