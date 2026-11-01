@@ -1266,18 +1266,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
 extension MainViewController: AVSpeechSynthesizerDelegate {
     func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
-        let appState = UIApplication.shared.applicationState
-        let isSilentTuneMode = Storage.shared.backgroundRefreshType.value == .silentTune
-
-        if isSilentTuneMode, appState == .background {
-            LogManager.shared.log(category: .general, message: "Silent tune active in background; not deactivating session.", isDebug: true)
-        } else {
-            do {
-                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-                LogManager.shared.log(category: .general, message: "Audio session deactivated after speech.", isDebug: true)
-            } catch {
-                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
-            }
-        }
+        AlarmSound.releaseAudioSession()
     }
 }
