@@ -150,6 +150,10 @@ extension MainViewController {
             if basalData.count > 0 {
                 clearOldTempBasal()
             }
+            if let profileBasal = profileManager.currentBasal() {
+                infoManager.updateInfoData(type: .basal, value: profileBasal)
+                Storage.shared.lastBasal.value = profileBasal
+            }
         }
         if bolus.count > 0 {
             processNSBolus(entries: bolus)

@@ -18,6 +18,7 @@ final class ProfileManager {
     var targetHighSchedule: [TimeValue<HKQuantity>]
     var loopOverrides: [LoopOverride]
     var trioOverrides: [TrioOverride]
+    var loopDosingEnabled: Bool?
     var units: HKUnit
     var timezone: TimeZone
     var defaultProfile: String
@@ -93,6 +94,8 @@ final class ProfileManager {
         } else {
             loopOverrides = []
         }
+
+        loopDosingEnabled = profileData.loopSettings?.dosingEnabled
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in
