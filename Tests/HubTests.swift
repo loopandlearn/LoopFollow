@@ -1423,3 +1423,46 @@ struct HubClientBehaviourTests {
         #expect(HubAppGroup.acknowledgeCategory == "lfhub-ack")
     }
 }
+
+struct HubVersionTests {
+    @Test("the latest image follows main, the dev image and a hub's own build follow dev")
+    func branch() {
+        #expect(HubVersionManager.branch(for: "latest") == "main")
+        #expect(HubVersionManager.branch(for: "dev") == "dev")
+        #expect(HubVersionManager.branch(for: nil) == "dev")
+    }
+
+    @Test("the version is read from the project file")
+    func parse() {
+        let project = """
+        <Project Sdk="Microsoft.NET.Sdk.Web">
+          <PropertyGroup>
+            <Version>0.3.1</Version>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="Npgsql" Version="9.0.2" />
+          </ItemGroup>
+        </Project>
+        """
+        #expect(HubVersionManager.parseVersion(fromProject: project) == "0.3.1")
+        #expect(HubVersionManager.parseVersion(fromProject: "<Project></Project>") == nil)
+    }
+
+    @Test("a hub is outdated only when the latest version is newer")
+    func outdated() {
+        let hub = HubClient.Status.Hub(version: "0.2.0", api: 1, features: [], channel: "dev")
+        #expect(HubVersionManager.isOutdated(hub, latest: "0.2.1"))
+        #expect(HubVersionManager.isOutdated(hub, latest: "0.10.0"))
+        #expect(!HubVersionManager.isOutdated(hub, latest: "0.2.0"))
+        #expect(!HubVersionManager.isOutdated(hub, latest: "0.1.9"))
+    }
+
+    @Test("a status without a channel decodes")
+    func decodesWithoutChannel() throws {
+        let json = Data(#"{"version":"0.2.0","api":1,"features":["receipts"]}"#.utf8)
+        let hub = try JSONDecoder().decode(HubClient.Status.Hub.self, from: json)
+        #expect(hub.channel == nil)
+        let withChannel = Data(#"{"version":"0.2.0","api":1,"features":[],"channel":"latest"}"#.utf8)
+        #expect(try JSONDecoder().decode(HubClient.Status.Hub.self, from: withChannel).channel == "latest")
+    }
+}

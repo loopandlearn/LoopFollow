@@ -208,6 +208,10 @@ class Storage {
     var lastBlacklistNotificationShown = StorageValue<Date?>(key: "lastBlacklistNotificationShown", defaultValue: nil)
     var lastVersionUpdateNotificationShown = StorageValue<Date?>(key: "lastVersionUpdateNotificationShown", defaultValue: nil)
     var lastExpirationNotificationShown = StorageValue<Date?>(key: "lastExpirationNotificationShown", defaultValue: nil)
+    var hubLatestVersion = StorageValue<String?>(key: "hubLatestVersion", defaultValue: nil)
+    var hubLatestVersionBranch = StorageValue<String?>(key: "hubLatestVersionBranch", defaultValue: nil)
+    var hubLatestVersionChecked = StorageValue<Date?>(key: "hubLatestVersionChecked", defaultValue: nil)
+    var lastHubVersionUpdateNotificationShown = StorageValue<Date?>(key: "lastHubVersionUpdateNotificationShown", defaultValue: nil)
 
     // MARK: - Telemetry -----------------------------------------------------------
 

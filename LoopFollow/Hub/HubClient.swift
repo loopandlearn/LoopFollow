@@ -210,6 +210,9 @@ final class HubClient {
             let version: String
             let api: Int
             let features: [String]
+            /// The image tag the hub was published under (`latest` or `dev`); absent on a
+            /// hub built by its owner and on a hub older than the channel.
+            var channel: String? = nil
         }
 
         let hub: Hub?

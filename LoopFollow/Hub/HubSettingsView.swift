@@ -38,6 +38,8 @@ struct HubSettingsView: View {
     @State private var scanningInvite = false
 
     @State private var status: HubClient.Status?
+    /// The newest LF Hub for the hub's channel; nil until known.
+    @State private var latestHubVersion: String?
     @State private var statusError: String?
     @State private var devices: [HubClient.Device] = []
     @State private var deviceToRemove: HubClient.Device?
@@ -117,6 +119,10 @@ struct HubSettingsView: View {
             }
         }
         .refreshable { await refresh() }
+        .task(id: hubInfo.value) {
+            guard let info = hubInfo.value else { return }
+            latestHubVersion = await HubVersionManager.latestVersion(for: info)
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             Task {
                 await readNotificationPermission()
@@ -362,8 +368,10 @@ struct HubSettingsView: View {
     private var connectedSections: some View {
         Section(header: Text("Hub")) {
             row("Address", hubURL.value)
-            if let version = hubInfo.value?.version {
-                row("LF Hub version", version)
+            if let info = hubInfo.value {
+                row("LF Hub version", info.channel.map { "\(info.version) (\($0))" } ?? info.version,
+                    color: latestHubVersion.map { HubVersionManager.isOutdated(info, latest: $0) ? .orange : .green } ?? .secondary)
+                row("Latest LF Hub version", latestHubVersion ?? "Fetching…")
             }
             if let status {
                 row("Patient", status.patient.name)
@@ -567,11 +575,11 @@ struct HubSettingsView: View {
         return parts.joined(separator: " · ")
     }
 
-    private func row(_ title: String, _ value: String) -> some View {
+    private func row(_ title: String, _ value: String, color: Color = .secondary) -> some View {
         HStack {
             Text(title)
             Spacer()
-            Text(value).foregroundColor(.secondary).multilineTextAlignment(.trailing)
+            Text(value).foregroundColor(color).multilineTextAlignment(.trailing)
         }
     }
 

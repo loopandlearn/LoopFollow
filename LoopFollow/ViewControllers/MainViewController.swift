@@ -794,14 +794,33 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
                     self.versionAlert(message: "The current version has a critical issue and should be updated as soon as possible.")
                     Storage.shared.lastBlacklistNotificationShown.value = now
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
+                    return
                 }
             } else if isNewer {
                 let lastVersionUpdateShown = Storage.shared.lastVersionUpdateNotificationShown.value ?? Date.distantPast
                 if now.timeIntervalSince(lastVersionUpdateShown) > 1_209_600 { // 2 weeks
                     self.versionAlert(message: "A new version is available: \(latestVersion ?? "Unknown"). It is recommended to update.")
                     Storage.shared.lastVersionUpdateNotificationShown.value = now
+                    return
                 }
             }
+            self.checkAndNotifyHubVersionStatus()
+        }
+    }
+
+    /// Reminds an admin phone every two weeks while a newer LF Hub is out for the hub's channel.
+    func checkAndNotifyHubVersionStatus() {
+        let hub = HubClient.shared
+        guard hub.isAdmin, let info = hub.hubInfo.value else { return }
+        Task { @MainActor in
+            guard let latest = await HubVersionManager.latestVersion(for: info),
+                  HubVersionManager.isOutdated(info, latest: latest) else { return }
+            let lastShown = Storage.shared.lastHubVersionUpdateNotificationShown.value ?? Date.distantPast
+            guard Date().timeIntervalSince(lastShown) > 1_209_600, // 2 weeks
+                  self.presentedViewController == nil else { return }
+            self.versionAlert(title: "LF Hub Update Available",
+                              message: "LF Hub \(latest) is available; the hub runs \(info.version). Pull the new image and restart the hub to update it.")
+            Storage.shared.lastHubVersionUpdateNotificationShown.value = Date()
         }
     }
 
