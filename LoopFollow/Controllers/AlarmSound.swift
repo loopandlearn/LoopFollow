@@ -286,7 +286,7 @@ class AlarmSound {
     // field which fallback (if any) the user landed on.
     fileprivate static func activateAudioSessionWithFallback() {
         let isBackgroundWithoutSilentTune = UIApplication.shared.applicationState == .background
-            && Storage.shared.backgroundRefreshType.value != .silentTune
+            && BackgroundRefreshType.inEffect != .silentTune
 
         let dominate: (label: String, options: AVAudioSession.CategoryOptions) = ("[]", [])
         let duck: (label: String, options: AVAudioSession.CategoryOptions) = (".duckOthers", .duckOthers)

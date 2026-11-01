@@ -55,9 +55,20 @@ class BackgroundRefreshManager {
             complete(false)
         }
 
-        // This task exists only to revive the Silent Tune keep-alive. Reading the mode
-        // is safe before storage is confirmed readable: the default is `.silentTune`,
-        // so an unhydrated read keeps the check armed rather than cancelling it.
+        // In LoopFollow Hub mode the task checks that the hub is alive. While the hub
+        // does not drive the alarms the app runs as in Silent Tune, so the check is
+        // followed by the Silent Tune's.
+        if StorageReadiness.ready.value, Storage.shared.backgroundRefreshType.value == .hub {
+            Task { @MainActor in
+                await HubWatchdog.check()
+                BackgroundRefreshManager.shared.continueAfterHubCheck(complete: complete)
+            }
+            return
+        }
+
+        // Otherwise this task exists only to revive the Silent Tune keep-alive. Reading
+        // the mode is safe before storage is confirmed readable: the default is
+        // `.silentTune`, so an unhydrated read keeps the check armed rather than cancelling it.
         guard !StorageReadiness.ready.value || Storage.shared.backgroundRefreshType.value == .silentTune else {
             LogManager.shared.log(category: .taskScheduler, message: "Background refresh no longer needed for the current mode; cancelling")
             BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskIdentifier)
@@ -66,6 +77,22 @@ class BackgroundRefreshManager {
             return
         }
 
+        reviveSilentTune(complete: complete)
+    }
+
+    private func continueAfterHubCheck(complete: @escaping (Bool) -> Void) {
+        guard BackgroundRefreshType.inEffect == .silentTune else {
+            queue.async {
+                self.immediateRequested = false
+                self.submit(earliestBeginDate: Date(timeIntervalSinceNow: self.refreshInterval))
+            }
+            complete(true)
+            return
+        }
+        reviveSilentTune(complete: complete)
+    }
+
+    private func reviveSilentTune(complete: @escaping (Bool) -> Void) {
         // Queue the successor before doing any work, so an early expiration or a
         // crash still leaves a pending request behind.
         queue.async {

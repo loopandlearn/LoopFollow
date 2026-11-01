@@ -12,31 +12,8 @@ struct DexcomSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("Dexcom Settings")) {
-                HStack {
-                    Text("Username")
-                    TextField("Enter Username", text: $viewModel.userName)
-                        .textContentType(.username)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .multilineTextAlignment(.trailing)
-                }
-
-                HStack {
-                    Text("Password")
-                    TogglableSecureInput(
-                        placeholder: "Enter Password",
-                        text: $viewModel.password,
-                        style: .singleLine,
-                        textContentType: .password
-                    )
-                }
-
-                Picker("Server", selection: $viewModel.server) {
-                    Text("US").tag("US")
-                    Text("Outside US").tag("NON-US")
-                }
-                .pickerStyle(SegmentedPickerStyle())
+            HubManagedSources {
+                credentialsSection
             }
 
             if viewModel.isFreshSetup {
@@ -61,7 +38,9 @@ struct DexcomSettingsView: View {
                 }
             }
 
-            importSection
+            if !HubSourceSync.shared.hidesImport {
+                importSection
+            }
         }
         .navigationDestination(isPresented: $showUnitsSetup) {
             UnitsOnboardingView {
@@ -71,6 +50,35 @@ struct DexcomSettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Dexcom Settings", displayMode: .inline)
         .navigationBarBackButtonHidden(usesModalCloseButton)
+    }
+
+    private var credentialsSection: some View {
+        Section(header: Text("Dexcom Settings")) {
+            HStack {
+                Text("Username")
+                TextField("Enter Username", text: $viewModel.userName)
+                    .textContentType(.username)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .multilineTextAlignment(.trailing)
+            }
+
+            HStack {
+                Text("Password")
+                TogglableSecureInput(
+                    placeholder: "Enter Password",
+                    text: $viewModel.password,
+                    style: .singleLine,
+                    textContentType: .password
+                )
+            }
+
+            Picker("Server", selection: $viewModel.server) {
+                Text("US").tag("US")
+                Text("Outside US").tag("NON-US")
+            }
+            .pickerStyle(SegmentedPickerStyle())
+        }
     }
 
     private var importSection: some View {
