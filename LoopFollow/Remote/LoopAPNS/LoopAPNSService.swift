@@ -177,7 +177,7 @@ class LoopAPNSService {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
         LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", payload.carbsAmount ?? 0.0))g, absorption: \(String(format: "%.1f", payload.absorptionTime ?? 3.0))h")
-        sendRemoteCommand(finalPayload, completion: completion)
+        sendRemoteCommand(finalPayload, completion: RemoteCommandRefresh.following(.meal(grams: payload.carbsAmount ?? 0, bolus: 0), completion))
     }
 
     /// Sends bolus via APNS push notification
@@ -190,7 +190,7 @@ class LoopAPNSService {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
         LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", payload.bolusAmount ?? 0.0))U")
-        sendRemoteCommand(finalPayload, completion: completion)
+        sendRemoteCommand(finalPayload, completion: RemoteCommandRefresh.following(.bolus(units: payload.bolusAmount ?? 0), completion))
     }
 
     /// Validates APNS credentials similar to PushNotificationManager
@@ -479,7 +479,7 @@ class LoopAPNSService {
             apnsKey: creds.apnsKey,
             teamId: creds.teamId,
             payload: payload,
-            completion: completion
+            completion: RemoteCommandRefresh.following(.override, completion)
         )
     }
 
@@ -511,7 +511,7 @@ class LoopAPNSService {
             apnsKey: creds.apnsKey,
             teamId: creds.teamId,
             payload: payload,
-            completion: completion
+            completion: RemoteCommandRefresh.following(.override, completion)
         )
     }
 }
