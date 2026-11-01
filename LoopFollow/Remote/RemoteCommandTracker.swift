@@ -4,7 +4,7 @@
 import Foundation
 
 extension Notification.Name {
-    /// Posted when a remote meal edit/delete reaches a terminal state, so treatment lists can refresh.
+    /// Posted when a tracked remote command reaches a terminal state, with its key in `userInfo["key"]`, so lists can refresh.
     static let remoteMealCommandDidComplete = Notification.Name("LoopFollow.remoteMealCommandDidComplete")
 }
 
@@ -40,15 +40,23 @@ final class RemoteCommandTracker: ObservableObject {
         return false
     }
 
-    func begin(key: String) {
+    func begin(key: String, timeout: TimeInterval? = nil, timeoutMessage: String = RemoteCommandTracker.timeoutMessage) {
         onMain {
             self.timeouts[key]?.cancel()
             self.states[key] = .pending(since: Date())
             let work = DispatchWorkItem { [weak self] in
-                self?.resolve(key: key, success: false, message: Self.timeoutMessage)
+                self?.resolve(key: key, success: false, message: timeoutMessage)
             }
             self.timeouts[key] = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + self.timeout, execute: work)
+            DispatchQueue.main.asyncAfter(deadline: .now() + (timeout ?? self.timeout), execute: work)
+        }
+    }
+
+    /// True while any command whose key starts with `prefix` waits for its reply.
+    func isBusy(keyPrefix prefix: String) -> Bool {
+        states.contains { key, state in
+            if case .pending = state { return key.hasPrefix(prefix) }
+            return false
         }
     }
 
@@ -73,7 +81,10 @@ final class RemoteCommandTracker: ObservableObject {
     /// Returns true when the push resolved a pending command.
     @discardableResult
     func handleNotification(userInfo: [AnyHashable: Any]) -> Bool {
-        guard let resolution = trioAcks.resolution(for: userInfo) ?? LoopCarbAckAdapter.resolution(for: userInfo) else { return false }
+        guard let resolution = trioAcks.resolution(for: userInfo)
+            ?? LoopCarbAckAdapter.resolution(for: userInfo)
+            ?? LoopProfileAckAdapter.resolution(for: userInfo)
+        else { return false }
         guard isBusy(key: resolution.key) else {
             LogManager.shared.log(category: .apns, message: "Ack for \(LogRedactor.tail(resolution.key)) matched no pending command")
             return false
@@ -145,6 +156,34 @@ enum LoopCarbAckAdapter {
             defaultMessage = commandType == "carbs_delete" ? "Carb entry deleted." : "Carb entry updated."
         }
         return RemoteCommandTracker.Resolution(key: key, success: success, message: alertBody(userInfo) ?? defaultMessage)
+    }
+}
+
+/// Matches Loop's return push for a profile switch by the profile name in its message
+/// ("Profile '<name>' activated" or "... Profile '<name>' not activated: <reason>").
+enum LoopProfileAckAdapter {
+    static let keyPrefix = "loop-profile-switch:"
+    /// Pump programming and both pushes can take a while; a missing reply does not mean the switch failed.
+    static let timeout: TimeInterval = 180
+    static let timeoutMessage = "Loop has not replied. The switch may still complete; the list shows the active profile once Loop uploads it. Check it before sending again."
+
+    static func key(for name: String) -> String {
+        keyPrefix + name
+    }
+
+    static func resolution(for userInfo: [AnyHashable: Any]) -> RemoteCommandTracker.Resolution? {
+        guard userInfo["command_type"] as? String == "profile_switch",
+              let status = userInfo["command_status"] as? String,
+              let body = alertBody(userInfo),
+              let name = profileName(in: body)
+        else { return nil }
+        LogManager.shared.log(category: .apns, message: "Loop ack: type=profile_switch status=\(status)")
+        return RemoteCommandTracker.Resolution(key: key(for: name), success: status == "success", message: body)
+    }
+
+    static func profileName(in message: String) -> String? {
+        guard let match = message.firstMatch(of: /Profile '(.+)' (?:not )?activated/) else { return nil }
+        return String(match.1)
     }
 }
 
@@ -223,6 +262,15 @@ extension RemoteCommandTracker {
         }
     }
 
+    func sendLoopProfileSwitch(profile: LoopProfile, completion: @escaping (Bool, String?) -> Void) {
+        let key = LoopProfileAckAdapter.key(for: profile.name)
+        begin(key: key, timeout: LoopProfileAckAdapter.timeout, timeoutMessage: LoopProfileAckAdapter.timeoutMessage)
+        guard let otp = loopOTP(key: key, completion: completion) else { return }
+        LoopAPNSService().sendProfileSwitch(name: profile.name, fingerprint: profile.fingerprint, otp: otp) { [weak self] success, error in
+            self?.finishLoopSend(key: key, success: success, error: error, completion: completion)
+        }
+    }
+
     private func loopOTP(key: String, completion: (Bool, String?) -> Void) -> String? {
         let qrCodeURL = Storage.shared.loopAPNSQrCodeURL.value
         let otp = TOTPGenerator.extractOTPFromURL(qrCodeURL)
@@ -244,7 +292,7 @@ extension RemoteCommandTracker {
         DispatchQueue.main.async {
             if success {
                 TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
-                LogManager.shared.log(category: .apns, message: "Carb command sent for syncIdentifier=\(LogRedactor.tail(key))")
+                LogManager.shared.log(category: .apns, message: "Loop command sent for \(LogRedactor.tail(key))")
             } else {
                 self.resolve(key: key, success: false, message: error ?? "The command could not be sent.")
             }
