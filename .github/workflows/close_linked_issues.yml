@@ -1,0 +1,71 @@
+# -----------------------------------------------------------------------------
+# Workflow: Close Linked Issues on Dev
+#
+# Description:
+# GitHub only closes linked issues automatically when a pull request is merged
+# into the default branch (main). This workflow closes them when a pull request
+# is merged into dev.
+#
+# On every push to dev it looks up the merged pull request(s) for the pushed
+# commit and closes open issues in this repository that are either:
+# - linked to the pull request under "Development", or
+# - referenced in the pull request description with Closes/Fixes/Resolves #N
+# -----------------------------------------------------------------------------
+
+name: Close linked issues on merge to dev
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  close-issues:
+    if: ${{ !github.event.repository.fork }}
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Close issues linked to the merged pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          owner="${REPO%/*}"
+          name="${REPO#*/}"
+
+          prs=$(gh api "repos/$REPO/commits/$SHA/pulls" \
+            --jq '.[] | select(.merged_at != null and .base.ref == "dev") | .number')
+
+          for pr in $prs; do
+            linked=$(gh api graphql -F owner="$owner" -F name="$name" -F pr="$pr" -f query='
+              query($owner: String!, $name: String!, $pr: Int!) {
+                repository(owner: $owner, name: $name) {
+                  pullRequest(number: $pr) {
+                    closingIssuesReferences(first: 20) {
+                      nodes { number repository { nameWithOwner } }
+                    }
+                  }
+                }
+              }' --jq '.data.repository.pullRequest.closingIssuesReferences.nodes[]
+                       | select(.repository.nameWithOwner == env.REPO) | .number')
+
+            keywords=$(gh pr view "$pr" -R "$REPO" --json body -q .body \
+              | grep -oiE '\b(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#[0-9]+' \
+              | grep -oE '[0-9]+$' || true)
+
+            for n in $(printf '%s\n%s\n' "$linked" "$keywords" | grep -E '^[0-9]+$' | sort -un); do
+              state=$(gh api "repos/$REPO/issues/$n" \
+                --jq 'select(.pull_request == null) | .state' 2>/dev/null || true)
+              if [ "$state" = "open" ]; then
+                echo "Closing #$n (merged in #$pr)"
+                gh issue close "$n" -R "$REPO" --reason completed \
+                  --comment "Closed by #$pr, merged into dev."
+              fi
+            done
+          done
