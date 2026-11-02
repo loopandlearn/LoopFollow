@@ -183,7 +183,6 @@ class Storage {
     // MARK: - Advanced settings ---------------------------------------------------
 
     var downloadTreatments = StorageValue<Bool>(key: "downloadTreatments", defaultValue: true)
-    var downloadPrediction = StorageValue<Bool>(key: "downloadPrediction", defaultValue: true)
     var graphOtherTreatments = StorageValue<Bool>(key: "graphOtherTreatments", defaultValue: true)
     var graphBasal = StorageValue<Bool>(key: "graphBasal", defaultValue: true)
     var graphBolus = StorageValue<Bool>(key: "graphBolus", defaultValue: true)
