@@ -458,7 +458,7 @@ final class HubClient {
     static var clientSettings: [any ClientSetting] {
         let storage = Storage.shared
         return [
-            storage.units, storage.predictionToLoad, storage.downloadPrediction, storage.downloadTreatments,
+            storage.units, storage.predictionToLoad, storage.downloadTreatments,
             storage.downloadDays, storage.showYesterdayLine, storage.bgUpdateDelay, storage.infoDisplayItems,
             storage.persistentNotification, storage.speakBG, storage.speakBGAlways, storage.speakLowBG,
             storage.speakProactiveLowBG, storage.speakHighBG, storage.speakFastDropDelta, storage.speakLowBGLimit,
