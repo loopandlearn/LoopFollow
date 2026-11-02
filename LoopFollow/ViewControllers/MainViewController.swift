@@ -91,6 +91,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var iobPredictionData: [ShareGlucoseData] = []
     var cobPredictionData: [ShareGlucoseData] = []
     var uamPredictionData: [ShareGlucoseData] = []
+    var loopPredBGs: [Double]?
+    var loopPredUpdatedTime: TimeInterval?
     var openAPSPredBGs: [String: [Double]]?
     var openAPSPredUpdatedTime: TimeInterval?
     var bgCheckData: [ShareGlucoseData] = []

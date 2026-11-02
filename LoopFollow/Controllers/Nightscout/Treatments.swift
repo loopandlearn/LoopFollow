@@ -138,10 +138,21 @@ extension MainViewController {
         }
 
         if tempBasal.count > 0 {
-            processNSBasals(entries: tempBasal)
+            let suspensions = PumpSuspension.intervals(
+                notes: note.compactMap { entry in
+                    guard let date = NightscoutUtils.treatmentDate(from: entry), let text = entry["notes"] as? String else { return nil }
+                    return (date, text)
+                },
+                tempBasalStarts: tempBasal.compactMap { NightscoutUtils.treatmentDate(from: $0) }
+            )
+            processNSBasals(entries: tempBasal, suspensions: suspensions)
         } else {
             if basalData.count > 0 {
                 clearOldTempBasal()
+            }
+            if let profileBasal = profileManager.currentBasal() {
+                infoManager.updateInfoData(type: .basal, value: profileBasal)
+                Storage.shared.lastBasal.value = profileBasal
             }
         }
         if bolus.count > 0 {
