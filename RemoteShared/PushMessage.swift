@@ -43,24 +43,15 @@ struct CommandPayload: Encodable {
     var fat: Int?
     var overrideName: String?
     var scheduledTime: TimeInterval?
+    var commandID: String?
+    var mealID: String?
     var returnNotification: ReturnNotificationInfo?
 
-    struct ReturnNotificationInfo: Encodable {
-        let productionEnvironment: Bool
-        let deviceToken: String
-        let bundleId: String
-        let teamId: String
-        let keyId: String
-        let apnsKey: String
-
-        enum CodingKeys: String, CodingKey {
-            case productionEnvironment = "production_environment"
-            case deviceToken = "device_token"
-            case bundleId = "bundle_id"
-            case teamId = "team_id"
-            case keyId = "key_id"
-            case apnsKey = "apns_key"
+    var apnsCollapseID: String {
+        if commandType.usesCommandIDAsCollapseID, let commandID {
+            return commandID
         }
+        return commandType.rawValue
     }
 
     enum CodingKeys: String, CodingKey {
@@ -75,6 +66,8 @@ struct CommandPayload: Encodable {
         case fat
         case overrideName
         case scheduledTime = "scheduled_time"
+        case commandID = "command_id"
+        case mealID = "meal_id"
         case returnNotification = "return_notification"
     }
 }

@@ -7,6 +7,7 @@ struct LoopAPNSRemoteView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = RemoteSettingsViewModel()
     @ObservedObject private var activeOverrideNote = Observable.shared.override
+    @ObservedObject private var loopRemoteCommands = Storage.shared.loopRemoteCommands
 
     var body: some View {
         NavigationView {
@@ -22,6 +23,16 @@ struct LoopAPNSRemoteView: View {
                         CommandButtonView(command: "Meal", iconName: "fork.knife", destination: LoopAPNSCarbsView())
                         CommandButtonView(command: "Bolus", iconName: "syringe", destination: LoopAPNSBolusView())
                         CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverridePresetsView(), isActive: activeOverrideNote.value != nil)
+                        if loopRemoteCommands.value.contains(LoopProfile.switchCommand) {
+                            CommandButtonView(command: "Profiles", iconName: "arrow.triangle.2.circlepath", destination: LoopProfilesView())
+                        } else {
+                            UnavailableCommandButtonView(
+                                command: "Profiles",
+                                iconName: "arrow.triangle.2.circlepath",
+                                title: "Profiles Not Available",
+                                message: "Switching Loop profiles from LoopFollow needs Loop built with the Profile Save & Load customization, added with the Loop and Learn Customization Select script."
+                            )
+                        }
                     }
                     .padding(.horizontal)
                 } else {

@@ -46,6 +46,21 @@ private enum BGChartConfig {
     static let autoFollowPause: TimeInterval = 5 * 60
     /// Screen-space radius (pt) within which a tap selects a mark.
     static let tapHitRadius: CGFloat = 30
+    /// How far (pt) outside a linked pill a tap still opens its treatment.
+    static let pillLinkSlop: CGFloat = 8
+}
+
+/// For line/area series: the items inside the window plus one beyond each
+/// edge, so segments crossing (or spanning) the window survive. Assumes
+/// ascending dates.
+func chartWindowedLine<T>(_ items: [T], windowStart: Date, windowEnd: Date, date: (T) -> Date) -> [T] {
+    guard items.count > 1 else { return items }
+    let firstInside = items.firstIndex { date($0) >= windowStart } ?? items.count
+    let firstBeyond = items.firstIndex { date($0) > windowEnd } ?? items.count - 1
+    let lo = max(firstInside - 1, 0)
+    let hi = min(firstBeyond, items.count - 1)
+    guard lo <= hi else { return [] }
+    return Array(items[lo ... hi])
 }
 
 /// Small y-domain headroom keeps the top axis label readable instead of
@@ -70,18 +85,36 @@ struct BGChartView: View {
     /// attachments while BGChartInteraction preserves the viewport.
     @State private var gestureMountEpoch = 0
 
+    /// Treatment opened from a tapped pill on the main chart. Owned here, outside
+    /// the remounted subtree, so the sheet survives a foregrounding remount.
+    @State private var selectedTreatment: Treatment?
+
     var body: some View {
         Group {
             if config == .small {
                 SmallBGChart(model: model, interaction: model.interaction)
             } else {
-                MainBGChart(model: model, interaction: model.interaction)
+                MainBGChart(model: model, interaction: model.interaction, selectedTreatment: $selectedTreatment)
             }
         }
         .id(gestureMountEpoch)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             gestureMountEpoch &+= 1
         }
+        .sheet(item: $selectedTreatment) { treatment in
+            NavigationStack {
+                TreatmentDetailView(treatment: treatment, rootMeal: rootMeal(for: treatment))
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { selectedTreatment = nil }
+                        }
+                    }
+            }
+        }
+    }
+
+    private func rootMeal(for treatment: Treatment) -> Treatment? {
+        treatment.rootMeal(in: Treatment.rootMealsByFPUID(model.carbs.compactMap(\.detail)))
     }
 }
 
@@ -98,11 +131,15 @@ struct BGChartView: View {
 /// whose live preview is a `.scaleEffect(x:)` stretch anchored under the
 /// pinch centroid, committed on a geometric zoom grid. A one-finger press
 /// held stationary latches into inspect mode and scrubs a selection that is
-/// rendered by a shell overlay (never re-laying the canvas). Double-tap
-/// cycles zoom presets. No `.chartScrollableAxes`, no UIKit gesture hacks.
+/// rendered by a shell overlay (never re-laying the canvas). A tap on a mark
+/// shows its pill, and a tap on a pill that links to the Treatments list opens
+/// that treatment's details. Double-tap cycles zoom presets.
+/// No `.chartScrollableAxes`, no UIKit gesture hacks.
 private struct MainBGChart: View {
     @ObservedObject var model: BGChartModel
     @ObservedObject var interaction: BGChartInteraction
+    /// Treatment to show in the detail sheet; the shell owns the sheet.
+    @Binding var selectedTreatment: Treatment?
 
     /// Rendered slice of the domain. The canvas covers only this window
     /// (visible ± `renderWindowPadFactor` viewports), bounding canvas width
@@ -110,9 +147,10 @@ private struct MainBGChart: View {
     @State private var renderWindowStart: Date
     @State private var renderWindowEnd: Date
 
-    init(model: BGChartModel, interaction: BGChartInteraction) {
+    init(model: BGChartModel, interaction: BGChartInteraction, selectedTreatment: Binding<Treatment?>) {
         _model = ObservedObject(wrappedValue: model)
         _interaction = ObservedObject(wrappedValue: interaction)
+        _selectedTreatment = selectedTreatment
         // Seed the render window around the current viewport so a remount's
         // first frame draws in place.
         let pad = BGChartConfig.renderWindowPadFactor * interaction.visibleSeconds
@@ -172,6 +210,11 @@ private struct MainBGChart: View {
     /// away from the live edge, cleared on return to it.
     @State private var autoFollowPausedUntil: Date?
 
+    /// The jump to now button hides while the user pans, zooms or scrubs and
+    /// fades back in a moment after, so it stays out of the way.
+    @State private var showJumpToNow = true
+    @State private var jumpToNowFadeTask: Task<Void, Never>?
+
     private var timeZoneForAxis: TimeZone {
         if Storage.shared.graphTimeZoneEnabled.value,
            let tz = TimeZone(identifier: Storage.shared.graphTimeZoneIdentifier.value)
@@ -197,36 +240,71 @@ private struct MainBGChart: View {
         let canvasOffsetX = CGFloat(
             interaction.scrollPosition.timeIntervalSince(renderWindowStart) / windowSeconds
         ) * canvasWidth
+        let scaleAnchor = pinchScaleAnchor(viewportWidth: viewportWidth, canvasWidth: canvasWidth)
+
+        // Device status history panes stack under the main chart and share its
+        // render window, offset and pinch transform.
+        let panes = model.historyPanes
+        let paneHeight = historyPaneHeight(viewportHeight: viewport.height, count: panes.count)
+        let mainHeight = viewport.height - paneHeight * CGFloat(panes.count)
 
         return ZStack(alignment: .topLeading) {
-            BGChartCanvas(
-                model: model,
-                generation: model.generation,
-                isSmall: false,
-                windowStart: renderWindowStart,
-                windowEnd: renderWindowEnd,
-                canvasWidth: canvasWidth,
-                height: viewport.height,
-                visibleSeconds: interaction.visibleSeconds,
-                timeZone: timeZoneForAxis
-            )
-            .equatable()
-            .offset(x: -canvasOffsetX)
-            .scaleEffect(
-                x: pinchScale,
-                y: 1,
-                anchor: pinchScaleAnchor(viewportWidth: viewportWidth, canvasWidth: canvasWidth)
-            )
+            VStack(spacing: 0) {
+                ZStack(alignment: .topLeading) {
+                    BGChartCanvas(
+                        model: model,
+                        generation: model.generation,
+                        isSmall: false,
+                        windowStart: renderWindowStart,
+                        windowEnd: renderWindowEnd,
+                        canvasWidth: canvasWidth,
+                        height: mainHeight,
+                        visibleSeconds: interaction.visibleSeconds,
+                        timeZone: timeZoneForAxis
+                    )
+                    .equatable()
+                    .offset(x: -canvasOffsetX)
+                    .scaleEffect(x: pinchScale, y: 1, anchor: scaleAnchor)
 
-            // Pinned y-axis labels (BG trailing, basal leading) over the
-            // scrolling canvas. The canvas's own y-axis is hidden — its
-            // trailing edge sits far off-screen on the wide canvas.
-            StaticYAxisOverlay(generation: model.generation, maxBG: model.maxBG, maxBasal: model.maxBasal)
-                .equatable()
-                .frame(width: viewportWidth, height: viewport.height)
+                    // Pinned y-axis labels (BG trailing, basal leading) over the
+                    // scrolling canvas. The canvas's own y-axis is hidden — its
+                    // trailing edge sits far off-screen on the wide canvas.
+                    StaticYAxisOverlay(generation: model.generation, maxBG: model.maxBG, maxBasal: model.maxBasal)
+                        .equatable()
+                        .frame(width: viewportWidth, height: mainHeight)
+                        .allowsHitTesting(false)
+                }
+                .frame(width: viewportWidth, height: mainHeight, alignment: .topLeading)
+
+                ForEach(panes) { pane in
+                    ZStack(alignment: .topLeading) {
+                        BGChartHistoryPaneCanvas(
+                            pane: pane,
+                            generation: model.generation,
+                            now: model.now,
+                            windowStart: renderWindowStart,
+                            windowEnd: renderWindowEnd,
+                            canvasWidth: canvasWidth,
+                            height: paneHeight
+                        )
+                        .equatable()
+                        .offset(x: -canvasOffsetX)
+                        .scaleEffect(x: pinchScale, y: 1, anchor: scaleAnchor)
+
+                        BGChartHistoryPaneAxisOverlay(pane: pane, generation: model.generation)
+                            .equatable()
+                            .frame(width: viewportWidth, height: paneHeight)
+                            .allowsHitTesting(false)
+                    }
+                    .frame(width: viewportWidth, height: paneHeight, alignment: .topLeading)
+                    .clipped()
+                }
+            }
+
+            historyForecastOverlay(viewportWidth: viewportWidth)
                 .allowsHitTesting(false)
 
-            selectionOverlay(viewportWidth: viewportWidth)
+            selectionOverlay(viewportWidth: viewportWidth, indicatorBottom: viewport.height)
                 .allowsHitTesting(false)
 
             overrideBandLabelsOverlay(viewportWidth: viewportWidth)
@@ -234,6 +312,9 @@ private struct MainBGChart: View {
 
             if !interaction.followLatest {
                 jumpToNowButton
+                    .frame(width: viewportWidth, height: mainHeight)
+                    .opacity(showJumpToNow ? 1 : 0)
+                    .allowsHitTesting(showJumpToNow)
             }
         }
         .frame(width: viewportWidth, height: viewport.height, alignment: .topLeading)
@@ -241,21 +322,28 @@ private struct MainBGChart: View {
         .contentShape(Rectangle())
         .simultaneousGesture(panAndInspectGesture(viewportWidth: viewportWidth))
         .simultaneousGesture(magnifyGesture(viewportWidth: viewportWidth))
-        // Double-tap zooms; a single tap (only recognized once the double-tap
-        // window lapses) selects the mark under the finger, or clears the pill.
+        // Double-tap zooms. Single-tap waits for the double-tap window before
+        // selecting a mark or following a pill's link.
         .simultaneousGesture(
-            TapGesture(count: 2)
+            SpatialTapGesture(count: 2)
                 .exclusively(before: SpatialTapGesture())
                 .onEnded { value in
                     switch value {
                     case .first:
                         cycleZoomPreset()
                     case let .second(tap):
-                        handleTap(at: tap.location, viewportWidth: viewportWidth)
+                        handleTap(at: tap.location, viewportWidth: viewportWidth, mainHeight: mainHeight)
                     }
                 }
         )
         .onPreferenceChange(PlotFramePreferenceKey.self) { plotFrame = $0 }
+        // The displays show the scrubbed time only while the finger is down.
+        .onChange(of: isInspectLatched) { _, latched in
+            if !latched { RetroSelection.shared.select(nil) }
+        }
+        .onChange(of: isInteracting) { _, interacting in
+            updateJumpToNowVisibility(interacting: interacting)
+        }
         .onPreferenceChange(PillSizePreferenceKey.self) { pillSize = $0 }
         .onChange(of: interaction.scrollPosition) { _, _ in
             updateRenderWindow()
@@ -265,6 +353,11 @@ private struct MainBGChart: View {
             updateRenderWindow(force: true)
         }
         .onChange(of: model.now) { _, _ in
+            // New data while holding still: rebuild the scrubbed-time displays.
+            if isInspectLatched, let selection {
+                let anchor = selectionAnchor(for: selection)
+                RetroSelection.shared.select(anchor.map { $0.readingDate ?? $0.date }, refresh: true)
+            }
             if interaction.followLatest {
                 scrollToNow(animated: true)
             } else if let pausedUntil = autoFollowPausedUntil, Date() >= pausedUntil {
@@ -287,6 +380,7 @@ private struct MainBGChart: View {
         .onDisappear {
             momentumTask?.cancel()
             momentumTask = nil
+            jumpToNowFadeTask?.cancel()
             resetGestureState()
         }
     }
@@ -305,6 +399,26 @@ private struct MainBGChart: View {
         .padding(.trailing, 44)
         .padding(.bottom, 28)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+
+    /// A finger is on the chart (scrub, pan, pinch) or a flick is still gliding.
+    private var isInteracting: Bool {
+        isInspectLatched || panBaseline != nil || pinchAnchor != nil || momentumTask != nil
+    }
+
+    private func updateJumpToNowVisibility(interacting: Bool) {
+        jumpToNowFadeTask?.cancel()
+        if interacting {
+            showJumpToNow = false
+            return
+        }
+        jumpToNowFadeTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.4)) {
+                showJumpToNow = true
+            }
+        }
     }
 
     // MARK: Render window / follow state
@@ -481,6 +595,7 @@ private struct MainBGChart: View {
     }
 
     private func resetGestureState() {
+        RetroSelection.shared.select(nil)
         inspectHoldTask?.cancel()
         inspectHoldTask = nil
         pinchAnchor = nil
@@ -523,12 +638,14 @@ private struct MainBGChart: View {
             interaction.visibleSeconds * TimeInterval(fraction)
         )
         selection = date
+        let anchor = selectionAnchor(for: date)
         // A featherlight tick whenever the indicator snaps to a different slot.
-        if let anchor = selectionAnchor(for: date), anchor.date != lastHapticAnchorDate {
+        if let anchor, anchor.date != lastHapticAnchorDate {
             lastHapticAnchorDate = anchor.date
             scrubHaptic.selectionChanged()
             scrubHaptic.prepare()
         }
+        RetroSelection.shared.select(anchor.map { $0.readingDate ?? $0.date })
     }
 
     /// Deceleration after a flick. Mutates only scrollPosition (a transform),
@@ -665,6 +782,9 @@ private struct MainBGChart: View {
         }
         updateRenderWindow(force: true)
         interaction.persistZoom()
+        // A double tap is over at once: hide the button and fade it back in.
+        showJumpToNow = false
+        updateJumpToNowVisibility(interacting: false)
     }
 
     // MARK: Selection
@@ -676,13 +796,17 @@ private struct MainBGChart: View {
         let value: Double
         /// One pill entry per item under the selector (see PillLabel).
         let texts: [String]
+        /// The BG reading under the selector, whose forecast can be shown.
+        var readingDate: Date?
+        /// The Treatments list entry a tap on the pill opens.
+        var detail: Treatment?
     }
 
     /// Feeds every treatment mark to `body`. Single source for both the scrub
     /// lookup and the tap hit test.
     private func forEachTreatmentAnchor(_ body: (BGChartModel.TreatmentPoint) -> Void) {
         for group in [model.boluses, model.carbs, model.smbs, model.bgChecks,
-                      model.notes, model.suspends, model.resumes, model.sensorStarts]
+                      model.notes, model.sensorStates, model.suspends, model.resumes, model.sensorStarts]
         {
             for t in group {
                 body(t)
@@ -712,18 +836,30 @@ private struct MainBGChart: View {
         return texts
     }
 
+    /// Treatments list entry of a band at `date`, the override's before the
+    /// temp target's (the order bandPillTexts lists them in).
+    private func bandDetail(at date: Date) -> Treatment? {
+        let override = model.overrides
+            .filter { date >= $0.start && date <= $0.end }
+            .max { $0.start < $1.start }
+        let tempTarget = model.tempTargets
+            .filter { date >= $0.start && date <= $0.end }
+            .max { $0.start < $1.start }
+        return override?.detail ?? tempTarget?.detail
+    }
+
     /// Band (override / temp target) under the given date+value, if any.
     private func bandAnchor(at date: Date, value: Double) -> SelectionAnchor? {
         for band in model.overrides where date >= band.start && date <= band.end {
             if value >= band.yBottom, value <= band.yTop {
                 let midY = (band.yTop + band.yBottom) / 2
-                return SelectionAnchor(date: date, value: midY, texts: [band.pillText])
+                return SelectionAnchor(date: date, value: midY, texts: [band.pillText], detail: band.detail)
             }
         }
         for band in model.tempTargets where date >= band.start && date <= band.end {
             if value >= band.yBottom, value <= band.yTop {
                 let midY = (band.yTop + band.yBottom) / 2
-                return SelectionAnchor(date: date, value: midY, texts: [band.pillText])
+                return SelectionAnchor(date: date, value: midY, texts: [band.pillText], detail: band.detail)
             }
         }
         return nil
@@ -736,7 +872,14 @@ private struct MainBGChart: View {
     /// across the block. The indicator's height comes from the reading nearest
     /// the mark, else the nearest treatment, else the band; an empty block
     /// shows nothing.
-    private func selectionAnchor(for selected: Date) -> SelectionAnchor? {
+    private enum SelectionPurpose {
+        /// Press-and-hold scrubbing: how things were at that time.
+        case scrub
+        /// A tap: what happened at that point.
+        case tap
+    }
+
+    private func selectionAnchor(for selected: Date, purpose: SelectionPurpose = .scrub) -> SelectionAnchor? {
         let slot = model.scrubSlots.slot(containing: selected)
         let mark = slot.date
 
@@ -746,15 +889,17 @@ private struct MainBGChart: View {
         }
         treatments.sort { $0.date < $1.date }
         let readings = model.bg.filter { slot.contains($0.date) }
-
-        var texts = treatments.map(\.pillText) + readings.map(bgPillText)
         let bandTexts = bandPillTexts(at: mark)
-        texts += bandTexts
+
+        // Scrubbing shows no pill: the BG display and info table show the
+        // values at the scrubbed time. A tap lists what happened there.
+        let texts = purpose == .tap ? treatments.map(\.pillText) + readings.map(bgPillText) + bandTexts : []
 
         func distanceToMark(_ date: Date) -> TimeInterval { abs(date.timeIntervalSince(mark)) }
 
         var value: Double?
-        if let reading = readings.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
+        let nearestReading = readings.min(by: { distanceToMark($0.date) < distanceToMark($1.date) })
+        if let reading = nearestReading {
             value = reading.value
         } else if let nearest = treatments.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
             value = nearest.sgv
@@ -767,7 +912,7 @@ private struct MainBGChart: View {
         }
 
         guard let value else { return nil }
-        return SelectionAnchor(date: mark, value: value, texts: texts)
+        return SelectionAnchor(date: mark, value: value, texts: texts, readingDate: nearestReading?.date)
     }
 
     /// Tap hit test (screen-space, 2D). Treatments take priority, then BG
@@ -778,20 +923,20 @@ private struct MainBGChart: View {
         var best: SelectionAnchor?
         var bestDistance2 = radius * radius
 
-        func consider(_ date: Date, _ value: Double, _ text: String) {
+        func consider(_ date: Date, _ value: Double, _ text: String, isReading: Bool = false, detail: Treatment? = nil) {
             let dx = xPosition(for: date, viewportWidth: viewportWidth) - location.x
             let dy = yPosition(forValue: value) - location.y
             let d2 = dx * dx + dy * dy
             if d2 <= bestDistance2 {
                 bestDistance2 = d2
-                best = SelectionAnchor(date: date, value: value, texts: [text])
+                best = SelectionAnchor(date: date, value: value, texts: [text], readingDate: isReading ? date : nil, detail: detail)
             }
         }
 
-        forEachTreatmentAnchor { consider($0.drawnDate, $0.sgv, $0.pillText) }
+        forEachTreatmentAnchor { consider($0.drawnDate, $0.sgv, $0.pillText, detail: $0.detail) }
         if best == nil {
             for p in model.bg {
-                consider(p.date, p.value, bgPillText(for: p))
+                consider(p.date, p.value, bgPillText(for: p), isReading: true)
             }
         }
         if best == nil {
@@ -802,14 +947,43 @@ private struct MainBGChart: View {
         }
         if let best {
             let texts = best.texts + bandPillTexts(at: best.date)
-            return SelectionAnchor(date: best.date, value: best.value, texts: texts)
+            let detail = best.detail ?? bandDetail(at: best.date)
+            return SelectionAnchor(date: best.date, value: best.value, texts: texts, readingDate: best.readingDate, detail: detail)
         }
         return nil
     }
 
-    private func handleTap(at location: CGPoint, viewportWidth: CGFloat) {
+    /// A tap on a linked pill opens its treatment. Otherwise taps on the main
+    /// chart hit-test its marks, and taps on a history pane select by time
+    /// alone, like a scrub.
+    private func handleTap(at location: CGPoint, viewportWidth: CGFloat, mainHeight: CGFloat) {
         guard plotFrame.height > 0 else { return }
-        tapped = tappedAnchor(at: location, viewportWidth: viewportWidth)
+        if let detail = tapped?.detail,
+           let frame = pillFrame(for: tapped, viewportWidth: viewportWidth),
+           frame.insetBy(dx: -BGChartConfig.pillLinkSlop, dy: -BGChartConfig.pillLinkSlop).contains(location)
+        {
+            momentumTask?.cancel()
+            momentumTask = nil
+            resetGestureState()
+            tapped = nil
+            selectedTreatment = detail
+            return
+        }
+        if location.y > mainHeight {
+            let date = interaction.scrollPosition.addingTimeInterval(
+                interaction.visibleSeconds * TimeInterval(location.x / viewportWidth)
+            )
+            tapped = selectionAnchor(for: date, purpose: .tap)
+        } else {
+            tapped = tappedAnchor(at: location, viewportWidth: viewportWidth)
+        }
+    }
+
+    /// Pane height for `count` history panes, leaving the main chart most of the space.
+    private func historyPaneHeight(viewportHeight: CGFloat, count: Int) -> CGFloat {
+        guard count > 0 else { return 0 }
+        let preferred = min(max(viewportHeight * 0.15, 44), 72)
+        return min(preferred, viewportHeight * 0.45 / CGFloat(count))
     }
 
     /// The anchor the overlay should show: a live scrub wins over a sticky tap.
@@ -870,6 +1044,65 @@ private struct MainBGChart: View {
         }
     }
 
+    /// Screen frame of the pill for `anchor`, or nil when no pill is drawn.
+    /// Shared by the overlay and the tap that follows a pill's link.
+    private func pillFrame(for anchor: SelectionAnchor?, viewportWidth: CGFloat) -> CGRect? {
+        guard plotFrame.height > 0, let anchor, !anchor.texts.isEmpty else { return nil }
+        let x = xPosition(for: anchor.date, viewportWidth: viewportWidth)
+        guard x >= 0, x <= viewportWidth else { return nil }
+        // Measured size lags the text by one frame; fall back to a
+        // small nominal size until the first measurement lands.
+        let pillW = max(pillSize.width, 60)
+        let pillH = max(pillSize.height, 28)
+        let center = pillPosition(x: x, y: yPosition(forValue: anchor.value), pillW: pillW, pillH: pillH, viewportWidth: viewportWidth)
+        return CGRect(x: center.x - pillW / 2, y: center.y - pillH / 2, width: pillW, height: pillH)
+    }
+
+    /// Where the pill goes for an indicator at (x, y): under the anchor when
+    /// there is room, else above it.
+    private func pillPosition(x: CGFloat, y: CGFloat, pillW: CGFloat, pillH: CGFloat, viewportWidth: CGFloat) -> CGPoint {
+        let labelX = min(max(x, pillW / 2 + 4), viewportWidth - pillW / 2 - 4)
+        let below = y + 14 + pillH / 2
+        let above = y - 14 - pillH / 2
+        let fitsBelow = below + pillH / 2 <= plotFrame.maxY - 4
+        return CGPoint(x: labelX, y: fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4))
+    }
+
+    /// The forecast the loop made from the scrubbed BG reading, drawn in the
+    /// shell like the pill so scrubbing never re-lays the canvas.
+    @ViewBuilder
+    private func historyForecastOverlay(viewportWidth: CGFloat) -> some View {
+        if isInspectLatched, plotFrame.height > 0,
+           let readingDate = activeAnchor()?.readingDate,
+           let forecast = BGChartHistory.forecast(forReadingAt: readingDate)
+        {
+            ZStack(alignment: .topLeading) {
+                if !forecast.cone.isEmpty {
+                    Path { path in
+                        for (index, pt) in forecast.cone.enumerated() {
+                            let point = CGPoint(x: xPosition(for: pt.date, viewportWidth: viewportWidth), y: yPosition(forValue: pt.yMax))
+                            if index == 0 { path.move(to: point) } else { path.addLine(to: point) }
+                        }
+                        for pt in forecast.cone.reversed() {
+                            path.addLine(to: CGPoint(x: xPosition(for: pt.date, viewportWidth: viewportWidth), y: yPosition(forValue: pt.yMin)))
+                        }
+                        path.closeSubpath()
+                    }
+                    .fill(Color(.systemBlue).opacity(0.3))
+                }
+                ForEach(forecast.curves) { curve in
+                    Path { path in
+                        for (index, pt) in curve.points.enumerated() {
+                            let point = CGPoint(x: xPosition(for: pt.date, viewportWidth: viewportWidth), y: yPosition(forValue: pt.value))
+                            if index == 0 { path.move(to: point) } else { path.addLine(to: point) }
+                        }
+                    }
+                    .stroke(curve.color, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                }
+            }
+        }
+    }
+
     /// Vertical indicator + pill for the current selection, rendered in the
     /// shell with the same linear maps the canvas uses — neither scrubbing
     /// nor a tapped pill ever re-lays the canvas.
@@ -880,28 +1113,22 @@ private struct MainBGChart: View {
     /// SwiftUI's word wrapping, which respects the actual font metrics, so
     /// there is no manual line splitting.
     @ViewBuilder
-    private func selectionOverlay(viewportWidth: CGFloat) -> some View {
+    private func selectionOverlay(viewportWidth: CGFloat, indicatorBottom: CGFloat) -> some View {
         if plotFrame.height > 0, let anchor = activeAnchor() {
             let x = xPosition(for: anchor.date, viewportWidth: viewportWidth)
             if x >= 0, x <= viewportWidth {
-                let y = yPosition(forValue: anchor.value)
+                // With history panes the indicator runs down through them too.
+                let lineBottom = model.historyPanes.isEmpty ? plotFrame.maxY : indicatorBottom
 
                 Rectangle()
                     .fill(Color.primary.opacity(0.5))
-                    .frame(width: 1, height: plotFrame.height)
-                    .position(x: x, y: plotFrame.midY)
+                    .frame(width: 1, height: lineBottom - plotFrame.minY)
+                    .position(x: x, y: (plotFrame.minY + lineBottom) / 2)
 
-                // Measured size lags the text by one frame; fall back to a
-                // small nominal size until the first measurement lands.
-                let pillW = max(pillSize.width, 60)
-                let pillH = max(pillSize.height, 28)
-                let labelX = min(max(x, pillW / 2 + 4), viewportWidth - pillW / 2 - 4)
-                let below = y + 14 + pillH / 2
-                let above = y - 14 - pillH / 2
-                let fitsBelow = below + pillH / 2 <= plotFrame.maxY - 4
-                let labelY = fitsBelow ? below : max(above, plotFrame.minY + pillH / 2 + 4)
-                PillLabel(texts: anchor.texts, maxWidth: min(300, viewportWidth - 16))
-                    .position(x: labelX, y: labelY)
+                if let frame = pillFrame(for: anchor, viewportWidth: viewportWidth) {
+                    PillLabel(texts: anchor.texts, maxWidth: min(300, viewportWidth - 16), showsLink: anchor.detail != nil)
+                        .position(x: frame.midX, y: frame.midY)
+                }
             }
         }
     }
@@ -1046,9 +1273,14 @@ private struct BGChartCanvas: View, Equatable {
             coneMarks
             if !isSmall {
                 yesterdayMarks
+                // Under the readings, so low BG stays visible above the band.
+                historyOverlayMarks
             }
             bgLineMarks
             bgPointsMark
+            if !isSmall {
+                smoothedBGMarks
+            }
             predictionLineMark
             predictionVariantMarks
             if showTreatments {
@@ -1099,17 +1331,8 @@ private struct BGChartCanvas: View, Equatable {
         }
     }
 
-    /// For line/area series: like `windowed`, but keeps one point beyond each
-    /// edge so segments crossing (or spanning) the window survive. Assumes
-    /// ascending dates.
     private func windowedLine<T>(_ items: [T], date: (T) -> Date) -> [T] {
-        guard items.count > 1 else { return items }
-        let firstInside = items.firstIndex { date($0) >= windowStart } ?? items.count
-        let firstBeyond = items.firstIndex { date($0) > windowEnd } ?? items.count - 1
-        let lo = max(firstInside - 1, 0)
-        let hi = min(firstBeyond, items.count - 1)
-        guard lo <= hi else { return [] }
-        return Array(items[lo ... hi])
+        chartWindowedLine(items, windowStart: windowStart, windowEnd: windowEnd, date: date)
     }
 
     // MARK: X axis
@@ -1275,6 +1498,37 @@ private struct BGChartCanvas: View, Equatable {
     }
 
     @ChartContentBuilder
+    private var historyOverlayMarks: some ChartContent {
+        if let overlay = model.historyOverlay {
+            ForEach(overlay.series) { series in
+                ForEach(windowedLine(series.points) { $0.date }) { pt in
+                    LineMark(
+                        x: .value("time", pt.date),
+                        y: .value(series.kind.title, pt.value),
+                        series: .value("series", "overlay-\(series.id)-\(pt.segment)")
+                    )
+                    .foregroundStyle(series.color)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5))
+                }
+            }
+        }
+    }
+
+    @ChartContentBuilder
+    private var smoothedBGMarks: some ChartContent {
+        ForEach(windowedLine(model.smoothedBG) { $0.date }) { pt in
+            LineMark(
+                x: .value("time", pt.date),
+                y: .value("bg", pt.value),
+                series: .value("series", "smoothed-\(pt.segment)")
+            )
+            .foregroundStyle(Color.cyan)
+            .lineStyle(StrokeStyle(lineWidth: 2))
+            .interpolationMethod(.linear)
+        }
+    }
+
+    @ChartContentBuilder
     private var predictionLineMark: some ChartContent {
         ForEach(windowedLine(model.prediction) { $0.date }) { pt in
             LineMark(
@@ -1422,6 +1676,16 @@ private struct BGChartCanvas: View, Equatable {
             .symbolSize(isSmall ? 22 : 54)
             .foregroundStyle(Color.gray.opacity(0.75))
         }
+
+        ForEach(windowed(model.sensorStates) { $0.drawnDate }) { pt in
+            PointMark(
+                x: .value("time", pt.drawnDate),
+                y: .value("sgv", pt.sgv)
+            )
+            .symbol(.triangle)
+            .symbolSize(isSmall ? 22 : 54)
+            .foregroundStyle(Color.orange.opacity(0.85))
+        }
     }
 
     @ChartContentBuilder
@@ -1554,10 +1818,15 @@ private struct StaticYAxisOverlay: View, Equatable {
     }
 }
 
+/// Only the main chart's axis overlay reports a frame; siblings that report
+/// nothing must not reset it to zero.
 private struct PlotFramePreferenceKey: PreferenceKey {
     static var defaultValue: CGRect = .zero
     static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
+        let next = nextValue()
+        if next != .zero {
+            value = next
+        }
     }
 }
 
@@ -1566,7 +1835,10 @@ private struct PlotFramePreferenceKey: PreferenceKey {
 private struct PillSizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
-        value = nextValue()
+        let next = nextValue()
+        if next != .zero {
+            value = next
+        }
     }
 }
 
@@ -1591,27 +1863,36 @@ private struct PillLabel: View {
     /// readable over a busy cluster.
     let texts: [String]
     let maxWidth: CGFloat
+    /// The pill opens a Treatments list entry when tapped.
+    var showsLink = false
 
     var body: some View {
-        content
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(.secondarySystemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color.primary, lineWidth: 0.5)
-                    )
-            )
-            .background(
-                GeometryReader { geo in
-                    Color.clear.preference(key: PillSizePreferenceKey.self, value: geo.size)
-                }
-            )
-            // Transparent flexible container: it caps the width the text can
-            // wrap to, while the visible pill above still hugs its content.
-            .frame(maxWidth: maxWidth)
+        HStack(spacing: 4) {
+            content
+            if showsLink {
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundColor(.accentColor)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(.secondarySystemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(showsLink ? Color.accentColor : Color.primary, lineWidth: showsLink ? 1 : 0.5)
+                )
+        )
+        .background(
+            GeometryReader { geo in
+                Color.clear.preference(key: PillSizePreferenceKey.self, value: geo.size)
+            }
+        )
+        // Transparent flexible container: it caps the width the text can
+        // wrap to, while the visible pill above still hugs its content.
+        .frame(maxWidth: maxWidth)
     }
 
     @ViewBuilder

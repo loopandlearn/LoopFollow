@@ -8,6 +8,8 @@ struct GeneralSettingsView: View {
     @ObservedObject var appBadge = Storage.shared.appBadge
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
+    @ObservedObject var showTIRBand = Storage.shared.showTIRBand
+    @ObservedObject var statsSinceMidnight = Storage.shared.statsSinceMidnight
     @ObservedObject var showSmallGraph = Storage.shared.showSmallGraph
     @ObservedObject var screenlockSwitchState = Storage.shared.screenlockSwitchState
     @ObservedObject var showDisplayName = Storage.shared.showDisplayName
@@ -44,7 +46,6 @@ struct GeneralSettingsView: View {
                         Text(mode.displayName).tag(mode)
                     }
                 }
-                Toggle("Display Stats", isOn: $showStats.value)
                 Toggle("Display Small Graph", isOn: $showSmallGraph.value)
                 Toggle("Color BG Text", isOn: $colorBGText.value)
                 Toggle("Keep Screen Active", isOn: $screenlockSwitchState.value)
@@ -59,6 +60,24 @@ struct GeneralSettingsView: View {
 
                         window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                     }
+            }
+
+            Section {
+                Toggle("Display Stats", isOn: $showStats.value)
+                if showStats.value {
+                    Picker("Stats Style", selection: $showTIRBand.value) {
+                        Text("Statistics Box").tag(false)
+                        Text("Time in Range Band").tag(true)
+                    }
+                    Picker("Stats Period", selection: $statsSinceMidnight.value) {
+                        Text("Last 24 Hours").tag(false)
+                        Text("Today (since midnight)").tag(true)
+                    }
+                }
+            } header: {
+                Text("Statistics")
+            } footer: {
+                Text("The statistics box and the Time in Range band both cover this period. Today starts at midnight in your time zone, or in the Time Zone Override below when it is on.")
             }
 
             Section("Time Zone") {

@@ -54,17 +54,20 @@ final class BGChartModel: ObservableObject {
         let sgv: Double
         let label: String
         let pillText: String
+        /// The Treatments list entry the pill links to; nil for marks the list doesn't show.
+        let detail: Treatment?
         /// Where the symbol is drawn. Equals `date` unless `spread` nudged it
         /// left to keep a crowded run of treatments from stacking up.
         var drawnDate: Date
         var id: Double { date.timeIntervalSince1970 }
 
-        init(date: Date, value: Double, sgv: Double, label: String, pillText: String) {
+        init(date: Date, value: Double, sgv: Double, label: String, pillText: String, detail: Treatment? = nil) {
             self.date = date
             self.value = value
             self.sgv = sgv
             self.label = label
             self.pillText = pillText
+            self.detail = detail
             drawnDate = date
         }
     }
@@ -89,6 +92,8 @@ final class BGChartModel: ObservableObject {
         let yTop: Double
         let label: String
         let pillText: String
+        /// The Treatments list entry the pill links to.
+        var detail: Treatment? = nil
         var id: String { "\(start.timeIntervalSince1970)-\(end.timeIntervalSince1970)" }
     }
 
@@ -140,6 +145,13 @@ final class BGChartModel: ObservableObject {
     @Published var resumes: [TreatmentPoint] = []
     @Published var sensorStarts: [TreatmentPoint] = []
     @Published var notes: [TreatmentPoint] = []
+    @Published var sensorStates: [TreatmentPoint] = []
+
+    /// Device status history panes under the main chart, in display order.
+    @Published var historyPanes: [BGChartHistory.Pane] = []
+    @Published var smoothedBG: [BGChartHistory.Point] = []
+    /// History curves in the main chart's bottom band, when placed there.
+    @Published var historyOverlay: BGChartHistory.Overlay?
 
     @Published var overrides: [BandRect] = []
     @Published var tempTargets: [BandRect] = []
@@ -391,6 +403,7 @@ final class BGChartModel: ObservableObject {
             guard let self else { return }
             self.rebuildScheduled = false
             self.performRebuild()
+            WatchSessionManager.shared.requestUpdate(reason: "chart")
         }
     }
 
@@ -402,8 +415,8 @@ final class BGChartModel: ObservableObject {
         let maxBGValue = Double(vc.calculateMaxBgGraphValue())
         maxBG = max(maxBGValue, Storage.shared.minBGScale.value)
 
-        // Same thresholds the stats and main header use: fixed 70–180 / 70–140
-        // for the TIR/TITR range modes, the user's lines for custom mode.
+        // Same thresholds the stats and main header use: the range mode's fixed
+        // cut-offs, or the user's lines for custom mode.
         let thresholds = UnitSettingsStore.shared.effectiveThresholds()
         lowLine = thresholds.low
         highLine = thresholds.high
@@ -461,7 +474,8 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Bolus\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         carbs = Self.spread((showCarbs ? vc.carbData : []).map {
@@ -475,9 +489,11 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: label,
-                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Carbs\n\(grams)g\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }, minGap: Spread.carbGap, maxShift: Spread.carbShift)
+        let automaticBolusTitle = isLoop ? "Auto Bolus" : "SMB"
         let smbPoints = (showBolus ? vc.smbData : []).map {
             let dose = self.formatDose($0.value)
             return TreatmentPoint(
@@ -485,7 +501,8 @@ final class BGChartModel: ObservableObject {
                 value: $0.value,
                 sgv: Double($0.sgv),
                 label: dose,
-                pillText: "SMB\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "\(automaticBolusTitle)\n\(dose)U\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         (boluses, smbs) = Self.spreadTogether(bolusPoints, smbPoints, minGap: Spread.bolusGap, maxShift: Spread.bolusShift)
@@ -514,6 +531,17 @@ final class BGChartModel: ObservableObject {
                 sgv: Double($0.sgv),
                 label: $0.note,
                 pillText: "\(Self.extractMessage(from: $0.note) ?? $0.note)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+            )
+        }
+
+        sensorStates = (showOtherTreatments ? vc.cgmSensorStates : []).compactMap { state in
+            guard let sgv = CGMSensorState.anchorSGV(at: state.date.timeIntervalSince1970, readings: vc.bgData) else { return nil }
+            return TreatmentPoint(
+                date: state.date,
+                value: Double(sgv),
+                sgv: Double(sgv),
+                label: state.name,
+                pillText: "CGM: \(state.displayName)\n\(pillTimeString(for: state.date))"
             )
         }
 
@@ -550,7 +578,8 @@ final class BGChartModel: ObservableObject {
                 yBottom: yBottom,
                 yTop: yTop,
                 label: displayName,
-                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Override\n\(displayName)\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
         tempTargets = (showOtherTreatments ? vc.tempTargetGraphData : []).map {
@@ -564,7 +593,8 @@ final class BGChartModel: ObservableObject {
                 yBottom: yCenter - 5,
                 yTop: yCenter + 5,
                 label: "Temp Target",
-                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))"
+                pillText: "Temp Target\n\(Localizer.toDisplayUnits(target))\n\(pillTimeString(for: Date(timeIntervalSince1970: $0.date)))",
+                detail: $0.detail
             )
         }
 
@@ -623,6 +653,27 @@ final class BGChartModel: ObservableObject {
         }
         midnightMarkers = midnights
 
+        rebuildHistory(from: currentNow.addingTimeInterval(-hoursBack - BGChartHistory.maxJoinGap))
+
         generation &+= 1
+    }
+
+    private func rebuildHistory(from start: Date) {
+        let enabledKinds = BGChartHistory.PaneKind.allCases.filter(\.isEnabled)
+        let showSmoothed = Storage.shared.showSmoothedBG.value && Storage.shared.device.value != "Loop"
+        let startTime = start.timeIntervalSince1970
+        let samples = enabledKinds.isEmpty && !showSmoothed
+            ? []
+            : DeviceStatusHistory.shared.state.samples.filter { $0.date >= startTime }
+
+        if Storage.shared.historyCurvePlacement.value == .mainGraph {
+            historyPanes = []
+            // The band stays below the low line so it does not cover in-range readings.
+            historyOverlay = BGChartHistory.overlay(kinds: enabledKinds, samples: samples, bandTop: min(maxBG * 0.22, lowLine * 0.9))
+        } else {
+            historyPanes = enabledKinds.compactMap { BGChartHistory.pane(kind: $0, samples: samples) }
+            historyOverlay = nil
+        }
+        smoothedBG = showSmoothed ? BGChartHistory.points(from: samples) { $0.smoothedBG } : []
     }
 }

@@ -11,6 +11,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         LogManager.shared.log(category: .general, message: "App started")
         LogManager.shared.cleanupOldLogs()
+        ExitDiagnostics.shared.start()
 
         // Notification and calendar permissions are no longer requested here.
         // They're deferred to the moment the user opts into the feature that
@@ -54,6 +55,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().setNotificationCategories([category])
 
         UNUserNotificationCenter.current().delegate = self
+
+        WatchSessionManager.shared.activate()
 
         // Only spin up Bluetooth if the user has chosen a BLE-based background
         // refresh. Initializing BLEManager creates a CBCentralManager, which
@@ -109,6 +112,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_: UIApplication) {
+        LogManager.shared.log(category: .general, message: "App will terminate (\(ExitDiagnostics.memoryDescription()))")
         #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.endOnTerminate()
         #endif
@@ -134,6 +138,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let userInfoKeys = userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
+        RemoteCommandTracker.shared.handleNotification(userInfo: userInfo)
 
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
@@ -183,6 +188,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        RemoteCommandTracker.shared.handleNotification(userInfo: response.notification.request.content.userInfo)
+
         if response.actionIdentifier == "OPEN_APP_ACTION" {
             // Dismiss any presented modal/sheet so the user actually sees Home
             UIApplication.shared.topMost?.dismiss(animated: true)
@@ -267,6 +274,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
         let content = notification.request.content
+        RemoteCommandTracker.shared.handleNotification(userInfo: content.userInfo)
         let userInfoKeys = content.userInfo.keys.compactMap { $0 as? String }.sorted()
         LogManager.shared.log(
             category: .general,

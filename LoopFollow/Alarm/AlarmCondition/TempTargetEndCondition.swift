@@ -3,19 +3,23 @@
 
 import Foundation
 
-/// Fires once when the active temp target ends.
-struct TempTargetEndCondition: AlarmCondition {
+/// Fires once when the active temp target ends and, with `predictiveMinutes`
+/// set, once that many minutes before the scheduled end.
+final class TempTargetEndCondition: AlarmCondition {
     static let type: AlarmType = .tempTargetEnd
+    private(set) var firedTitle: String?
     init() {}
 
-    func evaluate(alarm _: Alarm, data: AlarmData, now: Date) -> Bool {
-        guard let endTS = data.latestTempTargetEnd, endTS > 0 else { return false }
-        guard now.timeIntervalSince1970 - endTS <= 15 * 60 else { return false }
-
-        let last = Storage.shared.lastTempTargetEndNotified.value ?? 0
-        guard endTS > last else { return false }
-
-        Storage.shared.lastTempTargetEndNotified.value = endTS
-        return true
+    func evaluate(alarm: Alarm, data: AlarmData, now: Date) -> Bool {
+        let phase = EndAlarmPhases(
+            latestStart: data.latestTempTargetStart,
+            latestEnd: data.latestTempTargetEnd,
+            activeEnd: data.activeTempTargetEnd,
+            leadMinutes: alarm.predictiveMinutes,
+            endedMarker: Storage.shared.lastTempTargetEndNotified,
+            warnedMarker: Storage.shared.lastTempTargetPreEndNotified
+        ).fire(now: now)
+        firedTitle = phase == .endingSoon ? "Temp Target Ending Soon" : nil
+        return phase != nil
     }
 }

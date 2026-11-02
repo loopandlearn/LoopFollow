@@ -20,15 +20,7 @@ class TIRViewModel: ObservableObject {
     }
 
     func toggleTIRMode() {
-        let mode = UnitSettingsStore.shared.timeInRangeMode
-        switch mode {
-        case .tir:
-            UnitSettingsStore.shared.timeInRangeMode = .titr
-        case .titr:
-            UnitSettingsStore.shared.timeInRangeMode = .custom
-        case .custom:
-            UnitSettingsStore.shared.timeInRangeMode = .tir
-        }
+        UnitSettingsStore.shared.timeInRangeMode = UnitSettingsStore.shared.timeInRangeMode.next
         calculateTIR()
     }
 

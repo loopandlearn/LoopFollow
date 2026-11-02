@@ -13,6 +13,7 @@ struct SnoozerView: View {
     @ObservedObject var directionText = Observable.shared.directionText
     @ObservedObject var deltaText = Observable.shared.deltaText
     @ObservedObject var bgStale = Observable.shared.bgStale
+    @ObservedObject var cgmSensorState = Observable.shared.cgmSensorState
     @ObservedObject var bg = Observable.shared.bg
     @ObservedObject var snoozerEmoji = Storage.shared.snoozerEmoji
 
@@ -46,9 +47,16 @@ struct SnoozerView: View {
                             rightColumn(isLandscape: true)
                         }
                     } else {
-                        VStack(spacing: 0) {
-                            leftColumn(isLandscape: false, barShowing: barShowing)
-                            rightColumn(isLandscape: false)
+                        GeometryReader { content in
+                            VStack(spacing: 0) {
+                                leftColumn(
+                                    isLandscape: false,
+                                    barShowing: barShowing,
+                                    availableHeight: content.size.height - portraitRightColumnMinHeight
+                                )
+                                .layoutPriority(1)
+                                rightColumn(isLandscape: false)
+                            }
                         }
                     }
                 }
@@ -102,7 +110,7 @@ struct SnoozerView: View {
                 if let alarm = vm.activeAlarm {
                     VStack(spacing: 16) {
                         // Alarm name at the top
-                        Text(alarm.name)
+                        Text(vm.alarmTitle)
                             .font(.system(size: 30, weight: .semibold))
                             .foregroundColor(.white)
                             .lineLimit(1)
@@ -155,23 +163,49 @@ struct SnoozerView: View {
 
     // MARK: - Columns
 
-    private func leftColumn(isLandscape: Bool, barShowing: Bool) -> some View {
+    private let portraitEmojiMinHeight: CGFloat = 70
+    private let portraitClockMinHeight: CGFloat = 80
+    private let portraitClockBottomSpace: CGFloat = 16
+    private let displayNameHeight: CGFloat = 60
+
+    /// Height the emoji and clock need below the left column in portrait.
+    private var portraitRightColumnMinHeight: CGFloat {
+        let emoji = snoozerEmoji.value ? portraitEmojiMinHeight + 4 : 0
+        return emoji + portraitClockMinHeight + portraitClockBottomSpace + 8
+    }
+
+    /// The left column's heights are scaled down together when `availableHeight`
+    /// is smaller than their combined maximum, so the column never pushes the
+    /// emoji and clock off screen.
+    private func leftColumn(isLandscape: Bool, barShowing: Bool, availableHeight: CGFloat? = nil) -> some View {
         let topPad: CGFloat = barShowing ? 0 : 16
-        let bigMaxH: CGFloat = barShowing ? (isLandscape ? 210 : 220) : 240
-        let dirMaxH: CGFloat = barShowing ? (isLandscape ? 72 : 72) : 80
-        let deltaMaxH: CGFloat = barShowing ? (isLandscape ? 60 : 60) : 68
-        let ageMaxH: CGFloat = barShowing ? 36 : 40
+        let nameH: CGFloat = (!isLandscape && showDisplayName.value) ? displayNameHeight : 0
+        let maxHeights: [CGFloat] = [
+            barShowing ? (isLandscape ? 210 : 200) : 240,
+            barShowing ? (isLandscape ? 72 : 90) : (isLandscape ? 80 : 110),
+            barShowing ? (isLandscape ? 60 : 80) : (isLandscape ? 68 : 100),
+            barShowing ? (isLandscape ? 36 : 60) : (isLandscape ? 40 : 80),
+        ]
+        let fit: CGFloat = availableHeight.map {
+            min(1, max(0, $0 - topPad - nameH) / maxHeights.reduce(0, +))
+        } ?? 1
+        let bigMaxH = maxHeights[0] * fit
+        let dirMaxH = maxHeights[1] * fit
+        let deltaMaxH = maxHeights[2] * fit
+        let ageMaxH = maxHeights[3] * fit
+        let minScale: CGFloat = isLandscape ? 0.5 : 0.3
 
         return VStack(spacing: 0) {
             if !isLandscape && showDisplayName.value {
                 Text(Bundle.main.displayName)
                     .font(.system(size: 50, weight: .bold))
                     .foregroundColor(.white.opacity(0.9))
+                    .frame(height: displayNameHeight)
             }
 
             Text(bgText.value)
                 .font(.system(size: 300, weight: .black))
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(minScale)
                 .foregroundColor(bgTextColor.value)
                 .strikethrough(
                     bgStale.value,
@@ -185,30 +219,40 @@ struct SnoozerView: View {
                     Text(directionText.value)
                         .font(.system(size: 90, weight: .black))
                     Text(deltaText.value)
-                        .font(.system(size: 70))
+                        .font(.system(size: 70).monospacedDigit())
                 }
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(minScale)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: dirMaxH)
             } else {
                 Text(directionText.value)
-                    .font(.system(size: 110, weight: .black))
-                    .minimumScaleFactor(0.5)
+                    .font(.system(size: 160, weight: .black))
+                    .minimumScaleFactor(minScale)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: dirMaxH)
 
                 Text(deltaText.value)
-                    .font(.system(size: 70))
-                    .minimumScaleFactor(0.5)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 140).monospacedDigit())
+                    .minimumScaleFactor(minScale)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: deltaMaxH)
             }
 
             Text(minAgoText.value)
-                .font(.system(size: 60))
-                .minimumScaleFactor(0.5)
-                .foregroundColor(.white.opacity(0.6))
+                .font(.system(size: isLandscape ? 60 : 80).monospacedDigit())
+                .minimumScaleFactor(minScale)
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: ageMaxH)
+
+            if let state = cgmSensorState.value {
+                Text("CGM: \(state.summary)")
+                    .font(.system(size: 30, weight: .semibold))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.orange)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(.top, topPad)
         .padding(.horizontal, 16)
@@ -224,32 +268,23 @@ struct SnoozerView: View {
                     .padding(.bottom, 8)
             }
 
-            if snoozerEmoji.value {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    VStack(spacing: 4) {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                VStack(spacing: 4) {
+                    if snoozerEmoji.value {
                         Text(bgEmoji)
                             .font(.system(size: 128))
                             .minimumScaleFactor(0.5)
+                            .frame(minHeight: isLandscape ? nil : portraitEmojiMinHeight)
+                    }
 
-                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
-                            .font(.system(size: 70))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(.white)
-                            .frame(height: 78)
-                    }
-                }
-            } else {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    VStack(spacing: 4) {
-                        Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
-                            .font(.system(size: 70))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(.white)
-                            .frame(height: 78)
-                    }
+                    Text(context.date, format: Date.FormatStyle(date: .omitted, time: .shortened))
+                        .font(.system(size: isLandscape ? 70 : 100).monospacedDigit())
+                        .minimumScaleFactor(0.5)
+                        .foregroundColor(.white)
+                        .frame(minHeight: isLandscape ? 78 : portraitClockMinHeight, maxHeight: isLandscape ? 78 : 100)
                 }
             }
-            Spacer()
+            Spacer(minLength: isLandscape ? nil : portraitClockBottomSpace)
         }
     }
 

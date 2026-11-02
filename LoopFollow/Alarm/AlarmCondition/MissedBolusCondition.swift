@@ -5,7 +5,8 @@ import Foundation
 
 /// Fires when a carb entry is logged but **no** qualifying bolus is given
 /// within the user-defined “delay” (after allowing for a pre-bolus window).
-/// • Ignores small-carb treatments, tiny boluses, and low-BG scenarios.
+/// • Ignores small-carb treatments and tiny boluses; the optional BG limit
+///   (`aboveBG`) is enforced by `passesBGLimits`.
 /// • Triggers once per carb entry.
 struct MissedBolusCondition: AlarmCondition {
     static let type: AlarmType = .missedBolus
@@ -19,14 +20,13 @@ struct MissedBolusCondition: AlarmCondition {
             let delayMin = alarm.monitoringWindow, delayMin > 0,
             let prebolusMin = alarm.predictiveMinutes,
             let minBolusU = alarm.delta, // ignore bolus ≤
-            let minCarbGr = alarm.threshold, // ignore carbs ≤
-            let minBG = alarm.aboveBG // ignore BG ≤
+            let minCarbGr = alarm.threshold // ignore carbs ≤
         else { return false }
 
         // ────────────────────────────────
-        // 1. get most-recent carb entry
+        // 1. get most-recent past carb entry
         // ────────────────────────────────
-        guard let carb = data.recentCarbs.last else { return false }
+        guard let carb = data.recentCarbs.last(where: { $0.date <= now }) else { return false }
 
         //  – must be at least `delayMin` old, but not older than 60 min
         guard carb.date > now.addingTimeInterval(-3600),
@@ -35,10 +35,6 @@ struct MissedBolusCondition: AlarmCondition {
 
         //  – ignore tiny carbs
         guard carb.grams > minCarbGr else { return false }
-
-        //  – ignore if BG is low
-        if let latestBG = data.bgReadings.last,
-           Double(latestBG.sgv) <= minBG { return false }
 
         // ────────────────────────────────
         // 2. already alerted for this carb?

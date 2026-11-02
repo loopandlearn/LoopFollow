@@ -12,8 +12,6 @@ struct BolusView: View {
     @ObservedObject private var maxBolus = Storage.shared.maxBolus
     @ObservedObject private var bolusIncrement = Storage.shared.bolusIncrement
 
-    @ObservedObject private var deviceRecBolus = Observable.shared.deviceRecBolus
-    @ObservedObject private var enactedOrSuggested = Observable.shared.enactedOrSuggested
     @ObservedObject private var quickPickBoluses = QuickPickBolusesManager.shared
 
     @FocusState private var bolusFieldIsFocused: Bool
@@ -203,8 +201,8 @@ struct BolusView: View {
                         title: Text("Old Calculation Warning"),
                         message: Text(alertMessage ?? ""),
                         primaryButton: .default(Text("Use Anyway")) {
-                            if let rec = deviceRecBolus.value {
-                                applyRecommendedBolus(rec)
+                            if let rec = RecommendedBolus.current() {
+                                applyRecommendedBolus(rec.units)
                             }
                         },
                         secondaryButton: .cancel()
@@ -220,10 +218,10 @@ struct BolusView: View {
 
     @ViewBuilder
     private func recommendedBlocks(now: Date) -> some View {
-        if let rec = deviceRecBolus.value,
-           let t = enactedOrSuggested.value
-        {
-            let ageSec = max(0, now.timeIntervalSince1970 - t)
+        // The TimelineView redraws this every second, so a new loop cycle or bolus shows up here.
+        if let recommended = RecommendedBolus.current() {
+            let rec = recommended.units
+            let ageSec = max(0, now.timeIntervalSince1970 - recommended.at)
 
             if ageSec < 12 * 60 {
                 let maxU = maxBolus.value.doubleValue(for: .internationalUnit())

@@ -9,6 +9,7 @@ struct RemoteSettingsView: View {
     @ObservedObject var viewModel: RemoteSettingsViewModel
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject var bolusIncrement = Storage.shared.bolusIncrement
+    @ObservedObject private var watchRemoteCommands = Storage.shared.watchRemoteCommands
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -93,6 +94,13 @@ struct RemoteSettingsView: View {
 
             if viewModel.remoteType == .trc || viewModel.remoteType == .loopAPNS {
                 guardrailsSection
+
+                Section(
+                    header: Text("Apple Watch"),
+                    footer: Text("Commands from the LoopFollow watch app are sent by this iPhone, with the same guardrails as here. The iPhone must be within reach of the watch.")
+                ) {
+                    Toggle("Allow Commands from Apple Watch", isOn: $watchRemoteCommands.value)
+                }
             }
 
             if !Storage.shared.bolusIncrementDetected.value {
@@ -235,17 +243,6 @@ struct RemoteSettingsView: View {
                     .buttonStyle(.borderedProminent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-
-                    HStack {
-                        Text("Environment")
-                        Spacer()
-                        Toggle("Production", isOn: $viewModel.productionEnvironment)
-                            .toggleStyle(SwitchToggleStyle())
-                    }
-
-                    Text("Production is used for browser builders and should be switched off for Xcode builders")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
 
                 if let errorMessage = viewModel.loopAPNSErrorMessage, !errorMessage.isEmpty {
@@ -258,6 +255,7 @@ struct RemoteSettingsView: View {
 
                 Section(header: Text("Debug / Info")) {
                     Text("Device Token: \(Storage.shared.deviceToken.value)")
+                    Text("APNS Environment: \(Storage.shared.productionEnvironment.value ? "Production" : "Development")")
                     Text("Bundle ID: \(Storage.shared.bundleId.value)")
 
                     if let otpCode = TOTPGenerator.extractOTPFromURL(Storage.shared.loopAPNSQrCodeURL.value) {

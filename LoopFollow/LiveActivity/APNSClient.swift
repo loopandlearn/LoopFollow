@@ -241,6 +241,7 @@ class APNSClient {
         ]
 
         snapshotDict["isNotLooping"] = snapshot.isNotLooping
+        if let cgmSensorState = snapshot.cgmSensorState { snapshotDict["cgmSensorState"] = cgmSensorState }
         snapshotDict["showRenewalOverlay"] = snapshot.showRenewalOverlay
         if let iob = snapshot.iob { snapshotDict["iob"] = iob }
         if let cob = snapshot.cob { snapshotDict["cob"] = cob }

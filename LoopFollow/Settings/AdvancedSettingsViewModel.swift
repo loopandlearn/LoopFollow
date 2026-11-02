@@ -10,12 +10,6 @@ class AdvancedSettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var downloadPrediction: Bool {
-        didSet {
-            Storage.shared.downloadPrediction.value = downloadPrediction
-        }
-    }
-
     @Published var graphBasal: Bool {
         didSet {
             Storage.shared.graphBasal.value = graphBasal
@@ -58,7 +52,6 @@ class AdvancedSettingsViewModel: ObservableObject {
 
     init() {
         downloadTreatments = Storage.shared.downloadTreatments.value
-        downloadPrediction = Storage.shared.downloadPrediction.value
         graphBasal = Storage.shared.graphBasal.value
         graphBolus = Storage.shared.graphBolus.value
         graphCarbs = Storage.shared.graphCarbs.value

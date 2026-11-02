@@ -214,8 +214,7 @@ private struct LockScreenLiveActivityView: View {
                         .foregroundStyle(.white.opacity(0.80))
                         .lineLimit(1)
                 }
-                .frame(minWidth: 160, maxWidth: 184, alignment: .leading)
-                .layoutPriority(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Rectangle()
                     .fill(Color.white.opacity(0.20))
@@ -236,6 +235,16 @@ private struct LockScreenLiveActivityView: View {
             }
 
             ActiveAdjustmentsView(snapshot: s)
+
+            if let sensorState = s.cgmSensorState {
+                Text("CGM: \(sensorState)")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
 
             Text(LAAppGroupSettings.showDisplayName()
                 ? "\(LAAppGroupSettings.displayName()) — \(LAFormat.updated(s))"
@@ -260,10 +269,22 @@ private struct LockScreenLiveActivityView: View {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color(uiColor: UIColor.systemRed).opacity(0.85))
 
-                        Text("Not Looping")
-                            .font(.system(size: 20, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .tracking(1.5)
+                        VStack(spacing: 4) {
+                            Text("Not Looping")
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .tracking(1.5)
+
+                            if let sensorState = state.snapshot.cgmSensorState {
+                                Text("CGM: \(sensorState)")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.horizontal, 12)
                     }
                 }
             }
@@ -322,7 +343,7 @@ private struct MetricBlock: View {
                 .allowsTightening(true)
                 .layoutPriority(1)
         }
-        .frame(width: 72, alignment: .leading)
+        .frame(maxWidth: 72, alignment: .leading)
     }
 }
 
@@ -360,7 +381,7 @@ private struct SlotView: View {
     var body: some View {
         if option == .none {
             Color.clear
-                .frame(width: 72, height: 36)
+                .frame(maxWidth: 72, minHeight: 36, maxHeight: 36)
         } else {
             MetricBlock(label: option.gridLabel, value: slotFormattedValue(option: option, snapshot: snapshot))
         }
@@ -507,16 +528,31 @@ private struct DynamicIslandTrailingView: View {
 private struct DynamicIslandBottomView: View {
     let snapshot: GlucoseSnapshot
 
-    var body: some View {
-        if snapshot.isNotLooping {
-            Text("Loop has not reported in 15+ minutes")
+    @ViewBuilder
+    private var sensorStateText: some View {
+        if let sensorState = snapshot.cgmSensorState {
+            Text("CGM: \(sensorState)")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.92))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
+        }
+    }
+
+    var body: some View {
+        if snapshot.isNotLooping {
+            VStack(spacing: 2) {
+                Text("Loop has not reported in 15+ minutes")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                sensorStateText
+            }
         } else {
             VStack(spacing: 2) {
                 ActiveAdjustmentsView(snapshot: snapshot)
+                sensorStateText
                 Text("Updated at: \(LAFormat.updated(snapshot))")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.92))
@@ -779,12 +815,12 @@ private enum LAColors {
         let low = t.low
         let high = t.high
 
-        if mgdl < low {
-            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / (low - 54.0))
+        if mgdl <= low {
+            let raw = 0.48 + (0.85 - 0.48) * ((low - mgdl) / max(low - GlucoseThresholds.veryLow, 1))
             let opacity = min(max(raw, 0.48), 0.85)
             return Color(uiColor: UIColor.systemRed).opacity(opacity)
-        } else if mgdl > high {
-            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / (324.0 - high))
+        } else if mgdl >= high {
+            let raw = 0.44 + (0.85 - 0.44) * ((mgdl - high) / max(324.0 - high, 1))
             let opacity = min(max(raw, 0.44), 0.85)
             return Color(uiColor: UIColor.systemOrange).opacity(opacity)
         } else {
@@ -798,9 +834,9 @@ private enum LAColors {
         let low = t.low
         let high = t.high
 
-        if mgdl < low {
+        if mgdl <= low {
             return Color(uiColor: UIColor.systemRed)
-        } else if mgdl > high {
+        } else if mgdl >= high {
             return Color(uiColor: UIColor.systemOrange)
         } else {
             return Color(uiColor: UIColor.systemGreen)

@@ -53,16 +53,15 @@ extension MainViewController {
 
             let endDate = dateTimeStamp + duration
 
-            let dot = DataStructs.tempTargetStruct(date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason)
+            let detail = Treatment.historyEntries(from: currentEntry, date: parsedDate.timeIntervalSince1970) { 0 }.entries.first
+            let dot = DataStructs.tempTargetStruct(date: dateTimeStamp, endDate: endDate, duration: duration, correctionRange: [Int(targetValue!)], enteredBy: enteredBy, reason: reason, detail: detail)
             tempTargetGraphData.append(dot)
 
             // Set activeTempTarget only if it is still active
             let currentTime = Date().timeIntervalSince1970
             if currentTime < endDate {
                 activeTempTarget = Int(targetValue!)
-                // Trio represents indefinite temp targets as a ~30-day duration;
-                // treat a week or longer as indefinite (no end to display).
-                activeTempTargetEndAt = duration >= 7 * 24 * 3600 ? nil : endDate
+                activeTempTargetEndAt = dot.scheduledEndDate
             }
         }
 

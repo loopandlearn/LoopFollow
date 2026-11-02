@@ -101,6 +101,9 @@ protocol CurrentGlucoseStateProviding {
     /// True when LoopFollow detects the loop has not reported in 15+ minutes.
     var isNotLooping: Bool { get }
 
+    /// CGM state reported after the newest reading, as display text.
+    var cgmSensorState: String? { get }
+
     // MARK: - Renewal
 
     /// True when the Live Activity is within renewalWarning seconds of its deadline.
@@ -129,7 +132,7 @@ enum GlucoseSnapshotBuilder {
 
         let preferredUnit = PreferredGlucoseUnit.snapshotUnit()
         let deltaMgdl = provider.deltaMgdl ?? 0.0
-        let trend = mapTrend(provider.trendCode)
+        let trend = GlucoseSnapshot.Trend(code: provider.trendCode)
 
         if provider.showRenewalOverlay {
             LogManager.shared.log(category: .general, message: "[LA] renewal overlay ON")
@@ -173,42 +176,8 @@ enum GlucoseSnapshotBuilder {
             maxBgMgdl: provider.maxBgMgdl,
             unit: preferredUnit,
             isNotLooping: provider.isNotLooping,
+            cgmSensorState: provider.cgmSensorState,
             showRenewalOverlay: provider.showRenewalOverlay,
         )
-    }
-
-    // MARK: - Trend Mapping
-
-    private static func mapTrend(_ code: String?) -> GlucoseSnapshot.Trend {
-        guard
-            let raw = code?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased(),
-            !raw.isEmpty
-        else { return .unknown }
-
-        if raw.contains("doubleup") || raw.contains("rapidrise") || raw == "up2" || raw == "upfast" {
-            return .upFast
-        }
-        if raw.contains("fortyfiveup") {
-            return .upSlight
-        }
-        if raw.contains("singleup") || raw == "up" || raw == "up1" || raw == "rising" {
-            return .up
-        }
-        if raw.contains("flat") || raw == "steady" || raw == "none" {
-            return .flat
-        }
-        if raw.contains("doubledown") || raw.contains("rapidfall") || raw == "down2" || raw == "downfast" {
-            return .downFast
-        }
-        if raw.contains("fortyfivedown") {
-            return .downSlight
-        }
-        if raw.contains("singledown") || raw == "down" || raw == "down1" || raw == "falling" {
-            return .down
-        }
-
-        return .unknown
     }
 }

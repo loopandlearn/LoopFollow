@@ -128,6 +128,10 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// True when LoopFollow detects the loop has not reported in 15+ minutes (Nightscout only).
     let isNotLooping: Bool
 
+    /// CGM state reported after the newest reading, e.g. "Temporary sensor
+    /// issue at 22:33" (nil while readings flow).
+    let cgmSensorState: String?
+
     // MARK: - Renewal
 
     /// True when the Live Activity is within renewalWarning seconds of its renewal deadline.
@@ -168,6 +172,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         maxBgMgdl: Double? = nil,
         unit: Unit,
         isNotLooping: Bool,
+        cgmSensorState: String? = nil,
         showRenewalOverlay: Bool = false,
     ) {
         self.glucose = glucose
@@ -201,6 +206,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.maxBgMgdl = maxBgMgdl
         self.unit = unit
         self.isNotLooping = isNotLooping
+        self.cgmSensorState = cgmSensorState
         self.showRenewalOverlay = showRenewalOverlay
     }
 
@@ -247,6 +253,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             maxBgMgdl: maxBgMgdl,
             unit: unit,
             isNotLooping: isNotLooping,
+            cgmSensorState: cgmSensorState,
             showRenewalOverlay: value,
         )
     }
@@ -286,6 +293,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encodeIfPresent(maxBgMgdl, forKey: .maxBgMgdl)
         try container.encode(unit, forKey: .unit)
         try container.encode(isNotLooping, forKey: .isNotLooping)
+        try container.encodeIfPresent(cgmSensorState, forKey: .cgmSensorState)
         try container.encode(showRenewalOverlay, forKey: .showRenewalOverlay)
     }
 
@@ -322,6 +330,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         maxBgMgdl = try container.decodeIfPresent(Double.self, forKey: .maxBgMgdl)
         unit = try container.decode(Unit.self, forKey: .unit)
         isNotLooping = try container.decodeIfPresent(Bool.self, forKey: .isNotLooping) ?? false
+        cgmSensorState = try container.decodeIfPresent(String.self, forKey: .cgmSensorState)
         showRenewalOverlay = try container.decodeIfPresent(Bool.self, forKey: .showRenewalOverlay) ?? false
     }
 
@@ -332,7 +341,7 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         case recBolus, battery, pumpBattery, basalRate, pumpReservoirU
         case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
         case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
-        case unit, isNotLooping, showRenewalOverlay
+        case unit, isNotLooping, cgmSensorState, showRenewalOverlay
     }
 }
 
@@ -353,6 +362,28 @@ extension GlucoseSnapshot {
             let container = try decoder.singleValueContainer()
             let raw = try container.decode(String.self)
             self = Trend(rawValue: raw) ?? .unknown
+        }
+
+        /// Maps a Nightscout or Dexcom direction string, e.g. "FortyFiveUp".
+        init(code: String?) {
+            let raw = code?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+            if raw.contains("doubleup") || raw.contains("rapidrise") || raw == "up2" || raw == "upfast" {
+                self = .upFast
+            } else if raw.contains("fortyfiveup") {
+                self = .upSlight
+            } else if raw.contains("singleup") || raw == "up" || raw == "up1" || raw == "rising" {
+                self = .up
+            } else if raw.contains("flat") || raw == "steady" || raw == "none" {
+                self = .flat
+            } else if raw.contains("doubledown") || raw.contains("rapidfall") || raw == "down2" || raw == "downfast" {
+                self = .downFast
+            } else if raw.contains("fortyfivedown") {
+                self = .downSlight
+            } else if raw.contains("singledown") || raw == "down" || raw == "down1" || raw == "falling" {
+                self = .down
+            } else {
+                self = .unknown
+            }
         }
     }
 }

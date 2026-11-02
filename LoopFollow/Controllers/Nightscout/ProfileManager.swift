@@ -18,6 +18,7 @@ final class ProfileManager {
     var targetHighSchedule: [TimeValue<HKQuantity>]
     var loopOverrides: [LoopOverride]
     var trioOverrides: [TrioOverride]
+    var loopDosingEnabled: Bool?
     var units: HKUnit
     var timezone: TimeZone
     var defaultProfile: String
@@ -94,6 +95,8 @@ final class ProfileManager {
             loopOverrides = []
         }
 
+        loopDosingEnabled = profileData.loopSettings?.dosingEnabled
+
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in
                 let targetQuantity = entry.target != nil ? HKQuantity(unit: .milligramsPerDeciliter, doubleValue: entry.target!) : nil
@@ -122,41 +125,99 @@ final class ProfileManager {
         }
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
+        Storage.shared.remoteCommands.value = profileData.remoteCommands ?? []
+        Observable.shared.loopProfiles.set(LoopProfileSet(profileData))
     }
 
     func currentISF() -> HKQuantity? {
-        return getCurrentValue(from: isfSchedule)
+        isf(at: Date())
     }
 
     func currentBasal() -> String? {
-        if let basal = getCurrentValue(from: basalSchedule) {
-            return Localizer.formatToLocalizedString(basal, maxFractionDigits: 2, minFractionDigits: 0)
-        }
-        return nil
+        basal(at: Date())
     }
 
     func currentCarbRatio() -> Double? {
-        return getCurrentValue(from: carbRatioSchedule)
+        carbRatio(at: Date())
     }
 
     func currentTargetLow() -> HKQuantity? {
-        return getCurrentValue(from: targetLowSchedule)
+        targetLow(at: Date())
     }
 
     func currentTargetHigh() -> HKQuantity? {
-        return getCurrentValue(from: targetHighSchedule)
+        targetHigh(at: Date())
     }
 
-    private func getCurrentValue<T>(from schedule: [TimeValue<T>]) -> T? {
+    /// The loaded profile's scheduled values at the clock time of `date`.
+    func isf(at date: Date) -> HKQuantity? {
+        value(from: isfSchedule, at: date)
+    }
+
+    func basal(at date: Date) -> String? {
+        basalRate(at: date).map {
+            Localizer.formatToLocalizedString($0, maxFractionDigits: 2, minFractionDigits: 0)
+        }
+    }
+
+    func basalRate(at date: Date) -> Double? {
+        value(from: basalSchedule, at: date)
+    }
+
+    /// Scheduled basal from `start` to `end`, one segment per schedule entry crossed.
+    func scheduledBasalSegments(from start: Date, to end: Date) -> [(start: Date, rate: Double)] {
+        guard start < end, let firstRate = basalRate(at: start) else { return [] }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timezone
+
+        var boundaries: [Date] = []
+        var day = calendar.startOfDay(for: start)
+        while day < end {
+            for entry in basalSchedule {
+                guard let boundary = calendar.date(bySettingHour: entry.timeAsSeconds / 3600,
+                                                   minute: entry.timeAsSeconds % 3600 / 60,
+                                                   second: entry.timeAsSeconds % 60,
+                                                   of: day)
+                else { continue }
+                if boundary > start, boundary < end {
+                    boundaries.append(boundary)
+                }
+            }
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = nextDay
+        }
+
+        var segments = [(start: start, rate: firstRate)]
+        for boundary in boundaries.sorted() {
+            if let rate = basalRate(at: boundary), rate != segments.last?.rate {
+                segments.append((start: boundary, rate: rate))
+            }
+        }
+        return segments
+    }
+
+    func carbRatio(at date: Date) -> Double? {
+        value(from: carbRatioSchedule, at: date)
+    }
+
+    func targetLow(at date: Date) -> HKQuantity? {
+        value(from: targetLowSchedule, at: date)
+    }
+
+    func targetHigh(at date: Date) -> HKQuantity? {
+        value(from: targetHighSchedule, at: date)
+    }
+
+    private func value<T>(from schedule: [TimeValue<T>], at date: Date) -> T? {
         guard !schedule.isEmpty else { return nil }
 
-        let now = Date()
         var calendar = Calendar.current
         calendar.timeZone = timezone
 
-        let currentTimeInSeconds = calendar.component(.hour, from: now) * 3600 +
-            calendar.component(.minute, from: now) * 60 +
-            calendar.component(.second, from: now)
+        let currentTimeInSeconds = calendar.component(.hour, from: date) * 3600 +
+            calendar.component(.minute, from: date) * 60 +
+            calendar.component(.second, from: date)
 
         var lastValue: T?
         for timeValue in schedule {
@@ -207,5 +268,6 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
+        Observable.shared.loopProfiles.set(nil)
     }
 }

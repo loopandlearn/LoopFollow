@@ -2,7 +2,9 @@
 // ShareClientExtension.swift
 
 import Foundation
-import ShareClient
+#if canImport(ShareClient)
+    import ShareClient
+#endif
 
 public struct ShareGlucoseData: Decodable {
     var sgv: Int
@@ -56,7 +58,6 @@ private var TrendTable: [String] = [
     "RATE OUT OF RANGE", // 9
 ]
 
-// TODO: probably better to make this an inherited class rather than an extension
 public extension ShareClient {
     func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {
         fetchLast(entries) { error, result in

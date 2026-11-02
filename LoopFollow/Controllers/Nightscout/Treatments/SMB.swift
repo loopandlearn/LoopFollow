@@ -10,16 +10,7 @@ extension MainViewController {
         var lastFoundIndex = 0
 
         for currentEntry in entries.reversed() {
-            var bolusDate: String
-            if currentEntry["timestamp"] != nil {
-                bolusDate = currentEntry["timestamp"] as! String
-            } else if currentEntry["created_at"] != nil {
-                bolusDate = currentEntry["created_at"] as! String
-            } else {
-                continue
-            }
-
-            guard let parsedDate = NightscoutUtils.parseDate(bolusDate),
+            guard let parsedDate = NightscoutUtils.treatmentDate(from: currentEntry),
                   let bolus = currentEntry["insulin"] as? Double else { continue }
 
             let dateTimeStamp = parsedDate.timeIntervalSince1970
@@ -28,7 +19,8 @@ extension MainViewController {
 
             if dateTimeStamp < (dateTimeUtils.getNowTimeIntervalUTC() + (60 * 60)) {
                 // Make the dot
-                let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20))
+                let detail = Treatment.historyEntries(from: currentEntry, date: dateTimeStamp) { Int(sgv.sgv) }.bolus
+                let dot = bolusGraphStruct(value: bolus, date: Double(dateTimeStamp), sgv: Int(sgv.sgv + 20), detail: detail)
                 smbData.append(dot)
             }
         }

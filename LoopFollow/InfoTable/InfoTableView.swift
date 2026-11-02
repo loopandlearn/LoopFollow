@@ -6,6 +6,7 @@ import SwiftUI
 struct InfoTableView: View {
     @ObservedObject var infoManager: InfoManager
     var timeZoneOverride: String?
+    @ObservedObject private var retro = RetroSelection.shared
 
     @ScaledMetric(relativeTo: .body) private var fontSize: CGFloat = 17
     @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 21
@@ -16,17 +17,30 @@ struct InfoTableView: View {
                 row(name: "Time Zone", value: tz)
             }
             ForEach(infoManager.visibleRows) { item in
-                row(name: item.name, value: item.value, valueColor: color(for: item))
+                if let snapshot = retro.snapshot {
+                    // Scrubbing: the value at the scrubbed time, or "—" when unknown.
+                    let retroRow = InfoType(rawValue: item.id).flatMap { snapshot.rows[$0] }
+                    row(name: item.name, value: retroRow?.value ?? "", valueColor: color(for: item.id, numericValue: retroRow?.numericValue))
+                        .listRowBackground(Color.clear)
+                } else {
+                    row(name: item.name, value: item.value, valueColor: color(for: item.id, numericValue: item.numericValue))
+                }
             }
         }
         .listStyle(.plain)
         .environment(\.defaultMinListRowHeight, rowHeight)
+        .scrollContentBackground(retro.snapshot != nil ? .hidden : .automatic)
+        .background {
+            if retro.snapshot != nil {
+                RetroCardBackground()
+            }
+        }
     }
 
     /// Threshold-based color for a row's value, or nil to use the default color.
-    private func color(for item: InfoData) -> Color? {
-        guard let numericValue = item.numericValue,
-              let type = InfoType(rawValue: item.id),
+    private func color(for id: Int, numericValue: Double?) -> Color? {
+        guard let numericValue,
+              let type = InfoType(rawValue: id),
               let config = type.colorConfig
         else { return nil }
         return Storage.shared.infoDisplayItems.value.item(for: type)?

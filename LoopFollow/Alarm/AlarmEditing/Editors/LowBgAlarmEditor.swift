@@ -37,7 +37,7 @@ struct LowBgAlarmEditor: View {
                     + "if any future value is at or below the threshold, "
                     + "you’ll be warned early. Set 0 to disable.",
                 title: "Predictive",
-                range: 0 ... 60,
+                range: 0 ... Double(LowBGCondition.maxPredictiveMinutes),
                 step: 5,
                 unitLabel: alarm.type.snoozeTimeUnit.label,
                 value: $alarm.predictiveMinutes

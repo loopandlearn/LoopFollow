@@ -7,7 +7,7 @@ import HealthKit
 extension MainViewController {
     func DeviceStatusOpenAPS(formatter: ISO8601DateFormatter, lastDeviceStatus: [String: AnyObject]?, lastLoopRecord: [String: AnyObject]) {
         Storage.shared.device.value = lastDeviceStatus?["device"] as? String ?? ""
-        if lastLoopRecord["failureReason"] != nil {
+        if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
         } else {
@@ -72,7 +72,9 @@ extension MainViewController {
             }
 
             // IOB
-            if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob") {
+            if let iobMetric = InsulinMetric(from: lastLoopRecord["iob"], key: "iob")
+                ?? InsulinMetric(from: enactedOrSuggested, key: "IOB")
+            {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
                 Observable.shared.iobText.value = iobMetric.formattedValue()
@@ -105,6 +107,11 @@ extension MainViewController {
                 }
             }
 
+            // Smoothed BG: the glucose the algorithm ran on (smoothed in Trio)
+            if let smoothedBG = enactedOrSuggested["bg"] as? Double, smoothedBG > 0 {
+                infoManager.updateInfoData(type: .smoothedBG, value: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: smoothedBG))
+            }
+
             // Autosens
             if let sens = enactedOrSuggested["sensitivityRatio"] as? Double {
                 let formattedSens = String(format: "%.0f", sens * 100.0) + "%"
@@ -116,9 +123,11 @@ extension MainViewController {
             if let rec = lastLoopRecord["recommendedBolus"] as? Double {
                 infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(rec))
                 Observable.shared.deviceRecBolus.value = rec
+                Observable.shared.deviceRecBolusAt.value = updatedTime ?? Observable.shared.enactedOrSuggested.value
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+                Observable.shared.deviceRecBolusAt.value = nil
             }
 
             // Eventual BG
@@ -219,8 +228,14 @@ extension MainViewController {
                 openAPSPredUpdatedTime = nil
             }
 
-            if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
-                if let tempBasalTime = formatter.date(from: (loopStatus["timestamp"] as! String))?.timeIntervalSince1970 {
+            // Trio uploads dosingMode "open" while Closed Loop is off
+            if lastLoopRecord["dosingMode"] as? String == "open" {
+                Observable.shared.loopStatusText.value = "⏀"
+                latestLoopStatusString = "⏀"
+            } else if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
+                if let tempBasalString = loopStatus["timestamp"] as? String,
+                   let tempBasalTime = formatter.date(from: tempBasalString)?.timeIntervalSince1970
+                {
                     var lastBGTime = updatedTime ?? Date().timeIntervalSince1970
                     if bgData.count > 0 {
                         lastBGTime = bgData[bgData.count - 1].date

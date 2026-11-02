@@ -38,7 +38,7 @@ struct OTPSecureMessenger {
 }
 
 /// Information needed to send a response notification back via APNS
-struct ReturnNotificationInfo: Codable {
+struct ReturnNotificationInfo: Codable, Equatable {
     let productionEnvironment: Bool
     let deviceToken: String
     let bundleId: String

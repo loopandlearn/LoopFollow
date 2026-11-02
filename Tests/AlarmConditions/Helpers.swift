@@ -29,6 +29,15 @@ extension Alarm {
         return alarm
     }
 
+    static func missedBolus(delay: Int = 15, prebolus: Int = 15, minBolus: Double = 0.1, minCarbs: Double = 4) -> Self {
+        var alarm = Alarm(type: .missedBolus)
+        alarm.monitoringWindow = delay
+        alarm.predictiveMinutes = prebolus
+        alarm.delta = minBolus
+        alarm.threshold = minCarbs
+        return alarm
+    }
+
     static func low(belowBG: Double?, predictiveMinutes: Int? = nil, persistentMinutes: Int? = nil) -> Self {
         var alarm = Alarm(type: .low)
         alarm.belowBG = belowBG
@@ -41,6 +50,18 @@ extension Alarm {
         var alarm = Alarm(type: .fastDrop)
         alarm.delta = delta
         alarm.monitoringWindow = window
+        return alarm
+    }
+
+    static func tempTargetEnd(warnBefore: Int? = nil) -> Self {
+        var alarm = Alarm(type: .tempTargetEnd)
+        alarm.predictiveMinutes = warnBefore
+        return alarm
+    }
+
+    static func overrideEnd(warnBefore: Int? = nil) -> Self {
+        var alarm = Alarm(type: .overrideEnd)
+        alarm.predictiveMinutes = warnBefore
         return alarm
     }
 }
@@ -160,7 +181,42 @@ extension AlarmData {
         )
     }
 
-    static func withCarbs(_ carbs: [CarbSample]) -> Self {
+    static func withEnds(
+        latestTempTargetStart: TimeInterval? = nil,
+        latestTempTargetEnd: TimeInterval? = nil,
+        activeTempTargetEnd: TimeInterval? = nil,
+        latestOverrideStart: TimeInterval? = nil,
+        latestOverrideEnd: TimeInterval? = nil,
+        activeOverrideEnd: TimeInterval? = nil
+    ) -> Self {
+        AlarmData(
+            bgReadings: [],
+            predictionData: [],
+            expireDate: nil,
+            lastLoopTime: nil,
+            latestOverrideStart: latestOverrideStart,
+            latestOverrideEnd: latestOverrideEnd,
+            latestTempTargetStart: latestTempTargetStart,
+            latestTempTargetEnd: latestTempTargetEnd,
+            activeOverrideEnd: activeOverrideEnd,
+            activeTempTargetEnd: activeTempTargetEnd,
+            recBolus: nil,
+            COB: nil,
+            sageInsertTime: nil,
+            pumpInsertTime: nil,
+            latestPumpVolume: nil,
+            IOB: nil,
+            recentBoluses: [],
+            latestBattery: nil,
+            latestBatteryIsCharging: nil,
+            latestPumpBattery: nil,
+            batteryHistory: [],
+            recentCarbs: [],
+            dbSizePercentage: nil
+        )
+    }
+
+    static func withCarbs(_ carbs: [CarbSample], boluses: [BolusEntry] = []) -> Self {
         AlarmData(
             bgReadings: [],
             predictionData: [],
@@ -176,7 +232,7 @@ extension AlarmData {
             pumpInsertTime: nil,
             latestPumpVolume: nil,
             IOB: nil,
-            recentBoluses: [],
+            recentBoluses: boluses,
             latestBattery: nil,
             latestBatteryIsCharging: nil,
             latestPumpBattery: nil,
