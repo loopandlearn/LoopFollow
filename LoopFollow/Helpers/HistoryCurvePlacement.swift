@@ -1,7 +1,7 @@
 // LoopFollow
 // HistoryCurvePlacement.swift
 
-/// Where the device status history curves (IOB, COB, sensitivity ratio) are drawn.
+/// Where the history curves (IOB, insulin activity, COB, sensitivity ratio) are drawn.
 enum HistoryCurvePlacement: String, CaseIterable, Codable {
     /// Each curve in its own graph under the main graph, with its own axis.
     case separate
