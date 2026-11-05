@@ -75,6 +75,8 @@ struct WatchProtocolTests {
             .startTempTarget(presetID: UUID().uuidString),
             .cancelTempTarget,
             .snoozeAlarm,
+            .snoozeAll(until: t0),
+            .snoozeAll(until: nil),
         ]
         for action in actions {
             let command = WatchCommand(action: action)

@@ -73,7 +73,7 @@ enum DirectCommandSender {
             payload.duration = Int(preset.durationSeconds / 60)
         case .cancelTempTarget:
             payload.commandType = .cancelTempTarget
-        case .snoozeAlarm:
+        case .snoozeAlarm, .snoozeAll:
             return (false, "Snoozing needs the iPhone.")
         }
 
@@ -121,7 +121,7 @@ enum DirectCommandSender {
             )
         case .cancelOverride:
             payload = LoopAPNSCommands.cancelOverridePayload(returnInfo: remote.returnNotification)
-        case .startTempTarget, .cancelTempTarget, .snoozeAlarm:
+        case .startTempTarget, .cancelTempTarget, .snoozeAlarm, .snoozeAll:
             return (false, "This command is not available for Loop.")
         }
 
