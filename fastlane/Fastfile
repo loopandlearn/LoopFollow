@@ -47,6 +47,7 @@ NOTIFICATION_SERVICE_IDENTIFIER = "#{APP_IDENTIFIER}.LoopFollowNotificationServi
 WATCH_IDENTIFIER = "#{APP_IDENTIFIER}.watchkitapp"
 WATCH_WIDGETS_IDENTIFIER = "#{WATCH_IDENTIFIER}.widgets"
 WATCH_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-for-the-apple-watch-app"
+NOTIFICATION_SERVICE_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-for-lf-hub"
 
 # The notification service extension, which rings LF Hub alarms, needs its own
 # identifier with the LoopFollow App Group, which existing browser builders add once
@@ -55,7 +56,7 @@ def notification_service_setup_error!
   UI.user_error!(
     "The LoopFollow Notification Service identifier is not set up yet. Run the Add Identifiers action, " \
     "add the LoopFollow App Group to the LoopFollow Notification Service identifier, " \
-    "run the Create Certificates action, then build again."
+    "run the Create Certificates action, then build again. Instructions: #{NOTIFICATION_SERVICE_SETUP_DOCS}"
   )
 end
 
