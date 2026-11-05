@@ -147,11 +147,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LogManager.shared.log(category: .apns, message: "Received remote notification: keys=\(userInfoKeys)")
         RemoteCommandTracker.shared.handleNotification(userInfo: userInfo)
 
-        if let sent = (userInfo["lfhubHeartbeat"] as? NSNumber)?.doubleValue {
-            let delay = Int(Date().timeIntervalSince1970 - sent)
-            LogManager.shared.log(category: .hub, message: "Hub heartbeat arrived \(delay) s after it was sent (app state \(UIApplication.shared.applicationState.rawValue))")
-        }
-
         // Check if this is a response notification from Loop or Trio
         if let aps = userInfo["aps"] as? [String: Any] {
             // Handle visible notification (alert, sound, badge)
