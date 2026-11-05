@@ -90,11 +90,16 @@ def explain_signing_failure(error, log_dir = nil)
       text += File.read(log) rescue nil
     end
   end
-  notification_service_setup_error! if [NOTIFICATION_SERVICE_IDENTIFIER, "LoopFollowNotificationService"].any? { |id| text.include?(id) }
+  app_group_error = /App Groups capability|com\.apple\.security\.application-groups/i
 
-  mentions_watch = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER, "LoopFollowWatch"].any? { |id| text.include?(id) }
-  missing_app_group = text.match?(/App Groups capability|com\.apple\.security\.application-groups/i)
-  watch_setup_error! if mentions_watch && missing_app_group
+  # Every build log names all targets, so a build failure counts only through its App
+  # Group error lines, which name the target; a match failure names only the
+  # identifiers it could not sign.
+  scope = log_dir ? text.lines.grep(app_group_error).join : text
+  notification_service_setup_error! if [NOTIFICATION_SERVICE_IDENTIFIER, "LoopFollowNotificationService"].any? { |id| scope.include?(id) }
+
+  mentions_watch = [WATCH_IDENTIFIER, WATCH_WIDGETS_IDENTIFIER, "LoopFollowWatch"].any? { |id| scope.include?(id) }
+  watch_setup_error! if mentions_watch && scope.match?(app_group_error)
 end
 
 platform :ios do
