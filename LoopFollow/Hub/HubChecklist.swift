@@ -95,7 +95,7 @@ enum HubChecklist {
         } else {
             if !facts.ownKeyAllowed {
                 items.append(Item(id: .apnKey, title: "APN key shared by an admin",
-                                  problem: "No admin phone shares an APN key yet. Ask an admin to add theirs.",
+                                  problem: "No admin phone shares an APN key for this LoopFollow yet. An admin's key works only for LoopFollow built with the same Apple Developer account. Ask an admin to add theirs, or install LoopFollow from the same build as the admin.",
                                   fix: .askAdmin))
             } else {
                 items.append(Item(id: .apnKey, title: "APN key added",
