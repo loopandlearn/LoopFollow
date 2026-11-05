@@ -32,7 +32,6 @@ struct SettingsMenuView: View {
 // MARK: – Sheet routing
 
 enum SettingsSection: String, CaseIterable, Hashable {
-    case hub = "LF Hub"
     case data = "Data Settings"
     case display = "Display Settings"
     case app = "App Settings"
@@ -295,12 +294,13 @@ enum SettingsRoute: Hashable, Identifiable {
             app.append(.remote)
         }
 
-        var sections: [(SettingsSection, [SettingsRoute])] = []
+        var data: [SettingsRoute] = [.nightscout, .dexcom]
         if HubClient.isSupported {
-            sections.append((.hub, [.hub]))
+            data.append(.hub)
         }
-        return sections + [
-            (.data, [.nightscout, .dexcom]),
+
+        return [
+            (.data, data),
             (.display, display),
             (.app, app),
             (.alarms, [.alarmSettings]),
