@@ -308,9 +308,9 @@ final class HubClient {
     let apnsKeyShared = StorageValue<Bool>(key: "hubApnsKeyShared", defaultValue: false)
     /// The patient's name at the hub, for messages about changes that reach every phone.
     let patientName = StorageValue<String>(key: "hubPatientName", defaultValue: "")
-    /// The hub stopped knowing this phone's key (the phone was replaced or removed), until
-    /// the phone joins again or the user dismisses the message.
-    let removedFromHub = StorageValue<Bool>(key: "hubRemovedFromHub", defaultValue: false)
+    /// The hub answers this phone's key with 401, until a call with the key succeeds or
+    /// the phone leaves or joins a hub.
+    let unrecognizedByHub = StorageValue<Bool>(key: "hubUnrecognized", defaultValue: false)
 
     /// Connected, and allowed to manage the patient's data sources, devices and invites.
     var isAdmin: Bool { isConnected && role.value == .admin }
@@ -693,7 +693,7 @@ final class HubClient {
             }
             try deviceKey.set(claim.deviceKey)
             uploads.forget()
-            removedFromHub.value = false
+            unrecognizedByHub.value = false
             role.value = joinRole
             joinedWithInvite.value = withInvite
             // The new device has no APN key at the hub yet.
@@ -976,7 +976,7 @@ final class HubClient {
     }
 
     /// The hub's health and, when it is unhealthy, why. A hub that does not know this
-    /// device's key gives no verdict: the phone has left it.
+    /// device's key gives no verdict: the phone shows that instead.
     func healthCheck() async -> (health: Health, cause: Unhealthy?) {
         guard isConnected else { return (.unhealthy, .noAnswer) }
         do {
@@ -987,7 +987,7 @@ final class HubClient {
             let cause = Self.unhealthiness(of: status, now: Date())
             return (cause == nil ? .healthy : .unhealthy, cause)
         } catch {
-            if Self.isCancellation(error) || !isConnected { return (.unknown, nil) }
+            if Self.isCancellation(error) || !isConnected || unrecognizedByHub.value { return (.unknown, nil) }
             return (.unhealthy, .noAnswer)
         }
     }
@@ -1120,7 +1120,7 @@ final class HubClient {
         do {
             try await confirm()
         } catch HubError.http(401, _) {
-            await forgotten()
+            await unrecognized()
         } catch {
             LogManager.shared.log(category: .hub, message: "Hub status failed: \(error.localizedDescription)")
         }
@@ -1191,6 +1191,7 @@ final class HubClient {
         apnsKeyShared.value = false
         patientName.value = ""
         sentKeyFingerprint.value = ""
+        unrecognizedByHub.value = false
         HubSourceSync.shared.forget()
         adoptionPending.value = .none
         if Storage.shared.backgroundRefreshType.value == .hub {
@@ -1249,7 +1250,7 @@ final class HubClient {
                 try await uploadAlarms()
             }
         } catch HubError.http(401, _) {
-            await forgotten()
+            await unrecognized()
             return
         } catch {
             LogManager.shared.log(category: .hub, message: "Hub sync failed: \(error.localizedDescription)")
@@ -1260,23 +1261,24 @@ final class HubClient {
         do {
             try await pushHubSettings()
         } catch HubError.http(401, _) {
-            await forgotten()
+            await unrecognized()
         } catch {
             LogManager.shared.log(category: .hub, message: "Hub settings push failed: \(error.localizedDescription)")
             uploadSoon { try await $0.pushHubSettings() }
         }
     }
 
-    /// The hub answered 401 to this phone's key: the phone was replaced or removed. Leaves
-    /// the hub at once, so the app alarms itself again, and tells the user once.
-    @MainActor private func forgotten() {
-        guard isConnected else { return }
-        LogManager.shared.log(category: .hub, message: "Hub no longer knows this device")
-        localDisconnect()
-        removedFromHub.value = true
+    /// The hub answered 401 to this phone's key: another phone replaced it, an admin
+    /// removed it, or the address leads to a different server. The phone keeps its key and
+    /// goes on asking, alarms itself until the hub knows it again, and tells the user once.
+    @MainActor private func unrecognized() {
+        guard isConnected, !unrecognizedByHub.value else { return }
+        LogManager.shared.log(category: .hub, message: "Hub does not recognize this device")
+        unrecognizedByHub.value = true
+        setConfirmed(false, problems: [])
         let content = UNMutableNotificationContent()
-        content.title = "This phone was removed from LF Hub"
-        content.body = "LoopFollow alarms by itself again. To use LF Hub, join again under Settings → LF Hub."
+        content.title = "LF Hub doesn't recognize this phone"
+        content.body = "LoopFollow alarms by itself until it does. If this phone was replaced or removed, disconnect under Settings → LF Hub and join again."
         content.sound = .default
         postNotification(UNNotificationRequest(identifier: "lfhub.removed", content: content, trigger: nil))
     }
@@ -1589,8 +1591,16 @@ final class HubClient {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-        // Any call with this phone's key answered 401: the hub does not know the phone.
-        if code == 401, let key, key == deviceKey.value { await forgotten() }
+        if let key, key == deviceKey.value {
+            if code == 401 {
+                await unrecognized()
+            } else if (200 ..< 300).contains(code), unrecognizedByHub.value {
+                await MainActor.run {
+                    unrecognizedByHub.value = false
+                    LogManager.shared.log(category: .hub, message: "Hub recognizes this device again")
+                }
+            }
+        }
         return (data, code)
     }
 }

@@ -15,7 +15,7 @@ struct HubSettingsView: View {
     @ObservedObject private var hubInfo = HubClient.shared.hubInfo
     @ObservedObject private var hubConfirmed = HubClient.shared.hubConfirmed
     @ObservedObject private var hubProblems = HubClient.shared.hubProblems
-    @ObservedObject private var removedFromHub = HubClient.shared.removedFromHub
+    @ObservedObject private var unrecognizedByHub = HubClient.shared.unrecognizedByHub
     @ObservedObject private var lfKeyId = Storage.shared.lfKeyId
     @ObservedObject private var lfApnsKey = Storage.shared.lfApnsKey
 
@@ -220,17 +220,6 @@ struct HubSettingsView: View {
 
     @ViewBuilder
     private var connectSections: some View {
-        if removedFromHub.value {
-            Section {
-                Label("This phone was removed from LF Hub", systemImage: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-                Text("Another phone replaced it, or an admin removed it. LoopFollow alarms by itself now. To use LF Hub again, ask an admin for an invite and join below.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                Button("Dismiss") { removedFromHub.value = false }
-            }
-        }
-
         if let joinInvite, let joinableDevices {
             Section(header: Text("Join with Invite")) {
                 row("Hub", Self.host(joinInvite))
@@ -366,6 +355,17 @@ struct HubSettingsView: View {
 
     @ViewBuilder
     private var connectedSections: some View {
+        if unrecognizedByHub.value {
+            Section {
+                Label("LF Hub doesn't recognize this phone", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("Another phone may have replaced it, an admin may have removed it, or the address may lead to a different server. LoopFollow alarms by itself and keeps trying. If this phone was replaced or removed, disconnect and join again with an invite.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                Button("Disconnect", role: .destructive) { confirmingDisconnect = true }
+            }
+        }
+
         Section(header: Text("Hub")) {
             row("Address", hubURL.value)
             if let info = hubInfo.value {

@@ -357,11 +357,13 @@ struct HubForgottenTests {
         }
     }
 
-    @Test("a hub that no longer knows the device disconnects it and Hub mode falls back to Silent Tune")
-    func forgotten() async throws {
+    @Test("a hub that does not recognize the device keeps it connected, and the app alarms itself")
+    func unrecognized() async throws {
         let storage = Storage.shared
-        let deviceKey = HubClient.shared.deviceKey
-        let saved = (storage.hubURL.value, deviceKey.store, storage.backgroundRefreshType.value)
+        let client = HubClient.shared
+        let deviceKey = client.deviceKey
+        let saved = (storage.hubURL.value, deviceKey.store, storage.backgroundRefreshType.value,
+                     client.unrecognizedByHub.value)
         deviceKey.store = MemoryKeyStore()
         URLProtocol.registerClass(HubUnauthorizedProtocol.self)
         defer {
@@ -370,20 +372,82 @@ struct HubForgottenTests {
             deviceKey.store = saved.1
             deviceKey.reload()
             storage.backgroundRefreshType.value = saved.2
+            client.unrecognizedByHub.value = saved.3
         }
         try await MainActor.run {
             storage.hubURL.value = "https://\(HubUnauthorizedProtocol.host)"
             try deviceKey.set("lfh_test")
             storage.backgroundRefreshType.value = .hub
+            client.unrecognizedByHub.value = false
         }
 
-        await HubClient.shared.sync()
+        await client.sync()
 
-        // Leaving the hub runs on the main actor, also when the app's own fetch met the 401 first.
         await MainActor.run {
-            #expect(deviceKey.value.isEmpty)
+            #expect(deviceKey.value == "lfh_test")
+            #expect(client.unrecognizedByHub.value)
+            #expect(storage.backgroundRefreshType.value == .hub)
+            #expect(!client.hubConfirmed.value)
+            #expect(!client.drivesAlarms)
+        }
+        await Self.stopBackgroundWork()
+    }
+
+    @Test("a call the hub answers with the device's key clears that the hub does not recognize it")
+    func recognizedAgain() async throws {
+        let storage = Storage.shared
+        let client = HubClient.shared
+        let saved = (storage.hubURL.value, client.deviceKey.store, client.unrecognizedByHub.value)
+        client.deviceKey.store = MemoryKeyStore()
+        URLProtocol.registerClass(HubSourcesProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(HubSourcesProtocol.self)
+            storage.hubURL.value = saved.0
+            client.deviceKey.store = saved.1
+            client.deviceKey.reload()
+            client.unrecognizedByHub.value = saved.2
+        }
+        try await MainActor.run {
+            storage.hubURL.value = "https://\(HubSourcesProtocol.host)"
+            try client.deviceKey.set("lfh_test")
+            client.unrecognizedByHub.value = true
+        }
+
+        _ = try await client.sources()
+
+        await MainActor.run { #expect(!client.unrecognizedByHub.value) }
+        await Self.stopBackgroundWork()
+    }
+
+    @Test("leaving the hub clears that it did not recognize the device")
+    func leavingClearsUnrecognized() async throws {
+        let storage = Storage.shared
+        let client = HubClient.shared
+        let saved = (storage.hubURL.value, client.deviceKey.store, storage.backgroundRefreshType.value,
+                     client.unrecognizedByHub.value)
+        client.deviceKey.store = MemoryKeyStore()
+        URLProtocol.registerClass(HubUnauthorizedProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(HubUnauthorizedProtocol.self)
+            storage.hubURL.value = saved.0
+            client.deviceKey.store = saved.1
+            client.deviceKey.reload()
+            storage.backgroundRefreshType.value = saved.2
+            client.unrecognizedByHub.value = saved.3
+        }
+        try await MainActor.run {
+            storage.hubURL.value = "https://\(HubUnauthorizedProtocol.host)"
+            try client.deviceKey.set("lfh_test")
+            storage.backgroundRefreshType.value = .hub
+            client.unrecognizedByHub.value = true
+        }
+
+        await client.disconnect()
+
+        await MainActor.run {
+            #expect(!client.isConnected)
+            #expect(!client.unrecognizedByHub.value)
             #expect(storage.backgroundRefreshType.value == .silentTune)
-            #expect(!HubClient.shared.hubConfirmed.value)
         }
         await Self.stopBackgroundWork()
     }
@@ -1128,12 +1192,12 @@ final class HubSourcesProtocol: URLProtocol {
 }
 
 extension HubForgottenTests {
-    @Test("any call the hub answers 401 leaves the hub at once, falls back to the app's alarms and tells the user")
+    @Test("any call the hub answers 401 marks the device unrecognized and falls back to the app's alarms")
     func unauthorizedCall() async throws {
         let storage = Storage.shared
         let client = HubClient.shared
         let saved = (storage.hubURL.value, client.deviceKey.store, storage.backgroundRefreshType.value,
-                     client.removedFromHub.value)
+                     client.unrecognizedByHub.value)
         client.deviceKey.store = MemoryKeyStore()
         URLProtocol.registerClass(HubUnauthorizedProtocol.self)
         defer {
@@ -1142,14 +1206,14 @@ extension HubForgottenTests {
             client.deviceKey.store = saved.1
             client.deviceKey.reload()
             storage.backgroundRefreshType.value = saved.2
-            client.removedFromHub.value = saved.3
+            client.unrecognizedByHub.value = saved.3
         }
         for call in ["health check", "bundle"] {
             try await MainActor.run {
                 storage.hubURL.value = "https://\(HubUnauthorizedProtocol.host)"
                 try client.deviceKey.set("lfh_replaced")
                 storage.backgroundRefreshType.value = .hub
-                client.removedFromHub.value = false
+                client.unrecognizedByHub.value = false
             }
 
             if call == "bundle" {
@@ -1162,9 +1226,9 @@ extension HubForgottenTests {
             }
 
             await MainActor.run {
-                #expect(!client.isConnected, "\(call)")
-                #expect(client.removedFromHub.value, "\(call)")
-                #expect(storage.backgroundRefreshType.value == .silentTune, "\(call)")
+                #expect(client.isConnected, "\(call)")
+                #expect(client.unrecognizedByHub.value, "\(call)")
+                #expect(!client.drivesAlarms, "\(call)")
             }
         }
         await Self.stopBackgroundWork()
