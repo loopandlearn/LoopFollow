@@ -9,6 +9,7 @@ struct LoopAPNSCarbsView: View {
 
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
+    @ObservedObject private var maxFutureCarbHours = Storage.shared.loopMaxFutureCarbHours
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
     @State private var absorptionMinutes = 0
@@ -25,12 +26,15 @@ struct LoopAPNSCarbsView: View {
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
-    private let maxFutureHours = 1
     private let minAllowedAbsorptionTime = 0.5
     private let maxAllowedAbsorptionTime = 8.0
     private let lollipopStandardAbsorption: AbsorptionPreset = (0, 30)
     private let tacoStandardAbsorption: AbsorptionPreset = (3, 0)
     private let pizzaStandardAbsorption: AbsorptionPreset = (5, 0)
+    private var maxFutureHours: Int {
+        maxFutureCarbHours.value
+    }
+
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     @FocusState private var carbsFieldIsFocused: Bool
@@ -516,7 +520,7 @@ struct LoopAPNSCarbsView: View {
         }
 
         if consumedDate > latestAcceptedDate {
-            alertMessage = "Time must be within the next \(maxFutureHours) hour"
+            alertMessage = "Time must be within the next \(maxFutureHours) \(maxFutureHours == 1 ? "hour" : "hours")"
             alertType = .error
             showAlert = true
             return

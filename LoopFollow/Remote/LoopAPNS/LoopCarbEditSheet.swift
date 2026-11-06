@@ -19,7 +19,10 @@ struct LoopCarbEditSheet: View {
     @FocusState private var carbsFocused: Bool
 
     private let maxPastHours = 12
-    private let maxFutureHours = 1
+    private var maxFutureHours: Int {
+        Storage.shared.loopMaxFutureCarbHours.value
+    }
+
     private let minAbsorptionHours = 0.5
     private let maxAbsorptionHours = 8
 
