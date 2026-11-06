@@ -39,6 +39,15 @@ struct GlucoseComplicationView: View {
         snapshot.map { WatchFormat.minutesAgo($0.updatedAt, now: entry.date) } ?? ""
     }
 
+    private var displayName: String? { entry.state?.displayName }
+
+    /// Names built from the default `LoopFollow_<suffix>` pattern truncate at the head so the suffix stays visible.
+    private func nameText(_ name: String) -> some View {
+        Text(name)
+            .lineLimit(1)
+            .truncationMode(name.hasPrefix("LoopFollow") ? .head : .tail)
+    }
+
     var body: some View {
         switch family {
         case .accessoryCircular:
@@ -71,21 +80,28 @@ struct GlucoseComplicationView: View {
     private var rectangular: some View {
         HStack(spacing: 6) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(bgText)
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundStyle(bgColor)
-                        .strikethrough(isStale, color: .red)
-                    Text(trendText)
-                        .font(.system(size: 14, weight: .bold))
+                if let displayName {
+                    nameText(displayName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
                 }
-                Text("\(deltaText)  \(ageText)")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Text(bgText)
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundStyle(bgColor)
+                            .strikethrough(isStale, color: .red)
+                        Text(trendText)
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    Text("\(deltaText)  \(ageText)")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .widgetAccentable()
             }
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
-            .widgetAccentable()
             sparkline
         }
     }
@@ -122,11 +138,12 @@ struct GlucoseComplicationView: View {
             .foregroundStyle(bgColor)
             .widgetCurvesContent()
             .widgetLabel {
-                Text("\(trendText) \(deltaText) \(ageText)")
+                Text([displayName, trendText, deltaText, ageText].compactMap { $0 }.joined(separator: " "))
             }
     }
 
     private var inline: some View {
-        Text(snapshot == nil ? "LoopFollow --" : "\(bgText) \(trendText) \(deltaText) · \(ageText)")
+        let reading = snapshot == nil ? "--" : "\(bgText) \(trendText) \(deltaText) · \(ageText)"
+        return Text(snapshot == nil && displayName == nil ? "LoopFollow --" : [displayName, reading].compactMap { $0 }.joined(separator: " "))
     }
 }
