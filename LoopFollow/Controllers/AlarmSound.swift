@@ -173,11 +173,6 @@ class AlarmSound {
             // When repeatDelay > 0, we play once and then use the delegate to schedule the next play with delay
             audioPlayer!.numberOfLoops = (repeating && repeatDelay == 0) ? -1 : 0
 
-            // Store existing volume
-            if systemOutputVolumeBeforeOverride == nil {
-                systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
-            }
-
             if !audioPlayer!.prepareToPlay() {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
             }
@@ -196,9 +191,7 @@ class AlarmSound {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
             }
 
-            if Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume {
-                MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
-            }
+            applySystemOutputVolumeOverride()
         } catch {
             LogManager.shared.log(category: .alarm, message: "AlarmSound - unable to play sound; error: \(error)")
         }
@@ -233,6 +226,7 @@ class AlarmSound {
 
                 if audioPlayer!.play() {
                     Observable.shared.alarmSoundPlaying.value = true
+                    applySystemOutputVolumeOverride()
                 } else {
                     LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play (delayed repeat)")
                 }
@@ -279,6 +273,19 @@ class AlarmSound {
         } catch {
             LogManager.shared.log(category: .alarm, message: "Terminate AlarmSound - unable to play sound; error: \(error)")
         }
+    }
+
+    /// Raises the output volume of the current route to the configured alarm volume,
+    /// remembering the volume it had so it can be put back between repeats and on stop.
+    fileprivate static func applySystemOutputVolumeOverride() {
+        guard Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume else {
+            return
+        }
+
+        if systemOutputVolumeBeforeOverride == nil {
+            systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
+        }
+        MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
     }
 
     fileprivate static func restoreSystemOutputVolume() {
@@ -336,9 +343,11 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
 
         // If we're repeating with delay, schedule the next play
         if AlarmSound.repeatDelay > 0 {
+            AlarmSound.restoreSystemOutputVolume()
             AlarmSound.playNextWithDelay()
         } else {
             Observable.shared.alarmSoundPlaying.value = false
+            AlarmSound.restoreSystemOutputVolume()
             AlarmSound.releaseAudioSession()
         }
     }
