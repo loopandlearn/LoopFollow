@@ -55,6 +55,7 @@ final class WatchSessionManager: NSObject {
             Storage.shared.watchRemoteCommands.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.remoteType.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.colorBGText.$value.map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.showDisplayName.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.units.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.mealWithBolus.$value.map { _ in () }.eraseToAnyPublisher(),
             Storage.shared.mealWithFatProtein.$value.map { _ in () }.eraseToAnyPublisher(),

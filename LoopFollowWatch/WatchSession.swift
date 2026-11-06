@@ -267,7 +267,7 @@ final class WatchSession: NSObject, ObservableObject {
 
     private static func complicationKey(_ state: WatchState) -> String {
         let s = state.snapshot
-        return "\(s?.updatedAt.timeIntervalSince1970 ?? 0)|\(s?.unit.rawValue ?? "")|\(state.lowMgdl)|\(state.highMgdl)|\(state.colorBGText)"
+        return "\(s?.updatedAt.timeIntervalSince1970 ?? 0)|\(s?.unit.rawValue ?? "")|\(state.lowMgdl)|\(state.highMgdl)|\(state.colorBGText)|\(state.displayName ?? "")"
     }
 
     private func receiveCredentials(_ data: Data) {

@@ -67,7 +67,10 @@ enum WatchStateBuilder {
             stats: vc.map { stats($0.statsDisplayModel) },
             device: Storage.shared.device.value,
             alarm: currentAlarm(),
-            remote: remoteConfig()
+            remote: remoteConfig(),
+            displayName: Storage.shared.showDisplayName.value
+                ? Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+                : nil
         )
     }
 
