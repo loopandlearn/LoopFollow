@@ -102,8 +102,33 @@ private struct SmallFamilyView: View {
         return snapshot.unit.displayName
     }
 
+    private func rightColumn(name: String?, slot: LiveActivitySlotOption, showsLabel: Bool, unitLabel: String?) -> some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            if let name {
+                DisplayNameText(name: name)
+            }
+            if showsLabel {
+                Text(slot.gridLabel)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.65))
+            }
+            Text(slotFormattedValue(option: slot, snapshot: snapshot))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            if let unitLabel {
+                Text(unitLabel)
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.55))
+            }
+        }
+    }
+
     var body: some View {
         let rightSlot = LAAppGroupSettings.smallWidgetSlot()
+        let name = LAAppGroupSettings.showDisplayName() ? LAAppGroupSettings.displayName() : nil
 
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
@@ -128,54 +153,39 @@ private struct SmallFamilyView: View {
             Spacer()
 
             if rightSlot != .none {
-                if let unitLabel = rightSlotUnitLabel(for: rightSlot) {
-                    // Use ViewThatFits so the unit label appears on surfaces with
-                    // enough vertical space (CarPlay) and is omitted where it doesn't
-                    // fit (Watch Smart Stack).
-                    ViewThatFits(in: .vertical) {
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(rightSlot.gridLabel)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.65))
-                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .monospacedDigit()
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                            Text(unitLabel)
-                                .font(.system(size: 11, weight: .regular, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.55))
-                        }
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(rightSlot.gridLabel)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.65))
-                            Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .monospacedDigit()
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
+                // The first candidate that fits is shown: CarPlay has room for the
+                // unit label, the Watch Smart Stack drops it, and with a display name
+                // the slot label goes before the name does.
+                ViewThatFits(in: .vertical) {
+                    if let unitLabel = rightSlotUnitLabel(for: rightSlot) {
+                        rightColumn(name: name, slot: rightSlot, showsLabel: true, unitLabel: unitLabel)
                     }
-                } else {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(rightSlot.gridLabel)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.65))
-                        Text(slotFormattedValue(option: rightSlot, snapshot: snapshot))
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .monospacedDigit()
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                    rightColumn(name: name, slot: rightSlot, showsLabel: true, unitLabel: nil)
+                    if name != nil {
+                        rightColumn(name: name, slot: rightSlot, showsLabel: false, unitLabel: nil)
                     }
                 }
+            } else if let name {
+                DisplayNameText(name: name)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(10)
+    }
+}
+
+/// App display name for the small family. Names built from the default
+/// `LoopFollow_<suffix>` pattern truncate at the head so the suffix stays visible.
+private struct DisplayNameText: View {
+    let name: String
+
+    var body: some View {
+        Text(name)
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.65))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .truncationMode(name.hasPrefix("LoopFollow") ? .head : .tail)
     }
 }
 
