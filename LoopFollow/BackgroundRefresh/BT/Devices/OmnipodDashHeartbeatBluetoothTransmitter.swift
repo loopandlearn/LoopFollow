@@ -33,6 +33,6 @@ class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {
-        return 3 * 60
+        return 5 * 60
     }
 }
