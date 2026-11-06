@@ -213,7 +213,6 @@ class Storage {
     var telemetryEnabled = StorageValue<Bool>(key: "telemetryEnabled", defaultValue: true)
     // Written by builds that asked for consent; read only as a storage-readable probe.
     var telemetryConsentDecisionMade = StorageValue<Bool>(key: "telemetryConsentDecisionMade", defaultValue: false)
-    var telemetryInstallId = StorageValue<String>(key: "telemetryInstallId", defaultValue: "")
     var telemetryLastSentAt = StorageValue<Date?>(key: "telemetryLastSentAt", defaultValue: nil)
     var telemetryLastSentBuild = StorageValue<String>(key: "telemetryLastSentBuild", defaultValue: "")
     var telemetryLastAttemptAt = StorageValue<Date?>(key: "telemetryLastAttemptAt", defaultValue: nil)

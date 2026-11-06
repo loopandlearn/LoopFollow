@@ -104,7 +104,6 @@ final class TelemetryClient {
     /// the last successful full send, then runs the daily overdue check and
     /// arms the scheduler. Foreground transitions repeat the overdue check.
     func start() {
-        _ = installId()
         recordColdLaunch()
 
         if foregroundObserver == nil {
@@ -147,20 +146,7 @@ final class TelemetryClient {
         Storage.shared.telemetryColdLaunchTimes.value = recent
     }
 
-    // MARK: - Identity
-
-    /// Stable per-install UUID, generated on first use. IDFV resets when every
-    /// app from this developer is removed at once; this survives that and is
-    /// wiped only by deleting this LoopFollow instance.
-    func installId() -> String {
-        let storage = Storage.shared
-        if !storage.telemetryInstallId.value.isEmpty {
-            return storage.telemetryInstallId.value
-        }
-        let new = UUID().uuidString
-        storage.telemetryInstallId.value = new
-        return new
-    }
+    // MARK: - Build
 
     private static var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
@@ -336,7 +322,6 @@ final class TelemetryClient {
         payload["isTestFlight"] = bd.isTestFlightBuild()
 
         payload["instance"] = AppConstants.appInstanceId
-        payload["installId"] = installId()
 
         if let idfv = UIDevice.current.identifierForVendor?.uuidString {
             payload["idfv"] = idfv
@@ -555,7 +540,7 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("What is sent")
                         .font(.headline)
-                    Text("App version, build commit and build date, whether this is a TestFlight build, the install instance number, a random install ID created by this app, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), the platform (iPhone, iPad or Mac), the iOS version, and how many times the app was started from scratch in the last 7 days. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
+                    Text("App version, build commit and build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), the platform (iPhone, iPad or Mac), the iOS version, and how many times the app was started from scratch in the last 7 days. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
                 }
 
                 Group {
