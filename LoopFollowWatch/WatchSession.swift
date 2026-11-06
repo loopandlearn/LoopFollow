@@ -255,8 +255,8 @@ final class WatchSession: NSObject, ObservableObject {
         let complicationChanged = Self.complicationKey(incoming) != state.map(Self.complicationKey)
         state = incoming
         WatchStateStore.save(encoded)
-        // Widget reloads are budgeted, so only reload when something the complication shows has changed.
-        if complicationChanged {
+        // Widget reloads are budgeted, except while the app is in the foreground.
+        if complicationChanged || WKApplication.shared().applicationState == .active {
             WidgetCenter.shared.reloadAllTimelines()
         }
 
