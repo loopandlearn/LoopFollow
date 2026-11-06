@@ -112,6 +112,21 @@ class NightscoutSettingsViewModel: ObservableObject {
         setupDebounce()
         checkNightscoutStatus()
         observeWebSocketState()
+
+        // A change made elsewhere while the screen is open, such as LF Hub putting its
+        // data source back, shows in the fields.
+        Storage.shared.url.$value.merge(with: Storage.shared.token.$value)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.followStorage() }
+            .store(in: &cancellables)
+    }
+
+    private func followStorage() {
+        let storage = Storage.shared
+        if storage.url.value != nightscoutURL { nightscoutURL = storage.url.value }
+        if storage.token.value != NightscoutUtils.sanitizeConnectionInput(nightscoutToken) {
+            nightscoutToken = storage.token.value
+        }
     }
 
     private func setupDebounce() {
@@ -356,7 +371,8 @@ class NightscoutSettingsViewModel: ObservableObject {
                 authStatus = "Read" + (Storage.shared.nsWriteAuth.value ? " & Write" : "")
             }
 
-            nightscoutStatus = "OK (\(authStatus))"
+            // A member's token comes from LF Hub; its Nightscout permissions are not this phone's role.
+            nightscoutStatus = HubClient.shared.isMember ? "OK" : "OK (\(authStatus))"
 
             if nightscoutURL != initialURL || nightscoutToken != initialToken {
                 NotificationCenter.default.post(name: NSNotification.Name("refresh"), object: nil)

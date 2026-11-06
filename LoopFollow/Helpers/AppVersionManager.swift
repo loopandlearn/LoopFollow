@@ -37,7 +37,7 @@ class AppVersionManager {
         if let cachedVersion = cachedForVersion, cachedVersion == currentVersion,
            now.timeIntervalSince(latestVersionChecked) < 24 * 3600, let latestVersion = latestVersion
         {
-            let isNewer = isVersion(latestVersion, newerThan: currentVersion)
+            let isNewer = Self.isVersion(latestVersion, newerThan: currentVersion)
             completion(latestVersion, isNewer, currentVersionBlackListed)
             return
         }
@@ -52,7 +52,7 @@ class AppVersionManager {
                 DispatchQueue.main.async {
                     let fetchedVersion = versionData.flatMap { String(data: $0, encoding: .utf8) }
                         .flatMap { self.parseVersionFromConfig(contents: $0) }
-                    let isNewer = fetchedVersion.map { self.isVersion($0, newerThan: currentVersion) } ?? false
+                    let isNewer = fetchedVersion.map { Self.isVersion($0, newerThan: currentVersion) } ?? false
 
                     let isBlacklisted = (try? blacklistData.flatMap { try JSONDecoder().decode(Blacklist.self, from: $0) })
                         .map { $0.blacklistedVersions.map { $0.version }.contains(currentVersion) } ?? false
@@ -83,7 +83,7 @@ class AppVersionManager {
         return nil
     }
 
-    private func isVersion(_ fetchedVersion: String, newerThan currentVersion: String) -> Bool {
+    static func isVersion(_ fetchedVersion: String, newerThan currentVersion: String) -> Bool {
         let fetchedVersionComponents = fetchedVersion.split(separator: ".").map { Int($0) ?? 0 }
         let currentVersionComponents = currentVersion.split(separator: ".").map { Int($0) ?? 0 }
 

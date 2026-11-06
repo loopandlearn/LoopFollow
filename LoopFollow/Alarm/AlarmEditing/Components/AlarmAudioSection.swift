@@ -9,8 +9,10 @@ struct AlarmAudioSection: View {
     var hideRepeat: Bool = false
     @State private var showingTonePicker = false
 
+    @ObservedObject private var backgroundRefreshType = Storage.shared.backgroundRefreshType
+
     var body: some View {
-        Section(header: Text("Alert Sound")) {
+        Section {
             Button {
                 showingTonePicker = true
             } label: {
@@ -59,7 +61,14 @@ struct AlarmAudioSection: View {
                     }
                 }
             }
-        }.onChange(of: alarm.activeOption) { newActive in
+        } header: {
+            Text("Alert Sound")
+        } footer: {
+            if backgroundRefreshType.value == .hub {
+                Text("In LF Hub mode, the alarm repeats its sound without a delay between sounds.")
+            }
+        }
+        .onChange(of: alarm.activeOption) { newActive in
             let playAllowed = PlaySoundOption.allowed(for: newActive)
             if !playAllowed.contains(alarm.playSoundOption) {
                 alarm.playSoundOption = playAllowed.last!

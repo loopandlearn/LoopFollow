@@ -16,7 +16,7 @@ extension MainViewController {
             "count": "1",
         ]
 
-        NightscoutUtils.executeRequest(eventType: .iage, parameters: parameters) { (result: Result<[iageData], Error>) in
+        NightscoutUtils.executeRequest(eventType: .iage, parameters: parameters, hubPart: .iage) { (result: Result<[iageData], Error>) in
             switch result {
             case let .success(data):
                 DispatchQueue.main.async {
