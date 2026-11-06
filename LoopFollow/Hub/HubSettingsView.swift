@@ -99,6 +99,13 @@ struct HubSettingsView: View {
     }
 
     var body: some View {
+        sourceAndConnectionDialogs(deviceAlerts(form))
+            .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
+            .navigationTitle("LF Hub")
+            .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var form: some View {
         Form {
             if !HubClient.isSupported {
                 Section { Text("LF Hub requires iOS 26 or later.").foregroundColor(.secondary) }
@@ -141,79 +148,88 @@ struct HubSettingsView: View {
             }
         }
         .sheet(item: $shownInvite) { shown in
-            HubInviteSheet(invite: shown.invite, expiresAt: shown.expiresAt,
-                           patientName: status?.patient.name ?? HubClient.shared.patientName.value)
+            HubInviteSheet(invite: shown.invite, expiresAt: shown.expiresAt, patientName: patientDisplayName)
         }
-        .alert(actionError?.title ?? "", isPresented: Binding(get: { actionError != nil },
-                                                              set: { if !$0 { actionError = nil } }),
-               presenting: actionError)
-        { _ in
-            Button("OK", role: .cancel) {}
-        } message: { error in
-            Text(error.message)
-        }
-        .alert(replaceCandidate.map { "Replace \($0.device.name)?" } ?? "",
-               isPresented: Binding(get: { replaceCandidate != nil },
-                                    set: { if !$0 { replaceCandidate = nil } }),
-               presenting: replaceCandidate)
-        { candidate in
-            Button("Cancel", role: .cancel) {}
-            Button("Replace", role: .destructive) { choose(.replace(candidate.device.id), name: candidate.device.name) }
-        } message: { candidate in
-            Text(candidate.warning)
-        }
-        .alert(deviceToRemove.map { "Remove \($0.name)?" } ?? "",
-               isPresented: Binding(get: { deviceToRemove != nil },
-                                    set: { if !$0 { deviceToRemove = nil } }),
-               presenting: deviceToRemove)
-        { device in
-            Button("Cancel", role: .cancel) {}
-            Button("Remove", role: .destructive) { Task { await remove(device) } }
-        } message: { _ in
-            Text("The hub stops sending to it.")
-        }
-        .alert("Make this phone a member?",
-               isPresented: Binding(get: { deviceToDemote != nil },
-                                    set: { if !$0 { deviceToDemote = nil } }),
-               presenting: deviceToDemote)
-        { device in
-            Button("Cancel", role: .cancel) {}
-            Button("Make Member") { Task { await setRole(.member, of: device) } }
-        } message: { _ in
-            Text("This phone can no longer change the data source, invite or manage phones. Only another admin can make it an admin again.")
-        }
-        .confirmationDialog(sourceAction == .take ? "Use the hub's data sources in this app?" : "Send this app's data sources to the hub?",
-                            isPresented: Binding(get: { sourceAction != nil },
-                                                 set: { if !$0 { sourceAction = nil } }),
-                            titleVisibility: .visible,
-                            presenting: sourceAction)
-        { action in
-            Button(action == .take ? "Use Hub's Sources" : "Send to Hub") {
-                Task { action == .take ? await takeSources() : await sendSources() }
+    }
+
+    private func deviceAlerts(_ content: some View) -> some View {
+        content
+            .alert(actionError?.title ?? "", isPresented: Binding(get: { actionError != nil },
+                                                                  set: { if !$0 { actionError = nil } }),
+                   presenting: actionError)
+            { _ in
+                Button("OK", role: .cancel) {}
+            } message: { error in
+                Text(error.message)
             }
-        } message: { action in
-            Text(action == .take ? "This app's Nightscout and Dexcom settings are replaced."
-                : "The hub's Nightscout and Dexcom settings are replaced for every phone.")
-        }
-        .alert("Use LF Hub for Background Refresh?", isPresented: $offeringHubMode) {
-            Button("Not Now", role: .cancel) {}
-            Button("Use LF Hub") {
-                Task {
-                    await BackgroundRefreshSettingsViewModel.change(to: .hub)?.value
-                    await reload()
+            .alert(replaceCandidate.map { "Replace \($0.device.name)?" } ?? "",
+                   isPresented: Binding(get: { replaceCandidate != nil },
+                                        set: { if !$0 { replaceCandidate = nil } }),
+                   presenting: replaceCandidate)
+            { candidate in
+                Button("Cancel", role: .cancel) {}
+                Button("Replace", role: .destructive) { choose(.replace(candidate.device.id), name: candidate.device.name) }
+            } message: { candidate in
+                Text(candidate.warning)
+            }
+            .alert(deviceToRemove.map { "Remove \($0.name)?" } ?? "",
+                   isPresented: Binding(get: { deviceToRemove != nil },
+                                        set: { if !$0 { deviceToRemove = nil } }),
+                   presenting: deviceToRemove)
+            { device in
+                Button("Cancel", role: .cancel) {}
+                Button("Remove", role: .destructive) { Task { await remove(device) } }
+            } message: { _ in
+                Text("The hub stops sending to it.")
+            }
+            .alert("Make this phone a member?",
+                   isPresented: Binding(get: { deviceToDemote != nil },
+                                        set: { if !$0 { deviceToDemote = nil } }),
+                   presenting: deviceToDemote)
+            { device in
+                Button("Cancel", role: .cancel) {}
+                Button("Make Member") { Task { await setRole(.member, of: device) } }
+            } message: { _ in
+                Text("This phone can no longer change the data source, invite or manage phones. Only another admin can make it an admin again.")
+            }
+    }
+
+    private func sourceAndConnectionDialogs(_ content: some View) -> some View {
+        let title: String = sourceAction == .take
+            ? "Use the hub's data sources in this app?"
+            : "Send this app's data sources to the hub?"
+        return content
+            .confirmationDialog(title,
+                                isPresented: Binding(get: { sourceAction != nil },
+                                                     set: { if !$0 { sourceAction = nil } }),
+                                titleVisibility: .visible,
+                                presenting: sourceAction)
+            { action in
+                Button(action == .take ? "Use Hub's Sources" : "Send to Hub") {
+                    Task {
+                        if action == .take { await takeSources() } else { await sendSources() }
+                    }
                 }
+            } message: { action in
+                Text(action == .take ? "This app's Nightscout and Dexcom settings are replaced."
+                    : "The hub's Nightscout and Dexcom settings are replaced for every phone.")
             }
-        } message: {
-            Text("The hub keeps the badge, Live Activity and alarms up to date while LoopFollow is closed. You can change this under Background Refresh.")
-        }
-        .confirmationDialog("Disconnect from LF Hub?", isPresented: $confirmingDisconnect, titleVisibility: .visible) {
-            Button("Disconnect", role: .destructive) { Task { await disconnect() } }
-        } message: {
-            Text("This phone stops getting LF Hub's alarms. LoopFollow goes back to alarming by itself.")
-        }
-        .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
-        .navigationTitle("LF Hub")
-        .navigationBarTitleDisplayMode(.inline)
+            .alert("Use LF Hub for Background Refresh?", isPresented: $offeringHubMode) {
+                Button("Not Now", role: .cancel) {}
+                Button("Use LF Hub") {
+                    Task {
+                        await BackgroundRefreshSettingsViewModel.change(to: .hub)?.value
+                        await reload()
+                    }
+                }
+            } message: {
+                Text("The hub keeps the badge, Live Activity and alarms up to date while LoopFollow is closed. You can change this under Background Refresh.")
+            }
+            .confirmationDialog("Disconnect from LF Hub?", isPresented: $confirmingDisconnect, titleVisibility: .visible) {
+                Button("Disconnect", role: .destructive) { Task { await disconnect() } }
+            } message: {
+                Text("This phone stops getting LF Hub's alarms. LoopFollow goes back to alarming by itself.")
+            }
     }
 
     // MARK: - Not connected
