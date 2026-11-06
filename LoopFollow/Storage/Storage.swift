@@ -216,7 +216,6 @@ class Storage {
     var telemetryInstallId = StorageValue<String>(key: "telemetryInstallId", defaultValue: "")
     var telemetryLastSentAt = StorageValue<Date?>(key: "telemetryLastSentAt", defaultValue: nil)
     var telemetryLastSentBuild = StorageValue<String>(key: "telemetryLastSentBuild", defaultValue: "")
-    var telemetryAnonymousLastSentAt = StorageValue<Date?>(key: "telemetryAnonymousLastSentAt", defaultValue: nil)
     var telemetryLastAttemptAt = StorageValue<Date?>(key: "telemetryLastAttemptAt", defaultValue: nil)
     var telemetryLastFailureReason = StorageValue<String?>(key: "telemetryLastFailureReason", defaultValue: nil)
 

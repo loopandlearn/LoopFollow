@@ -105,11 +105,11 @@ struct TelemetrySendGateTests {
         let base = try #require(URL(string: "https://example.org/api/telemetry/"))
         let url = try #require(TelemetryClient.requestURL(
             baseURL: base,
-            path: "anonymous",
+            path: "checkin",
             reason: .buildChange,
             lastFailureReason: "checkin_http_500"
         ))
-        #expect(url.absoluteString == "https://example.org/api/telemetry/anonymous?reason=build_change&lastFailureReason=checkin_http_500")
+        #expect(url.absoluteString == "https://example.org/api/telemetry/checkin?reason=build_change&lastFailureReason=checkin_http_500")
 
         let plain = try #require(TelemetryClient.requestURL(baseURL: base, path: "checkin", reason: .timer, lastFailureReason: nil))
         #expect(plain.absoluteString == "https://example.org/api/telemetry/checkin?reason=timer")

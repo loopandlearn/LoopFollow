@@ -53,9 +53,7 @@ actor TelemetrySendGate {
 
 /// Opt-out anonymous usage check-in. Sends the payload from `buildPayload()`
 /// at most once every 24 hours, plus once after a new build is installed.
-/// Installs that turned sharing off send only an empty daily `/anonymous` GET
-/// carrying the app version, build, install identifier, trigger reason and
-/// prior failure category, so active installs per version can be counted.
+/// Installs that turned sharing off send nothing.
 final class TelemetryClient {
     static let shared = TelemetryClient()
 
@@ -183,7 +181,7 @@ final class TelemetryClient {
         "\(appVersion)|\(buildDate ?? "")|\(commitSha)"
     }
 
-    /// True until a send of either kind succeeds on the running build.
+    /// True until a send succeeds on the running build.
     func buildChangedSinceLastSend() -> Bool {
         Storage.shared.telemetryLastSentBuild.value != Self.buildIdentity
     }
@@ -191,19 +189,21 @@ final class TelemetryClient {
     // MARK: - Cadence
 
     /// Arms the scheduler for the next moment a send can be due: at once for an
-    /// unreported build, otherwise 24h after the last successful send of the
-    /// active kind, and never sooner than an hour after the last attempt. Each
-    /// tick runs the overdue check and re-arms.
+    /// unreported build, otherwise 24h after the last successful send, and
+    /// never sooner than an hour after the last attempt. With sharing off the
+    /// tick is parked a day out. Each tick runs the overdue check and re-arms.
     func scheduleRecurring() {
         let storage = Storage.shared
-        let lastSent = storage.telemetryEnabled.value
-            ? storage.telemetryLastSentAt.value
-            : storage.telemetryAnonymousLastSentAt.value
         let now = Date()
 
-        var nextRun = buildChangedSinceLastSend()
-            ? now
-            : lastSent.map { $0.addingTimeInterval(Self.dailyInterval) } ?? now
+        var nextRun: Date
+        if !storage.telemetryEnabled.value {
+            nextRun = now.addingTimeInterval(Self.dailyInterval)
+        } else if buildChangedSinceLastSend() {
+            nextRun = now
+        } else {
+            nextRun = storage.telemetryLastSentAt.value.map { $0.addingTimeInterval(Self.dailyInterval) } ?? now
+        }
         if let lastAttempt = storage.telemetryLastAttemptAt.value {
             nextRun = max(nextRun, lastAttempt.addingTimeInterval(Self.retryInterval))
         }
@@ -249,22 +249,21 @@ final class TelemetryClient {
         }
     }
 
-    /// Entry point shared by every trigger. Sends the full payload when
-    /// sharing is on and the anonymous heartbeat when it is off: at once when
-    /// the running build has not been reported yet, otherwise once the daily
-    /// interval has passed. Storage is read and written on the main actor;
-    /// only the request runs off it.
+    /// Entry point shared by every trigger. With sharing on, sends the payload
+    /// at once when the running build has not been reported yet, otherwise once
+    /// the daily interval has passed. Storage is read and written on the main
+    /// actor; only the request runs off it.
     @discardableResult func sendIfOverdue(reason: SendReason, now: Date = Date()) async -> Bool {
         let (sharing, lastSentAt, lastAttemptAt, buildChanged) = await MainActor.run {
             let storage = Storage.shared
-            let sharing = storage.telemetryEnabled.value
             return (
-                sharing,
-                sharing ? storage.telemetryLastSentAt.value : storage.telemetryAnonymousLastSentAt.value,
+                storage.telemetryEnabled.value,
+                storage.telemetryLastSentAt.value,
                 storage.telemetryLastAttemptAt.value,
                 self.buildChangedSinceLastSend()
             )
         }
+        guard sharing else { return false }
         let sendReason: SendReason = buildChanged ? .buildChange : reason
 
         return await sendGate.runIfEligible(
@@ -274,19 +273,9 @@ final class TelemetryClient {
             minimumInterval: Self.dailyInterval,
             retryInterval: Self.retryInterval,
             force: buildChanged,
-            operation: {
-                sharing ? await self.send(reason: sendReason) : await self.sendAnonymous(reason: sendReason)
-            },
+            operation: { await self.send(reason: sendReason) },
             onAttempt: { await MainActor.run { Storage.shared.telemetryLastAttemptAt.value = now } },
-            onSuccess: {
-                await MainActor.run {
-                    if sharing {
-                        self.recordSuccessfulSend()
-                    } else {
-                        self.recordSuccessfulAnonymousSend()
-                    }
-                }
-            }
+            onSuccess: { await MainActor.run { self.recordSuccessfulSend() } }
         )
     }
 
@@ -315,13 +304,6 @@ final class TelemetryClient {
     private func recordSuccessfulSend() {
         let storage = Storage.shared
         storage.telemetryLastSentAt.value = Date()
-        storage.telemetryLastSentBuild.value = Self.buildIdentity
-        storage.telemetryLastAttemptAt.value = nil
-    }
-
-    private func recordSuccessfulAnonymousSend() {
-        let storage = Storage.shared
-        storage.telemetryAnonymousLastSentAt.value = Date()
         storage.telemetryLastSentBuild.value = Self.buildIdentity
         storage.telemetryLastAttemptAt.value = nil
     }
@@ -392,26 +374,6 @@ final class TelemetryClient {
         return payload
     }
 
-    /// Everything the anonymous heartbeat carries, for the "What's sent"
-    /// preview. The trigger varies per request.
-    func anonymousPreview() -> [String: Any] {
-        var preview: [String: Any] = [
-            "appVersion": Self.appVersion,
-            "installId": installId(),
-            "reason": "what triggered the check-in, e.g. cold_launch",
-        ]
-        if !Self.commitSha.isEmpty {
-            preview["commitSha"] = Self.commitSha
-        }
-        if let buildDate = Self.buildDate {
-            preview["buildDate"] = buildDate
-        }
-        if let failure = Storage.shared.telemetryLastFailureReason.value {
-            preview["lastFailureReason"] = failure
-        }
-        return preview
-    }
-
     // MARK: - Send
 
     /// URL for `path` with the trigger reason and the previous attempt's
@@ -440,17 +402,6 @@ final class TelemetryClient {
         request.httpMethod = method
         request.timeoutInterval = 15
         request.setValue("Bearer \(Self.writeToken)", forHTTPHeaderField: "Authorization")
-        request.setValue(Self.appVersion, forHTTPHeaderField: "X-LoopFollow-Version")
-        request.setValue(installId(), forHTTPHeaderField: "X-LoopFollow-InstallId")
-        if !Self.commitSha.isEmpty {
-            request.setValue(Self.commitSha, forHTTPHeaderField: "X-LoopFollow-CommitSha")
-        }
-        if let buildDate = Self.buildDate {
-            request.setValue(buildDate, forHTTPHeaderField: "X-LoopFollow-BuildDate")
-        }
-        #if targetEnvironment(simulator)
-            request.setValue("true", forHTTPHeaderField: "X-LoopFollow-Simulator")
-        #endif
         return request
     }
 
@@ -497,11 +448,6 @@ final class TelemetryClient {
         return await perform(request, label: "checkin")
     }
 
-    private func sendAnonymous(reason: SendReason) async -> Bool {
-        let request = await MainActor.run { self.request(path: "anonymous", method: "GET", reason: reason) }
-        return await perform(request, label: "anonymous")
-    }
-
     // MARK: - Helpers
 
     /// Salted SHA-256, truncated to 16 hex chars (64 bits).
@@ -546,18 +492,16 @@ final class TelemetryClient {
 // MARK: - TelemetryPreviewView
 
 /// Renders the exact payload that would be sent right now, with a copy
-/// button. Linked to from the Diagnostics section in Settings and from the
-/// consent sheet's "See exactly what's sent" button.
+/// button. Linked to from the Diagnostics section in Settings.
 struct TelemetryPreviewView: View {
     @State private var jsonText: String = ""
-    @State private var sharing = Storage.shared.telemetryEnabled.value
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text(sharing
+                Text(Storage.shared.telemetryEnabled.value
                     ? "Below is the exact JSON object that LoopFollow would send to lf.bjorkert.se right now."
-                    : "Usage stats are off. LoopFollow sends only this minimal check-in to lf.bjorkert.se, once a day and after installing a new build.")
+                    : "Usage stats are off, so nothing is sent. Below is the JSON object LoopFollow would send if they were on.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .padding(.bottom, 4)
@@ -582,14 +526,12 @@ struct TelemetryPreviewView: View {
         .navigationTitle("What's sent")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            sharing = Storage.shared.telemetryEnabled.value
-            jsonText = Self.renderPayload(sharing: sharing)
+            jsonText = Self.renderPayload()
         }
     }
 
-    private static func renderPayload(sharing: Bool) -> String {
-        let payload = sharing ? TelemetryClient.shared.buildPayload() : TelemetryClient.shared.anonymousPreview()
-        guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys]),
+    private static func renderPayload() -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: TelemetryClient.shared.buildPayload(), options: [.prettyPrinted, .sortedKeys]),
               let text = String(data: data, encoding: .utf8)
         else { return "Unable to render payload." }
         return text
@@ -631,7 +573,7 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("Opt out")
                         .font(.headline)
-                    Text("Use the Send anonymous usage stats toggle above. Turning it off is immediate and persistent. After that, the app sends only a minimal check-in, once a day and after installing a new build, so the developers can count how many installs run each version: the app version, build commit and build date, the random install ID, and the trigger and error category described above. It contains no device, settings, or health information.")
+                    Text("Use the Send anonymous usage stats toggle above. Turning it off is immediate and persistent, and nothing is sent after that.")
                 }
 
                 Group {
