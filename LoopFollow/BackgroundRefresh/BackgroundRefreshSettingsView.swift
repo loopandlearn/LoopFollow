@@ -67,7 +67,7 @@ struct BackgroundRefreshSettingsView: View {
                         .foregroundColor(.secondary)
 
                 case .omnipodDash:
-                    Text("Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates once every 3 minutes and uses less battery than the silent tune method.")
+                    Text("Requires an OmniPod DASH pod paired with this device within Bluetooth range. Provides updates every 5 minutes and uses less battery than the silent tune method.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
