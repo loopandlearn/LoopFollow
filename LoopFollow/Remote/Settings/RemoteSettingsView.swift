@@ -10,6 +10,7 @@ struct RemoteSettingsView: View {
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject var bolusIncrement = Storage.shared.bolusIncrement
     @ObservedObject private var watchRemoteCommands = Storage.shared.watchRemoteCommands
+    @ObservedObject private var loopLollipopAbsorptionMinutes = Storage.shared.loopLollipopAbsorptionMinutes
 
     @State private var showAlert: Bool = false
     @State private var alertType: AlertType? = nil
@@ -87,6 +88,19 @@ struct RemoteSettingsView: View {
 
                     Toggle("Meal with Fat/Protein", isOn: $viewModel.mealWithFatProtein)
                         .toggleStyle(SwitchToggleStyle())
+                }
+            }
+
+            if viewModel.remoteType == .loopAPNS {
+                Section(
+                    header: Text("Meal Settings"),
+                    footer: Text("Absorption time set by the 🍭 button when entering carbs. Loop's own default is 30 min; use 2 hr if Loop is built with the 2hlollipop customization.")
+                ) {
+                    Picker("🍭 Absorption Time", selection: $loopLollipopAbsorptionMinutes.value) {
+                        ForEach(Array(stride(from: 30, through: 180, by: 30)), id: \.self) { minutes in
+                            Text(Self.absorptionText(minutes: minutes)).tag(minutes)
+                        }
+                    }
                 }
             }
 
@@ -378,6 +392,14 @@ struct RemoteSettingsView: View {
         // If isEnabled is false, user can see the row but not tap it.
         .disabled(!isEnabled)
         .foregroundColor(isEnabled ? .primary : .gray)
+    }
+
+    private static func absorptionText(minutes: Int) -> String {
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        if hours == 0 { return "\(remainder) min" }
+        if remainder == 0 { return "\(hours) hr" }
+        return "\(hours) hr \(remainder) min"
     }
 
     // MARK: - Validation Error Handler
