@@ -70,11 +70,6 @@ final class OnboardingViewModel: ObservableObject {
     private let onClose: () -> Void
     private var cancellables = Set<AnyCancellable>()
 
-    /// Whether to show the in-flow telemetry consent phase. Captured once at
-    /// launch so the decision the phase records doesn't remove it from under the
-    /// navigation while the user is still on it.
-    private let includeTelemetryStep: Bool
-
     /// Alarm types the user already has, captured at launch. Onboarding only
     /// offers recommended alarms whose type the user doesn't already own, so a
     /// returning user is helped to add new ones without touching their existing
@@ -83,7 +78,6 @@ final class OnboardingViewModel: ObservableObject {
 
     init(onClose: @escaping () -> Void) {
         self.onClose = onClose
-        includeTelemetryStep = !Storage.shared.telemetryConsentDecisionMade.value
         existingAlarmTypes = Set(Storage.shared.alarms.value.map(\.type))
         let hasNightscout = !Storage.shared.url.value.isEmpty
         let hasDexcom = !Storage.shared.shareUserName.value.isEmpty
@@ -122,7 +116,7 @@ final class OnboardingViewModel: ObservableObject {
     var canProceed: Bool {
         switch step {
         case .welcome, .overview, .units, .generalAlarms, .alarms,
-             .tabOrder, .notifications, .telemetry, .completion:
+             .tabOrder, .notifications, .completion:
             return true
         case .dataSource:
             return dataSource != nil
@@ -170,8 +164,8 @@ final class OnboardingViewModel: ObservableObject {
         var steps: [OnboardingStep] = [.welcome, .overview]
 
         // Already set up and nothing to add — the overview is the last stop, with
-        // a "Done" that finishes. Notification/telemetry consent is still handled
-        // after dismissal, the same as when skipping.
+        // a "Done" that finishes. The notification request is still handled after
+        // dismissal, the same as when skipping.
         if hasNothingToSetUp {
             return steps
         }
@@ -189,9 +183,6 @@ final class OnboardingViewModel: ObservableObject {
         steps.append(.tabOrder)
         if notificationsUndecided {
             steps.append(.notifications)
-        }
-        if includeTelemetryStep {
-            steps.append(.telemetry)
         }
         steps.append(.completion)
         return steps

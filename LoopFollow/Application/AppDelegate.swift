@@ -79,15 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // window — poisoned defaults would discard real history. Runs synchronously
         // on a normal launch.
         StorageReadiness.whenReady {
-            // SHA change fires an immediate ping (the scheduler can't notice an app
-            // update); otherwise the 24h scheduler handles cadence. See Telemetry.swift.
-            TelemetryClient.shared.recordColdLaunch()
-            Task.detached {
-                if TelemetryClient.shared.buildShaChangedSinceLastSend() {
-                    await TelemetryClient.shared.maybeSend()
-                }
-                TelemetryClient.shared.scheduleRecurring()
-            }
+            TelemetryClient.shared.start()
         }
 
         return true
