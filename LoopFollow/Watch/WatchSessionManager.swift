@@ -12,8 +12,9 @@ final class WatchSessionManager: NSObject {
     static let shared = WatchSessionManager()
 
     /// Complication pushes are rationed by watchOS (about 50 per day), so they
-    /// are only used when a new reading arrives and this long has passed.
-    private let complicationTransferInterval: TimeInterval = 15 * 60
+    /// are only used when a new reading arrives and this long has passed. One
+    /// every 30 minutes keeps the budget from running out before the day ends.
+    private let complicationTransferInterval: TimeInterval = 30 * 60
 
     /// A state equal to the last one is still sent this often, well inside the
     /// watch's 10 minutes before it treats the phone's data as stale.

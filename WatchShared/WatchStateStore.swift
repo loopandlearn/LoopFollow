@@ -14,9 +14,10 @@ enum WatchStateStore {
             .appendingPathComponent(fileName)
     }
 
+    /// Readable while the watch is locked, so the complication can show it after the first unlock.
     static func save(_ data: Data) {
         guard let url = fileURL else { return }
-        try? data.write(to: url, options: .atomic)
+        try? data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
     }
 
     static func load() -> WatchState? {
