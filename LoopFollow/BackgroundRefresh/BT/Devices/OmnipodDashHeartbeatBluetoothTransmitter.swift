@@ -35,4 +35,10 @@ class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
     override func expectedHeartbeatInterval() -> TimeInterval? {
         return 5 * 60
     }
+
+    /// The loop app skips pod communication on some cycles, so a single
+    /// missed cycle is normal; two or more in a row count as a dropout.
+    override func heartbeatDropoutFactor() -> Double {
+        return 2.5
+    }
 }
