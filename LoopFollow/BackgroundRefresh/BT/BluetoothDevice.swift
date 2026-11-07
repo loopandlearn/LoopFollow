@@ -329,4 +329,10 @@ class BluetoothDevice: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     func expectedHeartbeatInterval() -> TimeInterval? {
         return nil
     }
+
+    /// A beat this many expected intervals after the previous one counts as a
+    /// dropout. Stricter than the 15% logging margin - normal jitter must not count.
+    func heartbeatDropoutFactor() -> Double {
+        return 1.5
+    }
 }
