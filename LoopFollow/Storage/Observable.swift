@@ -17,6 +17,11 @@ class Observable {
 
     /// End of the active override as Unix epoch seconds; nil = no override or indefinite.
     var overrideEndAt = ObservableValue<TimeInterval?>(default: nil)
+    /// Insulin needs of the active override as a percentage; nil = none or 100 %.
+    var overridePercent = ObservableValue<Int?>(default: nil)
+    /// Target range of the active override in mg/dL; nil = none or not set.
+    var overrideRangeLowMgdl = ObservableValue<Double?>(default: nil)
+    var overrideRangeHighMgdl = ObservableValue<Double?>(default: nil)
     /// End of the active temp target as Unix epoch seconds; nil = no active temp target.
     var tempTargetEndAt = ObservableValue<TimeInterval?>(default: nil)
 

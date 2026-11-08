@@ -78,6 +78,9 @@ extension MainViewController {
         overrideGraphData.removeAll()
         Observable.shared.override.value = nil
         Observable.shared.overrideEndAt.value = nil
+        Observable.shared.overridePercent.value = nil
+        Observable.shared.overrideRangeLowMgdl.value = nil
+        Observable.shared.overrideRangeHighMgdl.value = nil
         updateOverrideGraph()
     }
 

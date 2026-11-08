@@ -170,8 +170,8 @@ enum WatchStateBuilder {
     }
 
     /// Insulin needs of an override, from its Nightscout entry or else from the preset of the same name,
-    /// since Trio does not upload the factor with the override.
-    private static func overridePercent(_ override: DataStructs.overrideStruct) -> Int? {
+    /// since Trio does not upload the factor with the override. Also used for the Live Activity.
+    static func overridePercent(_ override: DataStructs.overrideStruct) -> Int? {
         var factor = override.insulNeedsScaleFactor
         if factor == 1 {
             if let loop = ProfileManager.shared.loopOverrides.first(where: { $0.name == override.reason }) {
