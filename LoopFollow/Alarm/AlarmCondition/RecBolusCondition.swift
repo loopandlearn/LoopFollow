@@ -35,4 +35,11 @@ struct RecBolusCondition: AlarmCondition {
 
         return shouldAlert
     }
+
+    /// A recommended bolus at or above the threshold, whether or not that
+    /// was already announced.
+    func holds(alarm: Alarm, data: AlarmData, now _: Date) -> Bool? {
+        guard let threshold = alarm.threshold, threshold > 0, let rec = data.recBolus else { return false }
+        return rec >= threshold
+    }
 }

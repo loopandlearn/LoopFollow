@@ -323,7 +323,7 @@ private struct SmallFamilyStack: View {
 }
 
 /// A square step, drawn because SF Symbols has no square wave.
-private struct BasalStepIcon: Shape {
+struct BasalStepIcon: Shape {
     func path(in rect: CGRect) -> Path {
         let step = rect.width / 4
         var path = Path()
@@ -352,8 +352,8 @@ private struct SmallFamilyUpdateTime: View {
     }
 }
 
-/// "Name · 80% · 140–160 · 1h 20m". When space runs out the name truncates
-/// first, then the details shrink, so the percentage, range and time left stay.
+/// "Name · 80% · 140–160 · 14:20". When space runs out the name truncates
+/// first, then the details shrink, so the percentage, range and end time stay.
 private struct SmallFamilyOverride: View {
     let name: String
     let details: [String]
@@ -853,7 +853,7 @@ private struct DynamicIslandMinimalView: View {
 
 // MARK: - Formatting
 
-private enum LAFormat {
+enum LAFormat {
     private static let mgdlFormatter: NumberFormatter = {
         let nf = NumberFormatter()
         nf.numberStyle = .decimal
@@ -1057,7 +1057,7 @@ private enum LAFormat {
 
 // MARK: - Threshold-driven colors
 
-private enum LAColors {
+enum LAColors {
     static func backgroundTint(for snapshot: GlucoseSnapshot) -> Color {
         let mgdl = snapshot.glucose
         let t = LAAppGroupSettings.thresholdsMgdl()

@@ -254,9 +254,10 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         basalRate.components(separatedBy: "→").last?.trimmingCharacters(in: .whitespaces) ?? basalRate
     }
 
-    /// The active override's insulin needs, target range and time left, each
+    /// The active override's insulin needs, target range and end time, each
     /// formatted, in that order. Parts that are unknown or don't apply are left
-    /// out: 100 % insulin needs, no range of its own, or no end time.
+    /// out: 100 % insulin needs, no range of its own, or no end time. The end
+    /// is a clock time rather than a countdown, so it doesn't tick in CarPlay.
     func overrideDetails(now: Date = Date()) -> [String] {
         var parts: [String] = []
         if let percent = overridePercent {
@@ -268,21 +269,20 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             parts.append(lowText == highText ? lowText : "\(lowText)–\(highText)")
         }
         if let end = overrideEndAt, end > now.timeIntervalSince1970 {
-            parts.append(Self.timeLeft(end - now.timeIntervalSince1970))
+            parts.append(Self.clock(Date(timeIntervalSince1970: end), now: now))
         }
         return parts
     }
 
-    /// Whole minutes, rounded up so a running override never reads 0m: "45m", "2h", "1h 20m".
-    static func timeLeft(_ seconds: TimeInterval) -> String {
-        let minutes = max(1, Int((seconds / 60).rounded(.up)))
-        let hours = minutes / 60
-        let rest = minutes % 60
-        if hours == 0 { return "\(rest)m" }
-        return rest == 0 ? "\(hours)h" : "\(hours)h \(rest)m"
+    /// "14:05" today, "Sat 14:05" on another day, in the user's clock format.
+    static func clock(_ date: Date, now: Date = Date()) -> String {
+        if Calendar.current.isDate(date, inSameDayAs: now) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
 
-    private static func formatGlucose(_ mgdl: Double, unit: Unit) -> String {
+    static func formatGlucose(_ mgdl: Double, unit: Unit) -> String {
         switch unit {
         case .mgdl:
             "\(Int(mgdl.rounded()))"

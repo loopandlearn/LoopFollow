@@ -23,4 +23,11 @@ struct COBCondition: AlarmCondition {
         Storage.shared.lastCOBNotified.value = cob
         return true
     }
+
+    /// Carbs on board at or above the threshold, whether or not that was
+    /// already announced.
+    func holds(alarm: Alarm, data: AlarmData, now _: Date) -> Bool? {
+        guard let threshold = alarm.threshold, threshold > 0, let cob = data.COB else { return false }
+        return cob >= threshold
+    }
 }

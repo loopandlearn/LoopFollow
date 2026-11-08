@@ -15,6 +15,9 @@ protocol AlarmCondition {
     /// threshold, checked in `evaluate`; `false` (the default) treats them
     /// as activation limits enforced by `passesBGLimits`.
     var checksOwnBGLimits: Bool { get }
+    /// Whether the condition holds now, without side effects. A requirement
+    /// so the COB and recommended bolus overrides are dispatched dynamically.
+    func holds(alarm: Alarm, data: AlarmData, now: Date) -> Bool?
 }
 
 extension AlarmCondition {
@@ -69,6 +72,22 @@ extension AlarmCondition {
 
     /// applies every global & per-alarm guard exactly once
     func shouldFire(alarm: Alarm, data: AlarmData, now: Date, config: AlarmConfiguration) -> Bool {
+        guard passesGuards(alarm: alarm, data: data, now: now, config: config) else { return false }
+
+        // finally, run the type-specific logic
+        return evaluate(alarm: alarm, data: data, now: now)
+    }
+
+    /// Whether the condition holds now, checked without the side effects
+    /// `evaluate` may have, for the CarPlay widget. Nil for conditions that
+    /// announce an event rather than a state.
+    func holds(alarm: Alarm, data: AlarmData, now: Date) -> Bool? {
+        alarm.type.isStateCondition ? evaluate(alarm: alarm, data: data, now: now) : nil
+    }
+
+    /// The on/off switch, snooze, BG limits and time of day: every check
+    /// before the type-specific logic.
+    func passesGuards(alarm: Alarm, data: AlarmData, now: Date, config: AlarmConfiguration) -> Bool {
         // master on/off
         guard alarm.isEnabled else { return false }
         // per-alarm snooze
@@ -94,7 +113,6 @@ extension AlarmCondition {
             guard isNight else { return false }
         }
 
-        // finally, run the type-specific logic
-        return evaluate(alarm: alarm, data: data, now: now)
+        return true
     }
 }

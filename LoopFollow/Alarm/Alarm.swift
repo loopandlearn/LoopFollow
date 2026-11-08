@@ -56,6 +56,10 @@ struct Alarm: Identifiable, Codable, Equatable {
 
     var isEnabled: Bool = true
 
+    /// Show this alarm on the CarPlay widget while it's triggered. Off by
+    /// default, so the car only shows what the user picked.
+    var showInCarPlay: Bool = false
+
     /// If the alarm is manually snoozed, we store the end time for the snooze here
     var snoozedUntil: Date?
 
@@ -110,7 +114,7 @@ struct Alarm: Identifiable, Codable, Equatable {
     // MARK: - Codable (Custom implementation for backward compatibility)
 
     enum CodingKeys: String, CodingKey {
-        case id, type, name, isEnabled, snoozedUntil
+        case id, type, name, isEnabled, showInCarPlay, snoozedUntil
         case aboveBG, belowBG, threshold, predictiveMinutes, delta
         case persistentMinutes, suppressIfRising, suppressIfFalling, suppressIfCharging
         case monitoringWindow, soundFile
@@ -129,6 +133,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         type = try container.decode(AlarmType.self, forKey: .type)
         name = try container.decode(String.self, forKey: .name)
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+        showInCarPlay = try container.decodeIfPresent(Bool.self, forKey: .showInCarPlay) ?? false
         snoozedUntil = try container.decodeIfPresent(Date.self, forKey: .snoozedUntil)
         aboveBG = try container.decodeIfPresent(Double.self, forKey: .aboveBG)
         belowBG = try container.decodeIfPresent(Double.self, forKey: .belowBG)
@@ -162,6 +167,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         try container.encode(type, forKey: .type)
         try container.encode(name, forKey: .name)
         try container.encode(isEnabled, forKey: .isEnabled)
+        try container.encode(showInCarPlay, forKey: .showInCarPlay)
         try container.encodeIfPresent(snoozedUntil, forKey: .snoozedUntil)
         try container.encodeIfPresent(aboveBG, forKey: .aboveBG)
         try container.encodeIfPresent(belowBG, forKey: .belowBG)
@@ -219,7 +225,8 @@ struct Alarm: Identifiable, Codable, Equatable {
     var sensorLifetimeDays: Int?
 
     /// Extra notification text: the CGM state behind a gap in readings.
-    private var notificationBody: String? {
+    /// Also shown under the alarm on the CarPlay widget.
+    var notificationBody: String? {
         guard type == .missedReading || type == .notLooping,
               let state = Observable.shared.cgmSensorState.value
         else { return nil }

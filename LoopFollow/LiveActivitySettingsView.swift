@@ -128,7 +128,7 @@
             .navigationBarTitleDisplayMode(.inline)
         }
 
-        private static let statusLineInfo = "Shows a line under the reading with the update time, IOB and COB, or Not Looping when Loop stops reporting, then any active override with its insulin needs, range and time left. While it is on, IOB, COB and Override are not offered for the right slot. Changes appear with the next Live Activity update."
+        private static let statusLineInfo = "Shows a line under the reading with the update time, IOB and COB, or Not Looping when Loop stops reporting, then any active override with its insulin needs, range and end time. While it is on, IOB, COB and Override are not offered for the right slot. Changes appear with the next Live Activity update."
 
         private static let tightLayoutInfo = "Replaces the right slot with projected BG, IOB, COB and basal stacked on the right, and reduces the status line to the time. It only applies to wide CarPlay screens; the Watch and narrow CarPlay screens keep the regular layout. Changes appear with the next Live Activity update."
 

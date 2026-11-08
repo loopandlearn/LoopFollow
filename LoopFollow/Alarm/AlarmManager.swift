@@ -10,6 +10,14 @@ class AlarmManager {
     private let evaluators: [AlarmType: AlarmCondition]
     private var lastBGAlarmTime: Date?
 
+    /// When each alarm last fired and with what title, for the CarPlay
+    /// widget's event alarms.
+    private var lastFired: [UUID: (title: String, date: Date)] = [:]
+
+    /// How long the CarPlay widget lists an alarm that announces an event,
+    /// such as an override starting, after it fires.
+    static let carPlayEventDuration: TimeInterval = 15 * 60
+
     private init(
         conditionTypes: [AlarmCondition.Type] = [
             BuildExpireCondition.self,
@@ -136,6 +144,7 @@ class AlarmManager {
                 if titleOverride != Observable.shared.currentAlarmTitleOverride.value {
                     Observable.shared.currentAlarmTitleOverride.value = titleOverride
                     alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now, titleOverride: titleOverride)
+                    lastFired[alarm.id] = (titleOverride ?? alarm.name, now)
                 }
                 break
             }
@@ -145,6 +154,7 @@ class AlarmManager {
             Observable.shared.currentAlarm.value = alarm.id
 
             alarm.trigger(config: Storage.shared.alarmConfiguration.value, now: now, titleOverride: titleOverride)
+            lastFired[alarm.id] = (titleOverride ?? alarm.name, now)
 
             // Store the latest bg time so we don't use it again
             if alarm.type.isBGBased,
@@ -171,6 +181,59 @@ class AlarmManager {
             sendNotification(title: "Latest BG")
             Storage.shared.persistentNotificationLastBGTime.value = now
         }
+    }
+
+    /// The alarms the CarPlay widget shows: each enabled alarm marked for
+    /// CarPlay that is triggered now, the first of each type, most important
+    /// first, with the title to show. Snoozed alarms count.
+    ///
+    /// Alarms about a state (low BG, carbs on board over the threshold, a
+    /// sensor about to expire) are listed while the state holds, checked
+    /// without the side effects of the alarm's own check. Alarms about an
+    /// event (an override starting, a missed bolus) are listed for
+    /// `carPlayEventDuration` after they fire. Whatever is sounding is listed.
+    func carPlayAlarms(data: AlarmData, now: Date) -> [(alarm: Alarm, title: String)] {
+        let config = Storage.shared.alarmConfiguration.value
+        let sounding = Observable.shared.currentAlarm.value
+        lastFired = lastFired.filter { now.timeIntervalSince($0.value.date) < Self.carPlayEventDuration }
+
+        // Between readings the latest is up to 5 minutes old; allow until it
+        // is stale so BG alerts don't flicker off while waiting for the next.
+        let readingIsCurrent = data.bgReadings.last.map {
+            now.timeIntervalSince($0.date) < GlucoseSnapshot.staleAfter
+        } ?? false
+
+        var result: [(alarm: Alarm, title: String)] = []
+        var listedTypes = Set<AlarmType>()
+
+        for alarm in Storage.shared.alarms.value.sorted(by: Alarm.byPriorityThenSpec) {
+            guard alarm.showInCarPlay, !listedTypes.contains(alarm.type) else { continue }
+
+            var title: String?
+            if alarm.id == sounding {
+                // A temporary alarm disables itself as it fires, so this
+                // comes before the check that the alarm is on.
+                title = Observable.shared.currentAlarmTitleOverride.value ?? alarm.name
+            } else if alarm.isEnabled, let checker = evaluators[alarm.type] {
+                if alarm.type.isBGBased, alarm.type != .missedReading, !readingIsCurrent { continue }
+                var unsnoozed = alarm
+                unsnoozed.snoozedUntil = nil
+
+                if let holds = checker.holds(alarm: unsnoozed, data: data, now: now) {
+                    if holds, checker.passesGuards(alarm: unsnoozed, data: data, now: now, config: config) {
+                        title = alarm.name
+                    }
+                } else {
+                    title = lastFired[alarm.id]?.title
+                }
+            }
+
+            if let title {
+                result.append((alarm, title))
+                listedTypes.insert(alarm.type)
+            }
+        }
+        return result
     }
 
     func performSnooze(_ snoozeUnits: Int? = nil) {

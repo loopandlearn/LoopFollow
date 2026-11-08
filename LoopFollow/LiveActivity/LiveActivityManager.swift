@@ -1076,6 +1076,7 @@ final class LiveActivityManager {
         // Store: always update, independent of LA state.
         writeThresholds()
         GlucoseSnapshotStore.shared.save(snapshot)
+        CarPlayWidgetPublisher.publish(snapshot: snapshot)
 
         // LA update: gated on LA being active, snapshot having changed, and activities enabled.
         if !Storage.shared.laEnabled.value {

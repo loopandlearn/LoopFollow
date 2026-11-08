@@ -32,10 +32,11 @@ struct OverrideDetailsTests {
         )
     }
 
-    @Test("Percentage, range and time left, in that order")
+    @Test("Percentage, range and end time, in that order")
     func allDetails() {
         let details = snapshot(percent: 80, low: 140, high: 160, endsIn: 80 * 60).overrideDetails(now: now)
-        #expect(details == ["80%", "140–160", "1h 20m"])
+        let end = now.addingTimeInterval(80 * 60)
+        #expect(details == ["80%", "140–160", GlucoseSnapshot.clock(end, now: now)])
     }
 
     @Test("A single-value range shows once")
@@ -49,13 +50,11 @@ struct OverrideDetailsTests {
         #expect(snapshot(endsIn: -60).overrideDetails(now: now).isEmpty)
     }
 
-    @Test("Time left rounds up to whole minutes and never reads 0m")
-    func timeLeft() {
-        #expect(GlucoseSnapshot.timeLeft(5) == "1m")
-        #expect(GlucoseSnapshot.timeLeft(45 * 60) == "45m")
-        #expect(GlucoseSnapshot.timeLeft(44 * 60 + 1) == "45m")
-        #expect(GlucoseSnapshot.timeLeft(2 * 3600) == "2h")
-        #expect(GlucoseSnapshot.timeLeft(3600 + 20 * 60) == "1h 20m")
+    @Test("The end is a clock time, with the weekday when it is on another day")
+    func endTime() {
+        let tomorrow = now.addingTimeInterval(86400)
+        #expect(snapshot(endsIn: 86400).overrideDetails(now: now) == [GlucoseSnapshot.clock(tomorrow, now: now)])
+        #expect(GlucoseSnapshot.clock(tomorrow, now: now) == tomorrow.formatted(.dateTime.weekday(.abbreviated).hour().minute()))
     }
 
     @Test("A Nightscout range is read in mg/dL, and an unset one is ignored")
