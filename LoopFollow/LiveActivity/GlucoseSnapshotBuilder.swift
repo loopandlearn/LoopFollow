@@ -36,6 +36,13 @@ protocol CurrentGlucoseStateProviding {
     /// End of the active override as Unix epoch seconds (nil = no override or indefinite).
     var overrideEndAt: TimeInterval? { get }
 
+    /// Insulin needs of the active override as a percentage (nil = none or 100 %).
+    var overridePercent: Int? { get }
+
+    /// Target range of the active override in mg/dL (nil = none or not set).
+    var overrideRangeLowMgdl: Double? { get }
+    var overrideRangeHighMgdl: Double? { get }
+
     /// Active temporary target in mg/dL (nil if no active temp target).
     var tempTargetMgdl: Double? { get }
 
@@ -154,6 +161,9 @@ enum GlucoseSnapshotBuilder {
             projected: provider.projectedMgdl,
             override: provider.override,
             overrideEndAt: provider.overrideEndAt,
+            overridePercent: provider.overridePercent,
+            overrideRangeLowMgdl: provider.overrideRangeLowMgdl,
+            overrideRangeHighMgdl: provider.overrideRangeHighMgdl,
             tempTargetMgdl: provider.tempTargetMgdl,
             tempTargetEndAt: provider.tempTargetEndAt,
             recBolus: provider.recBolus,
