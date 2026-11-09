@@ -41,6 +41,8 @@ struct WatchState: Codable, Equatable {
     var alarm: WatchAlarm?
     /// Present when remote commands from the watch are enabled on the phone.
     var remote: WatchRemoteConfig?
+    /// The app's display name, present while the phone's "Show Display Name" setting is on.
+    var displayName: String?
 
     func encoded() -> Data? {
         try? JSONEncoder().encode(self)

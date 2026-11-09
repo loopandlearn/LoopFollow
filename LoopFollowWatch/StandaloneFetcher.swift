@@ -150,7 +150,8 @@ enum StandaloneFetcher {
             stats: base?.stats,
             device: base?.device ?? "",
             alarm: nil,
-            remote: remote
+            remote: remote,
+            displayName: base?.displayName
         )
     }
 
