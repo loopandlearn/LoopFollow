@@ -45,7 +45,7 @@ APP_IDENTIFIER = "com.#{TEAMID}.LoopFollow#{APP_SUFFIX}"
 LA_IDENTIFIER = "#{APP_IDENTIFIER}.LoopFollowLAExtension"
 WATCH_IDENTIFIER = "#{APP_IDENTIFIER}.watchkitapp"
 WATCH_WIDGETS_IDENTIFIER = "#{WATCH_IDENTIFIER}.widgets"
-WATCH_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-for-the-apple-watch-app"
+WATCH_SETUP_DOCS = "https://loopfollowdocs.org/build/lf-browser-build/#update-to-loopfollow-v8"
 
 # The watch app needs two identifiers with the LoopFollow App Group, which
 # existing browser builders have to add once by hand.
