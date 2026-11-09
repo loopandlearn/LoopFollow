@@ -208,10 +208,15 @@ class Storage {
 
     // See LoopFollow/Helpers/Telemetry.swift.
 
+    // Sharing is on unless the user turned it off; a stored `false` is always an
+    // explicit choice, because the default is never written.
     var telemetryEnabled = StorageValue<Bool>(key: "telemetryEnabled", defaultValue: true)
+    // Written by builds that asked for consent; read only as a storage-readable probe.
     var telemetryConsentDecisionMade = StorageValue<Bool>(key: "telemetryConsentDecisionMade", defaultValue: false)
     var telemetryLastSentAt = StorageValue<Date?>(key: "telemetryLastSentAt", defaultValue: nil)
-    var telemetryLastSentSha = StorageValue<String>(key: "telemetryLastSentSha", defaultValue: "")
+    var telemetryLastSentBuild = StorageValue<String>(key: "telemetryLastSentBuild", defaultValue: "")
+    var telemetryLastAttemptAt = StorageValue<Date?>(key: "telemetryLastAttemptAt", defaultValue: nil)
+    var telemetryLastFailureReason = StorageValue<String?>(key: "telemetryLastFailureReason", defaultValue: nil)
 
     // Sliding 7-day window of cold-launch timestamps.
     var telemetryColdLaunchTimes = StorageValue<[Date]>(key: "telemetryColdLaunchTimes", defaultValue: [])
