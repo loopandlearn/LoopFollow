@@ -39,16 +39,18 @@ struct LoopCarbTreatmentTests {
         #expect(LoopCarbTreatment(nightscoutEntry: entry(carbs: 0), date: 0) == nil)
     }
 
-    @Test("edit window is 23 h back and 1 h ahead")
+    @Test("edit window is 23 h back and the max future carbs setting ahead")
     func window() {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         func carb(offsetHours: Double) -> LoopCarbTreatment? {
             LoopCarbTreatment(nightscoutEntry: entry(), date: now.timeIntervalSince1970 + offsetHours * 3600)
         }
-        #expect(carb(offsetHours: -22)?.isWithinEditWindow(now: now) == true)
-        #expect(carb(offsetHours: -24)?.isWithinEditWindow(now: now) == false)
-        #expect(carb(offsetHours: 0.5)?.isWithinEditWindow(now: now) == true)
-        #expect(carb(offsetHours: 2)?.isWithinEditWindow(now: now) == false)
+        #expect(carb(offsetHours: -22)?.isWithinEditWindow(now: now, maxFutureHours: 1) == true)
+        #expect(carb(offsetHours: -24)?.isWithinEditWindow(now: now, maxFutureHours: 1) == false)
+        #expect(carb(offsetHours: 0.5)?.isWithinEditWindow(now: now, maxFutureHours: 1) == true)
+        #expect(carb(offsetHours: 2)?.isWithinEditWindow(now: now, maxFutureHours: 1) == false)
+        #expect(carb(offsetHours: 3.8)?.isWithinEditWindow(now: now, maxFutureHours: 4) == true)
+        #expect(carb(offsetHours: 4.5)?.isWithinEditWindow(now: now, maxFutureHours: 4) == false)
     }
 
     @Test("actions need Loop APNS, a Loop device and both commands advertised")
