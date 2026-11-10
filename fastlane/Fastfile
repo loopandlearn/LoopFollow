@@ -78,6 +78,21 @@ def explain_watch_setup_failure(error, log_dir = nil)
   watch_setup_error! if mentions_watch && missing_app_group
 end
 
+APPLE_ACCOUNT_ERROR_HINTS = {
+  /required agreement|license agreement/i =>
+    "❗️ Apple requires an agreement to be accepted. The Account Holder must sign in at https://developer.apple.com/account " \
+    "and accept the latest agreement (also check Business in App Store Connect), then wait a few minutes and run the action again."
+}.freeze
+
+# Annotates known Apple account problems on the GitHub Actions run summary, whichever lane hits them.
+error do |_lane, exception|
+  next unless ENV["GITHUB_ACTIONS"]
+
+  APPLE_ACCOUNT_ERROR_HINTS.each do |pattern, hint|
+    $stdout.puts("::error::#{hint}") if exception.message.to_s.match?(pattern)
+  end
+end
+
 platform :ios do
   desc "Build Loop Follow"
   lane :build_LoopFollow do
