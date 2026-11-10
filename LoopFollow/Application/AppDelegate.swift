@@ -299,6 +299,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             Task { await HubClient.shared.refreshStatus() }
         }
 
+        // A hub alarm ringing as a system alarm arrives passive; it still becomes the
+        // current alarm while the hub drives the alarms, so the in-app snooze acts on it.
+        if HubClient.shared.drivesAlarms,
+           let hubAlarm = content.userInfo["lfhubAlarmId"] as? String, let alarmID = UUID(uuidString: hubAlarm)
+        {
+            HubClient.shared.adoptHubAlarm(alarmID)
+        }
+
         // Suppress notifications iOS routes here that we never intended to surface:
         // the Live Activity push-to-start uses interruption-level: passive with empty
         // title/body and must not produce a banner or sound when LF is foregrounded.
@@ -306,10 +314,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         if content.interruptionLevel == .passive || (content.title.isEmpty && content.body.isEmpty) {
             completionHandler(content.badge != nil ? [.badge] : [])
             return
-        }
-
-        if let hubAlarm = content.userInfo["lfhubAlarmId"] as? String, let alarmID = UUID(uuidString: hubAlarm) {
-            HubClient.shared.adoptHubAlarm(alarmID)
         }
 
         // The hub's Speak BG: the app on screen shows the reading, so only the speech plays.

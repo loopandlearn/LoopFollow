@@ -1094,6 +1094,11 @@ final class HubClient {
         }
     }
 
+    /// Whether this is the alarm the hub is sounding, as adopted here.
+    @MainActor func isAdopted(_ alarmID: UUID) -> Bool {
+        adoptedAlarm == alarmID
+    }
+
     /// The hub no longer sounds the adopted alarm. While the hub drives the alarms it
     /// stops being the current alarm, without telling the hub it was handled; while
     /// the app alarms itself, its own check decides.
