@@ -139,6 +139,7 @@
 		DD57A7C02F7000000000000D /* Exceptions for "Shared" folder in "LoopFollowWatch" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+					CarPlayWidgetState.swift,
 					GlucoseLiveActivityAttributes.swift,
 					LAAppGroupSettings.swift,
 					LALivenessMarker.swift,
@@ -149,6 +150,7 @@
 		DD57A7C02F7000000000000E /* Exceptions for "Shared" folder in "LoopFollowWatchWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+					CarPlayWidgetState.swift,
 					GlucoseLiveActivityAttributes.swift,
 					LAAppGroupSettings.swift,
 					LALivenessMarker.swift,

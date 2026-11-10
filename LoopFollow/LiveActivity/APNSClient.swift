@@ -101,6 +101,63 @@ class APNSClient {
         }
     }
 
+    // MARK: - Send Widget Update (iOS 26+)
+
+    enum WidgetPushResult {
+        case sent
+        /// The token is no longer valid; the widget hands over a new one.
+        case tokenInvalid
+        case failed
+    }
+
+    /// Asks WidgetKit to reload LoopFollow's widgets. The payload carries no
+    /// data: the widget reads the App Group when it rebuilds its timeline.
+    /// The system rations these and delivers them when it chooses.
+    func sendWidgetUpdate(pushToken: String) async -> WidgetPushResult {
+        guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: lfKeyId, teamId: lfTeamId, apnsKey: lfApnsKey) else {
+            LogManager.shared.log(category: .carPlay, message: "Widget push skipped: no APNs key to sign it", isDebug: true)
+            return .failed
+        }
+
+        guard let url = URL(string: "\(apnsHost)/3/device/\(pushToken)"),
+              let payload = try? JSONSerialization.data(withJSONObject: ["aps": ["content-changed": true]])
+        else {
+            return .failed
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("bearer \(jwt)", forHTTPHeaderField: "authorization")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.setValue("\(bundleID).push-type.widgets", forHTTPHeaderField: "apns-topic")
+        request.setValue("widgets", forHTTPHeaderField: "apns-push-type")
+        request.httpBody = payload
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else { return .failed }
+            let body = String(data: data, encoding: .utf8) ?? ""
+            switch httpResponse.statusCode {
+            case 200:
+                LogManager.shared.log(category: .carPlay, message: "Widget push sent", isDebug: true)
+                return .sent
+            case 403:
+                JWTManager.shared.invalidateCache()
+                LogManager.shared.log(category: .carPlay, message: "Widget push JWT rejected (403): \(body)", isDebug: true)
+                return .failed
+            case 400 where body.contains("BadDeviceToken"), 404, 410:
+                LogManager.shared.log(category: .carPlay, message: "Widget push token invalid (\(httpResponse.statusCode)): \(body)", isDebug: true)
+                return .tokenInvalid
+            default:
+                LogManager.shared.log(category: .carPlay, message: "Widget push failed (\(httpResponse.statusCode)): \(body)", isDebug: true)
+                return .failed
+            }
+        } catch {
+            LogManager.shared.log(category: .carPlay, message: "Widget push error: \(error.localizedDescription)", isDebug: true)
+            return .failed
+        }
+    }
+
     // MARK: - Send Live Activity Start (push-to-start, iOS 17.2+)
 
     enum PushToStartResult {
@@ -223,6 +280,7 @@ class APNSClient {
             "aps": [
                 "timestamp": Int(Date().timeIntervalSince1970),
                 "event": "update",
+                "stale-date": Int(state.snapshot.staleDate().timeIntervalSince1970),
                 "content-state": contentState,
             ],
         ]
@@ -248,6 +306,9 @@ class APNSClient {
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }
         if let override = snapshot.override { snapshotDict["override"] = override }
         if let overrideEndAt = snapshot.overrideEndAt { snapshotDict["overrideEndAt"] = overrideEndAt }
+        if let overridePercent = snapshot.overridePercent { snapshotDict["overridePercent"] = overridePercent }
+        if let overrideRangeLowMgdl = snapshot.overrideRangeLowMgdl { snapshotDict["overrideRangeLowMgdl"] = overrideRangeLowMgdl }
+        if let overrideRangeHighMgdl = snapshot.overrideRangeHighMgdl { snapshotDict["overrideRangeHighMgdl"] = overrideRangeHighMgdl }
         if let tempTargetMgdl = snapshot.tempTargetMgdl { snapshotDict["tempTargetMgdl"] = tempTargetMgdl }
         if let tempTargetEndAt = snapshot.tempTargetEndAt { snapshotDict["tempTargetEndAt"] = tempTargetEndAt }
         if let recBolus = snapshot.recBolus { snapshotDict["recBolus"] = recBolus }

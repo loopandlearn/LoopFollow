@@ -72,6 +72,10 @@ extension MainViewController {
 
             AlarmManager.shared.checkAlarms(data: finalAlarmData)
 
+            #if !targetEnvironment(macCatalyst)
+                CarPlayWidgetPublisher.publish(alarmData: finalAlarmData, readings: self.bgData)
+            #endif
+
             TaskScheduler.shared.rescheduleTask(id: .alarmCheck, to: Date().addingTimeInterval(60))
         }
     }

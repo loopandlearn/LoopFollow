@@ -224,7 +224,8 @@ platform :ios do
     ])
 
     configure_bundle_id("LoopFollow Live Activity Extension", LA_IDENTIFIER, [
-      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS
+      Spaceship::ConnectAPI::BundleIdCapability::Type::APP_GROUPS,
+      Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
     ])
 
     configure_bundle_id("LoopFollow Watch App", WATCH_IDENTIFIER, [

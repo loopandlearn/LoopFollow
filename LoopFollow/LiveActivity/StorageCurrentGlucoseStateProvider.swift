@@ -52,6 +52,18 @@ struct StorageCurrentGlucoseStateProvider: CurrentGlucoseStateProviding {
         Observable.shared.overrideEndAt.value
     }
 
+    var overridePercent: Int? {
+        Observable.shared.overridePercent.value
+    }
+
+    var overrideRangeLowMgdl: Double? {
+        Observable.shared.overrideRangeLowMgdl.value
+    }
+
+    var overrideRangeHighMgdl: Double? {
+        Observable.shared.overrideRangeHighMgdl.value
+    }
+
     var tempTargetMgdl: Double? {
         Observable.shared.tempTarget.value?.doubleValue(for: .milligramsPerDeciliter)
     }
