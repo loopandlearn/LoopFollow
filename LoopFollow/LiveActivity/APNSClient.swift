@@ -223,6 +223,7 @@ class APNSClient {
             "aps": [
                 "timestamp": Int(Date().timeIntervalSince1970),
                 "event": "update",
+                "stale-date": Int(state.snapshot.staleDate().timeIntervalSince1970),
                 "content-state": contentState,
             ],
         ]
@@ -248,6 +249,9 @@ class APNSClient {
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }
         if let override = snapshot.override { snapshotDict["override"] = override }
         if let overrideEndAt = snapshot.overrideEndAt { snapshotDict["overrideEndAt"] = overrideEndAt }
+        if let overridePercent = snapshot.overridePercent { snapshotDict["overridePercent"] = overridePercent }
+        if let overrideRangeLowMgdl = snapshot.overrideRangeLowMgdl { snapshotDict["overrideRangeLowMgdl"] = overrideRangeLowMgdl }
+        if let overrideRangeHighMgdl = snapshot.overrideRangeHighMgdl { snapshotDict["overrideRangeHighMgdl"] = overrideRangeHighMgdl }
         if let tempTargetMgdl = snapshot.tempTargetMgdl { snapshotDict["tempTargetMgdl"] = tempTargetMgdl }
         if let tempTargetEndAt = snapshot.tempTargetEndAt { snapshotDict["tempTargetEndAt"] = tempTargetEndAt }
         if let recBolus = snapshot.recBolus { snapshotDict["recBolus"] = recBolus }

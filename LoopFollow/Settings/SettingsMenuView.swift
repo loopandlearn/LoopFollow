@@ -213,7 +213,7 @@ enum SettingsRoute: Hashable, Identifiable {
             case .liveActivity: return [
                     SettingsLeaf("Enable Live Activity"),
                     SettingsLeaf("Restart Live Activity"),
-                    SettingsLeaf("Grid Slots", ["carplay", "watch"]),
+                    SettingsLeaf("Grid Slots", ["carplay", "watch", "status line", "tight layout"]),
                 ]
         #endif
         case .remote: return [

@@ -196,7 +196,7 @@ final class LiveActivityManager {
         )
         let content = ActivityContent(
             state: state,
-            staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
+            staleDate: snapshot.staleDate(),
             relevanceScore: 100.0,
         )
 
@@ -376,11 +376,11 @@ final class LiveActivityManager {
         }
 
         let now = Date().timeIntervalSince1970
-        let staleDatePassed = activity.content.staleDate.map { $0 <= Date() } ?? false
-        if staleDatePassed {
+        let renewBy = Storage.shared.laRenewBy.value
+        if renewBy > 0, now >= renewBy {
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] liveness check: staleDate already passed"
+                message: "[LA] liveness check: renewal deadline already passed"
             )
             return true
         }
@@ -413,6 +413,15 @@ final class LiveActivityManager {
     /// request fails, the existing LA still has hours left, so no fallback fires.
     static let opportunisticRenewalThreshold: TimeInterval = 4 * 3600
     static let extensionLivenessGrace: TimeInterval = 15 * 60
+
+    /// Whether a running activity must be replaced instead of reused. Only the
+    /// renewal clock decides. The activity's stale date does not: it says the last
+    /// reading has aged, which a new activity would not fix. An activity with no
+    /// stored deadline is replaced because `renewIfNeeded` could never renew it,
+    /// leaving iOS to end it at 8 hours.
+    static func existingActivityNeedsReplacing(renewBy: TimeInterval, renewalFailed: Bool, now: TimeInterval) -> Bool {
+        renewalFailed || renewBy <= 0 || now >= renewBy - renewalWarning
+    }
 
     /// Base backoff after a 429 for push-to-start; doubled on each subsequent 429,
     /// capped at `pushToStartMaxBackoff`. Reset to base after a successful send.
@@ -502,15 +511,14 @@ final class LiveActivityManager {
         let startReason = nextStartReasonOverride ?? "user-start"
         nextStartReasonOverride = nil
 
-        // If an activity is already running and not stale we adopt/reuse it
+        // If an activity is already running and not due for renewal we adopt/reuse it
         // (covers warm starts where the LA survived a relaunch); only truly new
         // starts go through createActivity (local when foreground, APNs otherwise).
         if let existing = Activity<GlucoseLiveActivityAttributes>.activities.first {
             let renewBy = Storage.shared.laRenewBy.value
             let now = Date().timeIntervalSince1970
-            let staleDatePassed = existing.content.staleDate.map { $0 <= Date() } ?? false
-            let inRenewalWindow = renewBy > 0 && now >= renewBy - LiveActivityManager.renewalWarning
-            let needsRestart = Storage.shared.laRenewalFailed.value || inRenewalWindow || staleDatePassed
+            let renewalFailed = Storage.shared.laRenewalFailed.value
+            let needsRestart = LiveActivityManager.existingActivityNeedsReplacing(renewBy: renewBy, renewalFailed: renewalFailed, now: now)
             if !needsRestart {
                 // Opportunistic renewal: the LA is healthy but in the back half
                 // of its 8-hour lifetime and the app is open — replace it locally
@@ -530,7 +538,7 @@ final class LiveActivityManager {
             }
             LogManager.shared.log(
                 category: .general,
-                message: "[LA] existing activity is stale on startIfNeeded — replacing (staleDatePassed=\(staleDatePassed), inRenewalWindow=\(inRenewalWindow))"
+                message: "[LA] existing activity needs renewal on startIfNeeded — replacing (renewalFailed=\(renewalFailed), renewBy=\(renewBy), now=\(now))"
             )
             createActivity(reason: startReason, oldActivity: existing)
             return
@@ -753,10 +761,10 @@ final class LiveActivityManager {
             reason: reason,
             producedAt: Date(),
         )
-        let staleDate = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
+        let renewBy = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
         let content = ActivityContent(
             state: state,
-            staleDate: staleDate,
+            staleDate: workingSnapshot.staleDate(),
             relevanceScore: 100.0,
         )
 
@@ -770,7 +778,7 @@ final class LiveActivityManager {
                 category: .general,
                 message: "[LA] local create (\(reason)) succeeded id=\(activity.id) seq=\(nextSeq)"
             )
-            Storage.shared.laRenewBy.value = staleDate.timeIntervalSince1970
+            Storage.shared.laRenewBy.value = renewBy.timeIntervalSince1970
             Storage.shared.laRenewalFailed.value = false
             cancelRenewalFailedNotification()
             pendingForegroundRestart = false
@@ -930,7 +938,7 @@ final class LiveActivityManager {
             reason: reason,
             producedAt: Date(),
         )
-        let staleDate = Date().addingTimeInterval(LiveActivityManager.renewalThreshold)
+        let staleDate = freshSnapshot.staleDate()
 
         let tail = String(token.suffix(8))
         LogManager.shared.log(
@@ -1084,7 +1092,7 @@ final class LiveActivityManager {
             return
         }
         if current == nil,
-           let existing = Activity<GlucoseLiveActivityAttributes>.activities.first(where: { $0.activityState == .active })
+           let existing = firstUpdatableActivity
         {
             // Skip activities already in .ended/.dismissed — those are corpses
             // (typically post-410 ends pending iOS dismissal). Binding to them
@@ -1108,6 +1116,14 @@ final class LiveActivityManager {
         }
     }
 
+    /// The first activity that can still take updates. `.stale` counts: it only
+    /// means the last reading has aged, and the next update clears it.
+    private var firstUpdatableActivity: Activity<GlucoseLiveActivityAttributes>? {
+        Activity<GlucoseLiveActivityAttributes>.activities.first {
+            $0.activityState == .active || $0.activityState == .stale
+        }
+    }
+
     private func isAppVisibleForLiveActivityStart() -> Bool {
         let scenes = UIApplication.shared.connectedScenes
         return scenes.contains { $0.activationState == .foregroundActive }
@@ -1115,7 +1131,7 @@ final class LiveActivityManager {
 
     func update(snapshot: GlucoseSnapshot, reason: String) {
         if current == nil,
-           let existing = Activity<GlucoseLiveActivityAttributes>.activities.first(where: { $0.activityState == .active })
+           let existing = firstUpdatableActivity
         {
             bind(to: existing, logReason: "bind-existing")
         }
@@ -1145,7 +1161,7 @@ final class LiveActivityManager {
 
             let content = ActivityContent(
                 state: state,
-                staleDate: Date(timeIntervalSince1970: Storage.shared.laRenewBy.value),
+                staleDate: snapshot.staleDate(),
                 relevanceScore: 100.0,
             )
 
