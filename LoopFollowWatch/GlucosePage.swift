@@ -78,7 +78,7 @@ struct GlucosePage: View {
     private func unreliableLine(now: Date) -> some View {
         if let unsure = state.unreliable?.last,
            now.timeIntervalSince(unsure.date) < WatchFormat.staleAfter,
-           unsure.date > (state.snapshot?.updatedAt ?? .distantPast)
+           (state.snapshot?.updatedAt ?? .distantPast) < unsure.date
         {
             Label {
                 Text("\(WatchFormat.glucose(unsure.v, unit: state.snapshot?.unit ?? .mgdl)) not reliable · \(WatchFormat.minutesAgo(unsure.date, now: now))")
