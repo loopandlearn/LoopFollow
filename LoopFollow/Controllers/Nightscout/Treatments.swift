@@ -76,6 +76,7 @@ extension MainViewController {
         var carbs: [[String: AnyObject]] = []
         var temporaryOverride: [[String: AnyObject]] = []
         var temporaryTarget: [[String: AnyObject]] = []
+        var unreliable: [[String: AnyObject]] = []
         var note: [[String: AnyObject]] = []
         var bgCheck: [[String: AnyObject]] = []
         var suspendPump: [[String: AnyObject]] = []
@@ -107,6 +108,8 @@ extension MainViewController {
                 carbs.append(entry)
             case "Temporary Override", "Exercise":
                 temporaryOverride.append(entry)
+            case "Unreliable Glucose":
+                unreliable.append(entry)
             case "Temporary Target":
                 temporaryTarget.append(entry)
             case "Note":
@@ -190,6 +193,8 @@ extension MainViewController {
         if temporaryOverride.count > 0 {
             processNSOverrides(entries: temporaryOverride)
         }
+
+        processNSUnreliableGlucose(entries: unreliable)
 
         if temporaryTarget.count == 0, tempTargetGraphData.count > 0 {
             clearOldTempTarget()

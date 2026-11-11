@@ -86,6 +86,8 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     var statsBasalData: [basalGraphStruct] = []
     var overrideGraphData: [DataStructs.overrideStruct] = []
     var tempTargetGraphData: [DataStructs.tempTargetStruct] = []
+    /// G7 readings the sensor marked unreliable (Trio's "Unreliable Glucose" treatments), oldest first: hollow dots.
+    var unreliableGraphData: [ShareGlucoseData] = []
     var predictionData: [ShareGlucoseData] = []
     var ztPredictionData: [ShareGlucoseData] = []
     var iobPredictionData: [ShareGlucoseData] = []
