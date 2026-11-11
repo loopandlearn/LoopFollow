@@ -150,8 +150,24 @@ enum StandaloneFetcher {
             stats: base?.stats,
             device: base?.device ?? "",
             alarm: nil,
-            remote: remote
+            remote: remote,
+            unreliable: unreliableReadings(treatments, cutoff: cutoff)
         )
+    }
+
+    /// Trio's "Unreliable Glucose" treatments, as the phone reads them (Untethered.swift), in mg/dL.
+    private static func unreliableReadings(_ treatments: [[String: Any]], cutoff: TimeInterval) -> [WatchReading] {
+        treatments.compactMap { entry -> WatchReading? in
+            guard entry["eventType"] as? String == "Unreliable Glucose",
+                  let at = DeviceStatusSummary.date(entry["timestamp"] ?? entry["created_at"]),
+                  at.timeIntervalSince1970 >= cutoff
+            else { return nil }
+            let value = (entry["glucose"] as? NSNumber)?.doubleValue ?? Double(entry["glucose"] as? String ?? "")
+            guard var mgdl = value, mgdl > 0 else { return nil }
+            if let units = entry["units"] as? String, units.lowercased().hasPrefix("mmol") { mgdl *= 18.0182 }
+            return WatchReading(t: at.timeIntervalSince1970, v: mgdl.rounded())
+        }
+        .sorted { $0.t < $1.t }
     }
 
     private static func reading(_ treatment: [String: Any], key: String, cutoff: TimeInterval) -> WatchReading? {

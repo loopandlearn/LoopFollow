@@ -19,6 +19,7 @@ struct GlucosePage: View {
                     AlarmBanner(alarm: alarm)
                 }
                 glucose(now: context.date)
+                unreliableLine(now: context.date)
                 if !isLuminanceReduced {
                     details
                     overrideLine(now: context.date)
@@ -69,6 +70,25 @@ struct GlucosePage: View {
             Text("No BG data")
                 .font(.headline)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The newest reading the G7 marked unreliable, while fresh and newer than the last reliable one, as on the phone.
+    @ViewBuilder
+    private func unreliableLine(now: Date) -> some View {
+        if let unsure = state.unreliable?.last,
+           now.timeIntervalSince(unsure.date) < WatchFormat.staleAfter,
+           unsure.date > (state.snapshot?.updatedAt ?? .distantPast)
+        {
+            Label {
+                Text("\(WatchFormat.glucose(unsure.v, unit: state.snapshot?.unit ?? .mgdl)) not reliable · \(WatchFormat.minutesAgo(unsure.date, now: now))")
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
     }
 
@@ -199,7 +219,8 @@ struct Sparkline: View {
     var body: some View {
         let start = now.addingTimeInterval(-2 * 3600)
         let readings = state.readings.filter { $0.date >= start }
-        let values = readings.map(\.v)
+        let unreliable = (state.unreliable ?? []).filter { $0.date >= start }
+        let values = (readings + unreliable).map(\.v)
         let bottom = min(values.min() ?? state.lowMgdl, state.lowMgdl) - 10
         let top = max(values.max() ?? state.highMgdl, state.highMgdl) + 10
         Chart {
@@ -213,6 +234,14 @@ struct Sparkline: View {
                 PointMark(x: .value("Time", reading.date), y: .value("BG", reading.v))
                     .symbolSize(12)
                     .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+            }
+            ForEach(unreliable, id: \.t) { reading in
+                PointMark(x: .value("Time", reading.date), y: .value("BG", reading.v))
+                    .symbol {
+                        Circle()
+                            .strokeBorder(Color.orange, lineWidth: 1)
+                            .frame(width: WatchChartView.diameter(12), height: WatchChartView.diameter(12))
+                    }
             }
         }
         .chartXScale(domain: start ... now)

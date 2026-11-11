@@ -21,12 +21,13 @@ struct WatchChartView: View {
     var body: some View {
         let window = visibleWindow
         let readings = state.readings.filter { window.contains($0.date) }
+        let unreliable = (state.unreliable ?? []).filter { window.contains($0.date) }
         let predictions = state.predictions.map { line in
             (line.kind, line.points.filter { window.contains($0.date) })
         }
         let cone = state.cone.filter { window.contains($0.date) }
         let overrides = (state.overrides ?? []).filter { $0.endDate > window.lowerBound && $0.startDate < window.upperBound }
-        let top = yTop(readings: readings, predictions: predictions.flatMap(\.1) + cone.map { WatchReading(t: $0.t, v: $0.high) })
+        let top = yTop(readings: readings + unreliable, predictions: predictions.flatMap(\.1) + cone.map { WatchReading(t: $0.t, v: $0.high) })
 
         Chart {
             RuleMark(y: .value("High", state.highMgdl))
@@ -84,6 +85,19 @@ struct WatchChartView: View {
                 )
                 .symbolSize(spanHours <= 3 ? 14 : 6)
                 .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+            }
+
+            // readings the G7 marked unreliable: hollow, so they never read as real ones
+            ForEach(unreliable, id: \.t) { reading in
+                PointMark(
+                    x: .value("Time", reading.date),
+                    y: .value("BG", min(reading.v, top))
+                )
+                .symbol {
+                    Circle()
+                        .strokeBorder(Color.orange, lineWidth: 1)
+                        .frame(width: Self.diameter(spanHours <= 3 ? 14 : 6), height: Self.diameter(spanHours <= 3 ? 14 : 6))
+                }
             }
 
             ForEach(state.carbs.filter { window.contains($0.date) }, id: \.t) { carb in
@@ -185,6 +199,11 @@ struct WatchChartView: View {
     private func markerY(at date: Date, top: Double) -> Double {
         let nearest = state.readings.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }
         return min(nearest?.v ?? 100, top - 30)
+    }
+
+    /// The width of a filled dot of this symbol size (an area), for a hollow one to match.
+    static func diameter(_ symbolSize: CGFloat) -> CGFloat {
+        max(3, (symbolSize / .pi).squareRoot() * 2)
     }
 
     static func color(for kind: WatchPredictionLine.Kind) -> Color {
