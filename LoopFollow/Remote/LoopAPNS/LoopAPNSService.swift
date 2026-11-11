@@ -123,14 +123,30 @@ class LoopAPNSService {
     }
 
     /// Sends a command whose only confirmation is Loop's return push, so the encrypted return block is mandatory.
-    private func sendConfirmedCommand(_ payload: [String: Any], otp: String, completion: @escaping (Bool, String?) -> Void) {
-        guard let encryptedReturnInfo = encryptedReturnNotification(otp: otp) else {
+    /// `tooLargeMessage` explains a push over the APNs size limit; such a push is never sent.
+    private func sendConfirmedCommand(
+        _ payload: [String: Any],
+        otp: String,
+        tooLargeMessage: ((Int) -> String)? = nil,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        guard let payload = confirmedPayload(payload, otp: otp) else {
             completion(false, Self.returnNotificationRequiredMessage)
             return
         }
+        if let tooLargeMessage, let size = try? LoopAPNSCommands.apnsBody(payload).count, size > APNSDelivery.maxPayloadBytes {
+            LogManager.shared.log(category: .apns, message: "Command not sent: \(size) bytes")
+            completion(false, tooLargeMessage(size))
+            return
+        }
+        sendRemoteCommand(payload, completion: completion)
+    }
+
+    private func confirmedPayload(_ payload: [String: Any], otp: String) -> [String: Any]? {
+        guard let encryptedReturnInfo = encryptedReturnNotification(otp: otp) else { return nil }
         var payload = payload
         payload["encrypted_return_notification"] = encryptedReturnInfo
-        sendRemoteCommand(payload, completion: completion)
+        return payload
     }
 
     /// Deletes the Loop carb entry with this `syncIdentifier`. Requires the Loop remote carb edit patch.
@@ -163,8 +179,59 @@ class LoopAPNSService {
 
     /// Switches Loop to the saved profile `name`. Requires the Loop remote profile patch.
     func sendProfileSwitch(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
-        LogManager.shared.log(category: .apns, message: "Sending profile switch to \(name) fingerprint=\(fingerprint)")
+        LogManager.shared.log(category: .apns, message: "Sending profile switch fingerprint=\(fingerprint)")
         sendConfirmedCommand(LoopAPNSCommands.profileSwitchCommandPayload(name: name, fingerprint: fingerprint, otp: otp), otp: otp, completion: completion)
+    }
+
+    /// Creates, updates or renames a Loop profile. Requires a Loop that lists `profile-save` in its remote commands.
+    func sendProfileSave(
+        name: String,
+        originalName: String?,
+        baseFingerprint: String?,
+        values: TherapyProfileValues,
+        otp: String,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        LogManager.shared.log(category: .apns, message: "Sending profile save base=\(baseFingerprint ?? "-") new=\(values.fingerprint)")
+        sendConfirmedCommand(
+            LoopAPNSCommands.profileSaveCommandPayload(name: name, originalName: originalName, baseFingerprint: baseFingerprint, values: values, otp: otp),
+            otp: otp,
+            tooLargeMessage: ProfilePushSize.tooLargeMessage,
+            completion: completion
+        )
+    }
+
+    func sendProfileDelete(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending profile delete fingerprint=\(fingerprint)")
+        sendConfirmedCommand(LoopAPNSCommands.profileDeleteCommandPayload(name: name, fingerprint: fingerprint, otp: otp), otp: otp, completion: completion)
+    }
+
+    /// Replaces Loop's scheduled switches. Requires a Loop that lists `profile-scheduled-switches-save` in its remote commands.
+    func sendScheduledSwitchesSave(entries: [ScheduledProfileSwitch], baseFingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending scheduled switches save base=\(baseFingerprint) new=\(ScheduledProfileSwitch.fingerprint(entries))")
+        sendConfirmedCommand(
+            LoopAPNSCommands.scheduledSwitchesSaveCommandPayload(entries: entries, baseFingerprint: baseFingerprint, otp: otp),
+            otp: otp,
+            tooLargeMessage: ScheduledSwitchesPushSize.tooLargeMessage,
+            completion: completion
+        )
+    }
+
+    /// The size of the push a scheduled switches save would send. Nil when the push can not be built.
+    func scheduledSwitchesSavePushSize(entries: [ScheduledProfileSwitch], baseFingerprint: String) -> Int? {
+        let otp = "000000"
+        let payload = LoopAPNSCommands.scheduledSwitchesSaveCommandPayload(entries: entries, baseFingerprint: baseFingerprint, otp: otp)
+        guard let confirmed = confirmedPayload(payload, otp: otp) else { return nil }
+        return try? LoopAPNSCommands.apnsBody(confirmed).count
+    }
+
+    /// The size of the push a profile save would send, with a stand-in one-time code of the same length.
+    /// Nil when the push can not be built (LoopFollow's own APNs credentials are missing).
+    func profileSavePushSize(name: String, originalName: String?, baseFingerprint: String?, values: TherapyProfileValues) -> Int? {
+        let otp = "000000"
+        let payload = LoopAPNSCommands.profileSaveCommandPayload(name: name, originalName: originalName, baseFingerprint: baseFingerprint, values: values, otp: otp)
+        guard let confirmed = confirmedPayload(payload, otp: otp) else { return nil }
+        return try? LoopAPNSCommands.apnsBody(confirmed).count
     }
 
     /// Sends carbs via APNS push notification

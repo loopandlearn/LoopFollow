@@ -6,6 +6,13 @@ import Foundation
 /// Sends one remote command push to the Loop or Trio app. Used by the phone and
 /// by the watch when it sends without the phone.
 enum APNSDelivery {
+    /// The largest payload APNs accepts.
+    static let maxPayloadBytes = 4096
+
+    static func tooLargeMessage(size: Int) -> String {
+        "The command is too large to send remotely (\(size) of \(maxPayloadBytes) bytes)."
+    }
+
     /// Calls `completion` on an arbitrary queue with success, or the reason for failure.
     static func send(
         body: Data,
@@ -19,6 +26,12 @@ enum APNSDelivery {
         collapseID: String? = nil,
         completion: @escaping (Bool, String?) -> Void
     ) {
+        guard body.count <= maxPayloadBytes else {
+            let errorMessage = tooLargeMessage(size: body.count)
+            LogManager.shared.log(category: .apns, message: errorMessage)
+            completion(false, errorMessage)
+            return
+        }
         guard let jwt = JWTManager.shared.getOrGenerateJWT(keyId: keyId, teamId: teamId, apnsKey: apnsKey) else {
             let errorMessage = "Failed to generate JWT, please check that the APNS Key ID, APNS Key and Team ID are correct."
             LogManager.shared.log(category: .apns, message: errorMessage)

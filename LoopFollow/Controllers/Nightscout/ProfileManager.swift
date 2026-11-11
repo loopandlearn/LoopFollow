@@ -64,10 +64,11 @@ final class ProfileManager {
 
     func loadProfile(from profileData: NSProfile) {
         guard let store = profileData.store[profileData.defaultProfile] else {
+            LogManager.shared.log(category: .nightscout, message: "Profile document not loaded, its active entry could not be read")
             return
         }
 
-        units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
+        units = profileData.units(of: store).lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         defaultProfile = profileData.defaultProfile
 
         timezone = getTimeZone(from: store.timezone)
@@ -126,7 +127,7 @@ final class ProfileManager {
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
         Storage.shared.remoteCommands.value = profileData.remoteCommands ?? []
-        Observable.shared.loopProfiles.set(LoopProfileSet(profileData))
+        Observable.shared.therapyProfiles.set(TherapyProfileSet(profileData))
     }
 
     func currentISF() -> HKQuantity? {
@@ -268,6 +269,6 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
-        Observable.shared.loopProfiles.set(nil)
+        Observable.shared.therapyProfiles.set(nil)
     }
 }

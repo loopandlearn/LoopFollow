@@ -7,6 +7,7 @@ struct TrioRemoteControlView: View {
     @ObservedObject var viewModel: TrioRemoteControlViewModel
     @ObservedObject private var activeOverrideNote = Observable.shared.override
     @ObservedObject private var activeTempTarget = Observable.shared.tempTarget
+    @ObservedObject private var remoteCommands = Storage.shared.remoteCommands
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -22,6 +23,9 @@ struct TrioRemoteControlView: View {
                     CommandButtonView(command: "Bolus", iconName: "syringe", destination: BolusView())
                     CommandButtonView(command: "Temp Target", iconName: "scope", destination: TempTargetView(), isActive: activeTempTarget.value != nil)
                     CommandButtonView(command: "Overrides", iconName: "slider.horizontal.3", destination: OverrideView(), isActive: activeOverrideNote.value != nil)
+                    if ProfileRemote.trio.supportsAny(in: remoteCommands.value) {
+                        CommandButtonView(command: "Profiles", iconName: "arrow.triangle.2.circlepath", destination: TherapyProfilesView(remote: .trio))
+                    }
                 }
                 .padding(.horizontal)
 
