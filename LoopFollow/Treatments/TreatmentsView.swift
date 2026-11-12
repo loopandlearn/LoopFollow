@@ -616,7 +616,7 @@ struct TreatmentDetailView: View {
             Text(deleteDialogMessage)
         }
         .onChange(of: commandState) { _, state in
-            guard let commandKey, case .done(success: true, message: _) = state else { return }
+            guard let commandKey, case .done(success: true, message: _, outdated: _) = state else { return }
             commandTracker.consume(key: commandKey)
             presentationMode.wrappedValue.dismiss()
         }
@@ -649,7 +649,7 @@ struct TreatmentDetailView: View {
                 ProgressView().scaleEffect(0.8)
                 Text(pendingText).foregroundColor(.secondary)
             }
-        case let .done(success, message) where !success:
+        case let .done(success, message, _) where !success:
             Text(message)
                 .font(.footnote)
                 .foregroundColor(.red)

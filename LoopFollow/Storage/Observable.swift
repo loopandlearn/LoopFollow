@@ -61,8 +61,8 @@ class Observable {
 
     var loopFollowDeviceToken = ObservableValue<String>(default: "")
 
-    /// Saved profiles from the latest Loop profile upload; nil until one is loaded.
-    var loopProfiles = ObservableValue<LoopProfileSet?>(default: nil)
+    /// Saved profiles from the latest Loop or Trio profile upload; nil until one is loaded.
+    var therapyProfiles = ObservableValue<TherapyProfileSet?>(default: nil)
 
     var isNotLooping = ObservableValue<Bool>(default: false)
 
