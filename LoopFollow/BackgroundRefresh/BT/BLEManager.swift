@@ -114,7 +114,7 @@ class BLEManager: NSObject, ObservableObject {
             case .omnipodDash:
                 activeDevice = OmnipodDashHeartbeatBluetoothTransmitter(address: device.id.uuidString, name: device.name, bluetoothDeviceDelegate: self)
                 activeDevice?.connect()
-            case .silentTune, .none:
+            case .silentTune, .none, .hub:
                 return
             }
         } else {

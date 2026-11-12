@@ -9,13 +9,32 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
     case rileyLink = "RileyLink"
     case dexcom = "Dexcom"
     case omnipodDash = "Omnipod Dash"
+    case hub = "LoopFollow Hub"
+
+    /// The mode the app runs in: the selected one, except that LoopFollow Hub runs
+    /// as Silent Tune until the hub drives the alarms.
+    static var inEffect: BackgroundRefreshType {
+        let selected = Storage.shared.backgroundRefreshType.value
+        return selected == .hub && !HubClient.shared.drivesAlarms ? .silentTune : selected
+    }
+
+    /// The app keeps itself running in the background (and so is watched for
+    /// stalls). In Hub mode the hub does the work and the app may be suspended.
+    var keepsAppRunning: Bool {
+        switch self {
+        case .silentTune, .rileyLink, .dexcom, .omnipodDash:
+            return true
+        case .none, .hub:
+            return false
+        }
+    }
 
     /// Indicates if the device type uses Bluetooth
     var isBluetooth: Bool {
         switch self {
         case .rileyLink, .dexcom, .omnipodDash:
             return true
-        case .silentTune, .none:
+        case .silentTune, .none, .hub:
             return false
         }
     }
@@ -28,7 +47,7 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
             return 3 * 60
         case .dexcom:
             return 5 * 60
-        case .silentTune, .none:
+        case .silentTune, .none, .hub:
             return nil
         }
     }
@@ -37,7 +56,7 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         switch self {
         case .rileyLink:
             return true
-        case .dexcom, .omnipodDash, .silentTune, .none:
+        case .dexcom, .omnipodDash, .silentTune, .none, .hub:
             return false
         }
     }
@@ -68,7 +87,7 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
             }
             return false
 
-        case .silentTune, .none:
+        case .silentTune, .none, .hub:
             return false
         }
     }

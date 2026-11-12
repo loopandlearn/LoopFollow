@@ -17,6 +17,8 @@ final class OnboardingViewModel: ObservableObject {
         case nightscout
         case dexcom
         case copyFromPhone
+        /// Join a family's LF Hub with an invite; the hub brings the data source.
+        case hub
     }
 
     /// A single recommended alarm offered on the alarms phase. Display fields are
@@ -55,6 +57,9 @@ final class OnboardingViewModel: ObservableObject {
     /// Set once a QR settings import on the "copy from another phone" path
     /// succeeds, so the connect phase can be considered complete.
     @Published var didImportSettings = false
+
+    /// How this phone joined a family's LF Hub, once it has.
+    @Published var hubJoin: HubClient.Join?
 
     /// Whether the notification permission is still undecided. The notifications
     /// phase is only shown when it is — there's no point prompting someone who has
@@ -122,7 +127,7 @@ final class OnboardingViewModel: ObservableObject {
     var canProceed: Bool {
         switch step {
         case .welcome, .overview, .units, .generalAlarms, .alarms,
-             .tabOrder, .notifications, .telemetry, .completion:
+             .tabOrder, .notifications, .telemetry, .hubPermissions, .completion:
             return true
         case .dataSource:
             return dataSource != nil
@@ -131,6 +136,7 @@ final class OnboardingViewModel: ObservableObject {
             case .nightscout: return nightscoutViewModel.isConnected || nightscoutViewModel.provisionedTokenPending
             case .dexcom: return dexcomViewModel.canVerifyProceed
             case .copyFromPhone: return didImportSettings
+            case .hub: return hubJoin != nil
             case .none: return false
             }
         }
@@ -180,6 +186,19 @@ final class OnboardingViewModel: ObservableObject {
         // the connection screen; everyone else sets them up.
         if !isAlreadyConfigured {
             steps.append(contentsOf: [.dataSource, .connect])
+        }
+
+        // Joining a family hub brings the data source, and a replaced or copied phone's
+        // alarms and settings; one permissions phase covers what the hub needs.
+        if dataSource == .hub {
+            if hubJoin == nil || hubJoin == .new {
+                steps.append(.units)
+                if alarmsOffered {
+                    steps.append(contentsOf: [.generalAlarms, .alarms])
+                }
+            }
+            steps.append(contentsOf: [.hubPermissions, .completion])
+            return steps
         }
 
         steps.append(.units)
@@ -276,7 +295,9 @@ final class OnboardingViewModel: ObservableObject {
     /// Finish setup: seed selected alarms, mark units/onboarding complete, and
     /// kick a refresh so the home screen loads data immediately.
     func finish() {
-        persistSeededAlarms()
+        if activeSteps.contains(.alarms) {
+            persistSeededAlarms()
+        }
         Storage.shared.hasConfiguredUnits.value = true
         Storage.shared.hasCompletedOnboarding.value = true
         onClose()

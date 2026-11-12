@@ -7,7 +7,8 @@ import Foundation
 
 extension MainViewController {
     func evaluateSpeakConditions(currentValue: Int, previousValue: Int) {
-        guard Storage.shared.speakBG.value else {
+        // In LoopFollow Hub mode the hub speaks each reading through a notification.
+        guard Storage.shared.speakBG.value, !HubClient.shared.drivesSpeech else {
             return
         }
 
@@ -65,68 +66,6 @@ extension MainViewController {
         LogManager.shared.log(category: .general, message: "No condition met for speaking.", isDebug: true)
     }
 
-    struct AnnouncementTexts {
-        var stable: String
-        var increase: String
-        var decrease: String
-        var currentBGIs: String
-
-        static func forLanguage(_ language: String) -> AnnouncementTexts {
-            switch language {
-            case "fr":
-                return AnnouncementTexts(
-                    stable: "et c'est stable",
-                    increase: "et c'est monté de",
-                    decrease: "et c'est descendu de",
-                    currentBGIs: "La glycémie est"
-                )
-            case "it":
-                return AnnouncementTexts(
-                    stable: "ed è stabile",
-                    increase: "ed è salita di",
-                    decrease: "ed è scesa di",
-                    currentBGIs: "Glicemia attuale è"
-                )
-            case "sk":
-                return AnnouncementTexts(
-                    stable: "a je stabilná",
-                    increase: "a stúpla o",
-                    decrease: "a klesla o",
-                    currentBGIs: "Aktuálna glykémia je"
-                )
-            case "sv":
-                return AnnouncementTexts(
-                    stable: "och det är stabilt",
-                    increase: "och det har ökat med",
-                    decrease: "och det har minskat med",
-                    currentBGIs: "Blodsockret är"
-                )
-            case "en": fallthrough
-            default:
-                return AnnouncementTexts(
-                    stable: "and it is stable",
-                    increase: "and it is up",
-                    decrease: "and it is down",
-                    currentBGIs: "Glucose is"
-                )
-            }
-        }
-    }
-
-    enum LanguageVoiceMapping {
-        static let voiceLanguageMap: [String: String] = [
-            "en": "en-US",
-            "fr": "fr-FR",
-            "it": "it-IT",
-            "sk": "sk-SK",
-            "sv": "sv-SE",
-        ]
-
-        static func voiceLanguageCode(forAppLanguage appLanguage: String) -> String {
-            return voiceLanguageMap[appLanguage, default: "en-US"]
-        }
-    }
-
     // Speaks the current blood glucose value and the change from the previous value.
     func speakBG(currentValue: Int, previousValue: Int) {
         // 1. Check if there's a new, unspoken BG value
@@ -156,21 +95,11 @@ extension MainViewController {
         lastSpokenBGDate = lastBG.date
 
         // 4. Generate announcement text.
-        let bloodGlucoseDifference = currentValue - previousValue
         let preferredLanguage = Storage.shared.speakLanguage.value
-        let voiceLanguageCode = LanguageVoiceMapping.voiceLanguageCode(forAppLanguage: preferredLanguage)
-        let texts = AnnouncementTexts.forLanguage(preferredLanguage)
-        let negligibleThreshold = 3
-        let localizedCurrentValue = Localizer.toDisplayUnits(String(currentValue)).replacingOccurrences(of: ",", with: ".")
-        let announcementText: String
-
-        if abs(bloodGlucoseDifference) <= negligibleThreshold {
-            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(texts.stable)"
-        } else {
-            let directionText = bloodGlucoseDifference < 0 ? texts.decrease : texts.increase
-            let absoluteDifference = Localizer.toDisplayUnits(String(abs(bloodGlucoseDifference))).replacingOccurrences(of: ",", with: ".")
-            announcementText = "\(texts.currentBGIs) \(localizedCurrentValue) \(directionText) \(absoluteDifference)"
-        }
+        let voiceLanguageCode = BGAnnouncement.voiceLanguageCode(forAppLanguage: preferredLanguage)
+        let announcementText = BGAnnouncement.text(current: currentValue, previous: previousValue,
+                                                   language: preferredLanguage,
+                                                   mmol: UnitSettingsStore.shared.glucoseUnit == .mmolL)
 
         // 5. Speak.
         let speechUtterance = AVSpeechUtterance(string: announcementText)

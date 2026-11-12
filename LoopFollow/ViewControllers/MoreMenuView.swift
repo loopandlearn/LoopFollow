@@ -276,7 +276,10 @@ struct MoreMenuView: View {
             onShare: { noticeText in
                 let presenter = UIApplication.shared.topMost
                 presenter?.dismiss(animated: true) {
-                    presentLogShareSheet(noticeText: noticeText, logFiles: files)
+                    Task { @MainActor in
+                        let hubFiles = await HubClient.shared.diagnosticLogFiles()
+                        presentLogShareSheet(noticeText: noticeText, logFiles: files + hubFiles)
+                    }
                 }
             }
         )

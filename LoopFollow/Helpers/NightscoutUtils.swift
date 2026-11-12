@@ -65,21 +65,12 @@ class NightscoutUtils {
         }
     }
 
-    static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], completion: @escaping (Result<T, Error>) -> Void) {
-        let baseURL = Storage.shared.url.value
-        let token = Storage.shared.token.value
-
-        guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
-            completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-
-        let task = URLSession.shared.dataTask(with: request) { data, _, error in
+    /// `hubPart` names the LF Hub bundle part that answers this request in Hub mode;
+    /// without one, or without the part, the request goes to Nightscout.
+    static func executeRequest<T: Decodable>(eventType: EventType, parameters: [String: String], hubPart: HubBundle.Part? = nil, completion: @escaping (Result<T, Error>) -> Void) {
+        load(eventType: eventType, parameters: parameters, hubPart: hubPart) { data, error in
             guard let data = data, error == nil else {
-                completion(.failure(error!))
+                completion(.failure(error ?? NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
                 return
             }
 
@@ -109,24 +100,12 @@ class NightscoutUtils {
                 completion(.failure(error))
             }
         }
-        task.resume()
     }
 
-    static func executeDynamicRequest(eventType: EventType, parameters: [String: String], completion: @escaping (Result<Any, Error>) -> Void) {
-        let baseURL = Storage.shared.url.value
-        let token = Storage.shared.token.value
-
-        guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
-            completion(.failure(NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-
-        let task = URLSession.shared.dataTask(with: request) { data, _, error in
+    static func executeDynamicRequest(eventType: EventType, parameters: [String: String], hubPart: HubBundle.Part? = nil, completion: @escaping (Result<Any, Error>) -> Void) {
+        load(eventType: eventType, parameters: parameters, hubPart: hubPart) { data, error in
             guard let data = data, error == nil else {
-                completion(.failure(error!))
+                completion(.failure(error ?? NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to construct URL"])))
                 return
             }
 
@@ -146,7 +125,38 @@ class NightscoutUtils {
                 completion(.failure(error))
             }
         }
-        task.resume()
+    }
+
+    /// The response bytes: the LF Hub bundle part in Hub mode when there is a current
+    /// one, otherwise a Nightscout request when Nightscout is set up.
+    private static func load(eventType: EventType, parameters: [String: String], hubPart: HubBundle.Part?,
+                             completion: @escaping (Data?, Error?) -> Void)
+    {
+        let fromNightscout = {
+            let baseURL = Storage.shared.url.value
+            let token = Storage.shared.token.value
+            guard let url = NightscoutUtils.constructURL(baseURL: baseURL, token: token, endpoint: eventType.endpoint, parameters: parameters) else {
+                completion(nil, nil)
+                return
+            }
+            var request = URLRequest(url: url)
+            request.cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            URLSession.shared.dataTask(with: request) { data, _, error in completion(data, error) }.resume()
+        }
+
+        guard let hubPart, HubBundle.shared.isActive else {
+            fromNightscout()
+            return
+        }
+        Task {
+            if let data = await HubBundle.shared.data(for: hubPart) {
+                completion(data, nil)
+            } else if IsNightscoutEnabled() {
+                fromNightscout()
+            } else {
+                completion(nil, NSError(domain: "NightscoutUtils", code: -1, userInfo: [NSLocalizedDescriptionKey: "No current LF Hub data and no Nightscout URL"]))
+            }
+        }
     }
 
     static func createURLRequest(url: String, token: String?, path: String) -> URLRequest? {

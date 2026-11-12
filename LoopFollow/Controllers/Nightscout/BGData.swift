@@ -61,7 +61,7 @@ extension MainViewController {
     // NS BG Data Web call
     func webLoadNSBGData(dexData: [ShareGlucoseData] = []) {
         // This kicks it out in the instance where dexcom fails but they aren't using NS &&
-        if !IsNightscoutEnabled() {
+        if !IsNightscoutEnabled(), !HubBundle.shared.hasCurrent(.entries) {
             BannerManager.shared.clear(.nightscout)
             Storage.shared.lastBGChecked.value = Date()
             return
@@ -75,7 +75,7 @@ extension MainViewController {
         // Exclude 'cal' entries
         parameters["find[type][$ne]"] = "cal"
 
-        NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters) { (result: Result<[ShareGlucoseData], Error>) in
+        NightscoutUtils.executeRequest(eventType: .sgv, parameters: parameters, hubPart: .entries) { (result: Result<[ShareGlucoseData], Error>) in
             switch result {
             case let .success(entriesResponse):
                 BannerManager.shared.clear(.nightscout)
@@ -329,7 +329,7 @@ extension MainViewController {
             #endif
 
             // Update contact
-            if Storage.shared.contactEnabled.value {
+            if Storage.shared.contactEnabled.value, !HubClient.shared.isHubMode {
                 self.contactImageUpdater
                     .updateContactImage(
                         bgValue: Observable.shared.bgText.value,

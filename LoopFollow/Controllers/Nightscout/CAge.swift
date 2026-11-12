@@ -14,7 +14,7 @@ extension MainViewController {
             "count": "1",
         ]
 
-        NightscoutUtils.executeRequest(eventType: .cage, parameters: parameters) { (result: Result<[cageData], Error>) in
+        NightscoutUtils.executeRequest(eventType: .cage, parameters: parameters, hubPart: .cage) { (result: Result<[cageData], Error>) in
             switch result {
             case let .success(data):
                 self.updateCage(data: data)

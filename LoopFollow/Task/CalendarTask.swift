@@ -13,7 +13,9 @@ extension MainViewController {
     }
 
     func calendarTaskAction() {
-        if Storage.shared.writeCalendarEvent.value,
+        applyHubModeLimits()
+        if !HubClient.shared.isHubMode,
+           Storage.shared.writeCalendarEvent.value,
            !Storage.shared.calendarIdentifier.value.isEmpty
         {
             writeCalendar()
