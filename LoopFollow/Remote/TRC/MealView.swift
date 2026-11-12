@@ -127,8 +127,8 @@ struct MealView: View {
                         }
                     }
 
-                    Section(header: Text("Schedule")) {
-                        Toggle("Schedule for later", isOn: $isScheduling)
+                    Section(header: Text("Meal Time")) {
+                        Toggle("Adjust meal time", isOn: $isScheduling)
                         if isScheduling {
                             DatePicker(
                                 "Select Time",
@@ -141,7 +141,7 @@ struct MealView: View {
                             .datePickerStyle(CompactDatePickerStyle())
 
                             if bolusAmount.doubleValue(for: .internationalUnit()) > 0 {
-                                Text("Note: The meal will be scheduled, but the bolus is enacted immediately.")
+                                Text("Note: The meal uses the adjusted time, but the bolus is enacted immediately.")
                             }
                         }
                     }
