@@ -41,6 +41,9 @@ struct WatchState: Codable, Equatable {
     var alarm: WatchAlarm?
     /// Present when remote commands from the watch are enabled on the phone.
     var remote: WatchRemoteConfig?
+    /// G7 readings the sensor marked unreliable (Trio's "Unreliable Glucose" treatments), mg/dL, oldest first:
+    /// hollow orange dots, never used as BG; nil from a phone that doesn't send them.
+    var unreliable: [WatchReading]? = nil
 
     func encoded() -> Data? {
         try? JSONEncoder().encode(self)

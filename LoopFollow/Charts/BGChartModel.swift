@@ -116,6 +116,8 @@ final class BGChartModel: ObservableObject {
     }
 
     @Published var bg: [BGPoint] = []
+    /// G7 readings the sensor marked unreliable: hollow orange dots.
+    @Published var unreliable: [BGPoint] = []
     /// Scrub timeline on the BG cadence; rebuilt together with `bg`.
     private(set) var scrubSlots = BGChartScrubSlots(readingDates: [])
     @Published var bgRuns: [BGRun] = []
@@ -451,6 +453,9 @@ final class BGChartModel: ObservableObject {
         scrubSlots = BGChartScrubSlots(readingDates: vc.bgData.map { Date(timeIntervalSince1970: $0.date) })
         bg = vc.bgData.map { BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: colorFor($0.sgv, thresholds: thresholds)) }
         bgRuns = Self.makeRuns(bg)
+        unreliable = vc.unreliableGraphData.map {
+            BGPoint(date: Date(timeIntervalSince1970: $0.date), value: clampSgv($0.sgv), color: .orange)
+        }
 
         // Yesterday comparison overlay (#665): already +24h shifted, dimmed gray, no dots.
         if Storage.shared.showYesterdayLine.value {

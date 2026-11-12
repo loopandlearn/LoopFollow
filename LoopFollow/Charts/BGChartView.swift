@@ -819,6 +819,11 @@ private struct MainBGChart: View {
         "BG\n\(Localizer.toDisplayUnits(String(Int(point.value))))\n\(model.pillTimeString(for: point.date))"
     }
 
+    /// A reading the G7 marked unreliable: its warning in place of "BG".
+    private func unreliablePillText(for point: BGChartModel.BGPoint) -> String {
+        "\(model.pillTimeString(for: point.date))\n⚠︎ not reliable\n\(Localizer.toDisplayUnits(String(Int(point.value))))"
+    }
+
     private func bandPillTexts(at date: Date) -> [String] {
         var texts: [String] = []
         if let band = model.overrides
@@ -889,11 +894,17 @@ private struct MainBGChart: View {
         }
         treatments.sort { $0.date < $1.date }
         let readings = model.bg.filter { slot.contains($0.date) }
+        // readings the G7 marked unreliable: listed after the reliable ones, and on a scrub shown in the pill
+        // where no reliable reading is, since the BG display has nothing for that time
+        let unreliable = model.unreliable.filter { slot.contains($0.date) }
         let bandTexts = bandPillTexts(at: mark)
 
         // Scrubbing shows no pill: the BG display and info table show the
-        // values at the scrubbed time. A tap lists what happened there.
-        let texts = purpose == .tap ? treatments.map(\.pillText) + readings.map(bgPillText) + bandTexts : []
+        // values at the scrubbed time. A tap lists what happened there, readings the G7 marked unreliable after the
+        // reliable ones; a scrub over a block with no reliable reading shows the unreliable one.
+        let texts = purpose == .tap
+            ? treatments.map(\.pillText) + readings.map(bgPillText) + unreliable.map(unreliablePillText) + bandTexts
+            : (readings.isEmpty ? unreliable.map(unreliablePillText) : [])
 
         func distanceToMark(_ date: Date) -> TimeInterval { abs(date.timeIntervalSince(mark)) }
 
@@ -901,6 +912,8 @@ private struct MainBGChart: View {
         let nearestReading = readings.min(by: { distanceToMark($0.date) < distanceToMark($1.date) })
         if let reading = nearestReading {
             value = reading.value
+        } else if let nearest = unreliable.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
+            value = nearest.value
         } else if let nearest = treatments.min(by: { distanceToMark($0.date) < distanceToMark($1.date) }) {
             value = nearest.sgv
         } else if !bandTexts.isEmpty {
@@ -937,6 +950,10 @@ private struct MainBGChart: View {
         if best == nil {
             for p in model.bg {
                 consider(p.date, p.value, bgPillText(for: p), isReading: true)
+            }
+            // the hollow dots the G7 marked unreliable
+            for p in model.unreliable {
+                consider(p.date, p.value, unreliablePillText(for: p))
             }
         }
         if best == nil {
@@ -1494,6 +1511,17 @@ private struct BGChartCanvas: View, Equatable {
                 .symbolSize(isSmall ? 14 : 30)
                 .foregroundStyle(pt.color)
             }
+        }
+        // readings the G7 marked unreliable, also with dots off: hollow, so they never read as real ones
+        ForEach(windowed(model.unreliable) { $0.date }) { pt in
+            PointMark(
+                x: .value("time", pt.date),
+                y: .value("bg", pt.value)
+            )
+            // the size of the normal dots, only hollow
+            .symbol(.circle.strokeBorder(lineWidth: 1.5))
+            .symbolSize(isSmall ? 14 : 30)
+            .foregroundStyle(pt.color)
         }
     }
 

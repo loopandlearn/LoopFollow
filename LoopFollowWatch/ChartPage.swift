@@ -79,6 +79,11 @@ struct ChartScrubView: View {
         let marker = markerDate(now: now)
         let nearest = state.readings.min { abs($0.date.timeIntervalSince(marker)) < abs($1.date.timeIntervalSince(marker)) }
         let reading = nearest.flatMap { abs($0.date.timeIntervalSince(marker)) <= 450 ? $0 : nil }
+        // without a reliable reading there, one the G7 marked unreliable, hollow as on the chart
+        let nearestUnsure = (state.unreliable ?? []).min {
+            abs($0.date.timeIntervalSince(marker)) < abs($1.date.timeIntervalSince(marker))
+        }
+        let unsure = reading == nil ? nearestUnsure.flatMap { abs($0.date.timeIntervalSince(marker)) <= 450 ? $0 : nil } : nil
         let carbs = total(of: state.carbs, near: marker)
         let insulin = total(of: state.boluses, near: marker)
         return HStack(spacing: 8) {
@@ -90,6 +95,13 @@ struct ChartScrubView: View {
                         .fill(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
                         .frame(width: 7, height: 7)
                     Text(WatchFormat.glucose(reading.v, unit: state.snapshot?.unit ?? .mgdl))
+                } else if let unsure {
+                    Circle()
+                        .strokeBorder(Color.orange, lineWidth: 1)
+                        .frame(width: 7, height: 7)
+                    Text(WatchFormat.glucose(unsure.v, unit: state.snapshot?.unit ?? .mgdl))
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("\(WatchFormat.glucose(unsure.v, unit: state.snapshot?.unit ?? .mgdl)), not reliable")
                 } else {
                     Text("—")
                 }

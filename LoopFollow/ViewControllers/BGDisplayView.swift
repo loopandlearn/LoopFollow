@@ -18,6 +18,17 @@ struct BGDisplayView: View {
     @ObservedObject var isNotLooping = Observable.shared.isNotLooping
     @ObservedObject var cgmSensorState = Observable.shared.cgmSensorState
     @ObservedObject var retro = RetroSelection.shared
+    @ObservedObject var unreliableBG = Observable.shared.unreliableBG
+    @ObservedObject var unreliableBGDate = Observable.shared.unreliableBGDate
+
+    /// The newest reading the G7 marked unreliable, while fresh and newer than the last reliable one.
+    private var unreliableText: String? {
+        _ = minAgoText.value
+        guard let mgdl = unreliableBG.value, let date = unreliableBGDate.value else { return nil }
+        let age = Date().timeIntervalSince1970 - date
+        guard age < 12 * 60, date > (Storage.shared.lastBgReadingTimeSeconds.value ?? 0) else { return nil }
+        return "\(Localizer.toDisplayUnits(String(mgdl))) not reliable · \(Int(age / 60)) min ago"
+    }
 
     var onRefresh: (() -> Void)?
 
@@ -64,6 +75,13 @@ struct BGDisplayView: View {
                 } else {
                     Text(minAgoText.value)
                         .font(.system(size: 17))
+
+                    if let unreliableText {
+                        Label(unreliableText, systemImage: "exclamationmark.triangle.fill")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.orange)
+                            .frame(maxWidth: .infinity)
+                    }
 
                     if let state = cgmSensorState.value {
                         Text("CGM: \(state.summary)")
