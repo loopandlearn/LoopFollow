@@ -25,15 +25,14 @@ class BLEManager: NSObject, ObservableObject {
     /// stale history must not resurrect the banner after a relaunch.
     private var heartbeatDropoutTimes: [Date] = []
 
-    /// A beat this much later than expected counts as one dropout event.
-    /// Stricter than the 15% logging margin - normal jitter must not count.
-    private let dropoutFactor = 1.5
-
     /// Sliding window over which dropout events are counted.
     private let dropoutWindow: TimeInterval = 60 * 60
 
     /// Dropout events within the window needed to raise the banner.
     private let dropoutTriggerCount = 5
+
+    /// Dropout events within the window at or below which the banner clears.
+    private let dropoutClearCount = 1
 
     override private init() {
         super.init()
@@ -248,7 +247,7 @@ extension BLEManager: BluetoothDeviceDelegate {
                 let delay = elapsedTime - expectedInterval
                 LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (Delayed by \(String(format: "%.1f", delay)) seconds)")
             }
-            recordHeartbeatOutcome(elapsed: elapsedTime, expectedInterval: expectedInterval, now: now)
+            recordHeartbeatOutcome(elapsed: elapsedTime, expectedInterval: expectedInterval, dropoutFactor: device.heartbeatDropoutFactor(), now: now)
         } else {
             LogManager.shared.log(category: .bluetooth, message: "Heartbeat triggered (First heartbeat)")
         }
@@ -264,7 +263,7 @@ extension BLEManager: BluetoothDeviceDelegate {
     /// still delivers (late) beats, whereas total silence usually means
     /// out-of-range or a dead device and is already surfaced by the
     /// connection status in Background Refresh settings and by BG alarms.
-    private func recordHeartbeatOutcome(elapsed: TimeInterval, expectedInterval: TimeInterval, now: Date) {
+    private func recordHeartbeatOutcome(elapsed: TimeInterval, expectedInterval: TimeInterval, dropoutFactor: Double, now: Date) {
         heartbeatDropoutTimes.removeAll { now.timeIntervalSince($0) > dropoutWindow }
 
         // A gap this large means out-of-range, Bluetooth off or a suspended
@@ -281,11 +280,11 @@ extension BLEManager: BluetoothDeviceDelegate {
             LogManager.shared.log(category: .bluetooth, message: "Heartbeat dropout recorded (\(heartbeatDropoutTimes.count) in the last hour)")
         }
 
-        // Hysteresis: raise at the trigger count, clear only once the window
-        // is completely clean, so the banner doesn't flap at the boundary.
+        // Hysteresis: raise at the trigger count, clear once the window is
+        // nearly clean, so the banner doesn't flap at the boundary.
         if heartbeatDropoutTimes.count >= dropoutTriggerCount {
             BannerManager.shared.report(source: .heartbeat, severity: .warning, text: heartbeatDropoutBannerText())
-        } else if heartbeatDropoutTimes.isEmpty {
+        } else if heartbeatDropoutTimes.count <= dropoutClearCount {
             BannerManager.shared.clear(.heartbeat)
         }
     }
@@ -341,9 +340,9 @@ extension BLEManager {
 
         let expectedOffset = sensorOffset + pollingDelay
 
-        // If the heartbeat interval isn't a typical 60 or 300 seconds,
-        // we simply return a string indicating that the delay is "up to" the heartbeat interval.
-        if heartBeatInterval != 60, heartBeatInterval != 300 {
+        // The DASH heartbeat follows the loop app's pod communication, not the pod's
+        // advertising, so its delay is only bounded by the heartbeat interval.
+        if matchedType == .omnipodDash || (heartBeatInterval != 60 && heartBeatInterval != 300) {
             return "up to \(Int(heartBeatInterval)) sec"
         }
 
