@@ -203,7 +203,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Observable.shared.selectedTabIndex.value = 0
         }
 
-        if let hubAlarm = response.notification.request.content.userInfo["lfhubAlarmId"] as? String,
+        if HubClient.shared.drivesAlarms || response.actionIdentifier == "snooze",
+           let hubAlarm = response.notification.request.content.userInfo["lfhubAlarmId"] as? String,
            let alarmID = UUID(uuidString: hubAlarm)
         {
             HubClient.shared.adoptHubAlarm(alarmID)
