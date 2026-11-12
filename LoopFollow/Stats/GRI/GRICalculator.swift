@@ -25,16 +25,23 @@ class GRICalculator {
         var highCount = 0
         var vHighCount = 0
 
-        for reading in bgData {
-            let glucose = Double(reading.sgv)
+        // Compare at display precision so readings that show the same value share a band.
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
+        let vLowLimit = normalize(vLowThreshold)
+        let lowLimit = normalize(lowThreshold)
+        let highLimit = normalize(highThreshold)
+        let vHighLimit = normalize(vHighThreshold)
 
-            if glucose < vLowThreshold {
+        for reading in bgData {
+            let glucose = normalize(Double(reading.sgv))
+
+            if glucose < vLowLimit {
                 vLowCount += 1
-            } else if glucose < lowThreshold {
+            } else if glucose < lowLimit {
                 lowCount += 1
-            } else if glucose > vHighThreshold {
+            } else if glucose > vHighLimit {
                 vHighCount += 1
-            } else if glucose > highThreshold {
+            } else if glucose > highLimit {
                 highCount += 1
             }
         }

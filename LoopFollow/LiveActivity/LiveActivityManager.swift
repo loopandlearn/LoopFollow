@@ -5,6 +5,7 @@
 #if !targetEnvironment(macCatalyst)
 
 @preconcurrency import ActivityKit
+import Combine
 import Foundation
 import os
 import UIKit
@@ -44,6 +45,16 @@ final class LiveActivityManager {
         )
         startPushToStartTokenObservation()
         startActivityUpdatesObservation()
+
+        Publishers.Merge(
+            Storage.shared.lowLine.$value.map { _ in () },
+            Storage.shared.highLine.$value.map { _ in () }
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in
+            self?.refreshFromCurrentState(reason: "thresholds changed")
+        }
+        .store(in: &cancellables)
     }
 
     // MARK: - Push-to-start observation
@@ -433,6 +444,7 @@ final class LiveActivityManager {
     /// and arrives within a few seconds of the first request.
     private static let pushToStartTokenRetryDelay: TimeInterval = 10
 
+    private var cancellables = Set<AnyCancellable>()
     private(set) var current: Activity<GlucoseLiveActivityAttributes>?
     private var stateObserverTask: Task<Void, Never>?
     private var updateTask: Task<Void, Never>?
