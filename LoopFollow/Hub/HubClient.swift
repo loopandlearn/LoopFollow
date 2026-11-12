@@ -586,7 +586,7 @@ final class HubClient {
 
     /// Background time for an upload. When iOS takes it back, the upload's
     /// retries go on the next time the app runs.
-    @MainActor private final class BackgroundTime {
+    @MainActor final class BackgroundTime {
         private var id = UIBackgroundTaskIdentifier.invalid
 
         init(name: String) {

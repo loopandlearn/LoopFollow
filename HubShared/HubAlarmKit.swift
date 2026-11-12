@@ -18,10 +18,61 @@ import Foundation
     /// for every hub alarm push, so it rings even while LoopFollow is suspended
     /// or not running. The AlarmKit alarm takes the LoopFollow alarm's id, so a
     /// repeated push for an alarm that is still ringing does not ring twice.
+    ///
+    /// iOS takes a ringing alarm's banner, with its button, away when LoopFollow leaves
+    /// the screen, and the alarm sounds on without it. The app therefore rings its
+    /// sounding hub alarms again when it goes to the background, and the extension rings
+    /// a sounding one again when LoopFollow ended while on screen.
     @available(iOS 26, *)
     enum HubAlarmKit {
         /// A fixed alarm at or before now never fires, so it is set this far ahead.
         private static let immediateFireDelay: TimeInterval = 2
+
+        /// What a hub alarm was last rung with, so it can be rung again.
+        private struct Ringing: Codable {
+            let title: String
+            let soundName: String?
+            let symbol: String
+            let acknowledge: Bool
+        }
+
+        /// The App Group defaults key of a hub alarm rung and not stopped, one per alarm, so
+        /// the app and the extension never overwrite each other's.
+        private static func ringingKey(_ alarmID: UUID) -> String { "lfhubAlarmRinging.\(alarmID.uuidString)" }
+
+        /// The App Group defaults key of when LoopFollow last said it is on screen (Unix
+        /// seconds), 0 once it left the screen.
+        private static let onScreenKey = "lfhubAppOnScreenAt"
+
+        /// The app refreshes its on-screen time at each minute's alarm check; one this old
+        /// means LoopFollow ended while on screen.
+        private static let onScreenStale: TimeInterval = 150
+
+        private static var defaults: UserDefaults? { UserDefaults(suiteName: AppGroupID.current()) }
+
+        private static func ringing(_ alarmID: UUID) -> Ringing? {
+            defaults?.data(forKey: ringingKey(alarmID)).flatMap { try? JSONDecoder().decode(Ringing.self, from: $0) }
+        }
+
+        private static func setRinging(_ value: Ringing?, for alarmID: UUID) {
+            if let value, let data = try? JSONEncoder().encode(value) {
+                defaults?.set(data, forKey: ringingKey(alarmID))
+            } else {
+                defaults?.removeObject(forKey: ringingKey(alarmID))
+            }
+        }
+
+        /// The app records that it is on screen, where a system alarm's banner does not
+        /// outlast it, and refreshes that while it stays there.
+        static func setOnScreen(_ onScreen: Bool) {
+            defaults?.set(onScreen ? Date().timeIntervalSince1970 : 0, forKey: onScreenKey)
+        }
+
+        /// LoopFollow said it is on screen and has not refreshed that since: it ended there.
+        private static var endedOnScreen: Bool {
+            let at = defaults?.double(forKey: onScreenKey) ?? 0
+            return at > 0 && Date().timeIntervalSince1970 - at > onScreenStale
+        }
 
         static var isAuthorized: Bool {
             AlarmKit.AlarmManager.shared.authorizationState == .authorized
@@ -44,15 +95,28 @@ import Foundation
         /// notification keeps its sound. Without `soundName` it rings with the default sound.
         /// `symbol` is the SF Symbol on the alarm's button: the alarm type's icon. The button
         /// reads Acknowledge for an alarm whose snooze is 0 (`acknowledge`), as in the app.
+        /// `again` rings an alarm that already rings, with a new banner.
         static func ring(alarmID: UUID, title: String, soundName: String?, symbol: String = "moon.zzz",
-                         acknowledge: Bool = false) async -> (ringing: Bool, firesAt: Date?, detail: String)
+                         acknowledge: Bool = false, again: Bool = false) async
+            -> (ringing: Bool, firesAt: Date?, detail: String)
         {
             // A denied state is final; notDetermined is what an extension reads even
             // after the app was authorized, so scheduling is attempted then too.
             let state = AlarmKit.AlarmManager.shared.authorizationState
             guard state != .denied else { return (false, nil, "authorization denied") }
-            if ((try? AlarmKit.AlarmManager.shared.alarms) ?? []).contains(where: { $0.id == alarmID }) {
-                return (true, nil, "already scheduled")
+            var rungAgain = ""
+            if let existing = ((try? AlarmKit.AlarmManager.shared.alarms) ?? []).first(where: { $0.id == alarmID }) {
+                // LoopFollow ended while on screen: the alarm sounds on without its banner.
+                let bannerLost = endedOnScreen
+                guard again || bannerLost else {
+                    return (true, nil, existing.state == .alerting ? "already ringing" : "already scheduled")
+                }
+                if bannerLost { setOnScreen(false) }
+                rungAgain = ", rung again from state \(existing.state)\(bannerLost ? " after LoopFollow ended on screen" : "")"
+                stopAlarmKit(alarmID)
+            } else if endedOnScreen {
+                // This alarm gets its banner; one rung later must not count the app as on screen.
+                setOnScreen(false)
             }
 
             let presentation = AlarmPresentation(
@@ -74,7 +138,9 @@ import Foundation
             )
             do {
                 let alarm = try await AlarmKit.AlarmManager.shared.schedule(id: alarmID, configuration: configuration)
-                return (true, firesAt, "scheduled, state \(alarm.state) (authorization read \(state))")
+                setRinging(Ringing(title: title, soundName: soundName, symbol: symbol, acknowledge: acknowledge),
+                           for: alarmID)
+                return (true, firesAt, "scheduled, state \(alarm.state) (authorization read \(state))\(rungAgain)")
             } catch {
                 return (false, nil, "schedule failed with authorization \(state): \(error)")
             }
@@ -113,8 +179,28 @@ import Foundation
         }
 
         static func stop(alarmID: UUID) {
+            stopAlarmKit(alarmID)
+            setRinging(nil, for: alarmID)
+        }
+
+        private static func stopAlarmKit(_ alarmID: UUID) {
             try? AlarmKit.AlarmManager.shared.stop(id: alarmID)
             try? AlarmKit.AlarmManager.shared.cancel(id: alarmID)
+        }
+
+        /// Rings each sounding hub alarm again, so it gets back the banner and button iOS
+        /// took away when LoopFollow left the screen. Returns how many were rung again and
+        /// what went wrong with the others.
+        static func ringSoundingAgain() async -> (count: Int, failures: [String]) {
+            var count = 0
+            var failures: [String] = []
+            for alarm in (try? AlarmKit.AlarmManager.shared.alarms) ?? [] where alarm.state == .alerting {
+                guard let ringing = ringing(alarm.id) else { continue }
+                let result = await ring(alarmID: alarm.id, title: ringing.title, soundName: ringing.soundName,
+                                        symbol: ringing.symbol, acknowledge: ringing.acknowledge, again: true)
+                if result.ringing { count += 1 } else { failures.append("\(alarm.id.uuidString.prefix(8)): \(result.detail)") }
+            }
+            return (count, failures)
         }
     }
 

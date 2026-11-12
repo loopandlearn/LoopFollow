@@ -1279,9 +1279,26 @@ final class LiveActivityManager {
     private func observePushToken(for activity: Activity<GlucoseLiveActivityAttributes>) {
         tokenObservationTask?.cancel()
         let activityID = activity.id
+        // An activity started through push-to-start may already hold its token, which
+        // pushTokenUpdates does not always deliver.
+        if let tokenData = activity.pushToken {
+            let token = tokenData.map { String(format: "%02x", $0) }.joined()
+            if token != pushToken {
+                let previousTail = pushToken.map { String($0.suffix(8)) } ?? "nil"
+                pushToken = token
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] push token read id=\(activityID) token=…\(token.suffix(8)) (prev=…\(previousTail))"
+                )
+                HubClient.shared.reportLiveActivitySoon()
+            }
+        } else {
+            LogManager.shared.log(category: .general, message: "[LA] no push token yet id=\(activityID)")
+        }
         tokenObservationTask = Task {
             for await tokenData in activity.pushTokenUpdates {
                 let token = tokenData.map { String(format: "%02x", $0) }.joined()
+                guard token != self.pushToken else { continue }
                 let previousTail = self.pushToken.map { String($0.suffix(8)) } ?? "nil"
                 let tail = String(token.suffix(8))
                 self.pushToken = token

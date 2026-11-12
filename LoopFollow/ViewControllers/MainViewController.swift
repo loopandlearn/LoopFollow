@@ -614,6 +614,28 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
 
         NightscoutSocketManager.shared.disconnect()
         HubBundle.shared.stopListening()
+        ringHubAlarmsAgain()
+    }
+
+    /// iOS takes a ringing system alarm's banner away when the app leaves the screen,
+    /// and the alarm sounds on without a button to stop it; the hub alarms that sound
+    /// are rung again so they get it back.
+    private func ringHubAlarmsAgain() {
+        #if !targetEnvironment(macCatalyst)
+            guard #available(iOS 26, *) else { return }
+            HubAlarmKit.setOnScreen(false)
+            let time = HubClient.BackgroundTime(name: "Ring hub alarms again")
+            Task {
+                let (count, failures) = await HubAlarmKit.ringSoundingAgain()
+                if count > 0 {
+                    LogManager.shared.log(category: .alarm, message: "Rang \(count) sounding hub alarm(s) again on leaving the screen")
+                }
+                for failure in failures {
+                    LogManager.shared.log(category: .alarm, message: "Hub alarm not rung again on leaving the screen: \(failure)")
+                }
+                time.end()
+            }
+        #endif
     }
 
     /// Starts what the mode in effect uses in the background: the Silent Tune and the
@@ -719,6 +741,9 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     }
 
     @objc func appDidBecomeActive() {
+        #if !targetEnvironment(macCatalyst)
+            if #available(iOS 26, *) { HubAlarmKit.setOnScreen(true) }
+        #endif
         // applicationState == .active is guaranteed here, so the BFU guard in
         // runMigrationsIfNeeded() will always pass. Catches the case where viewDidLoad
         // ran during a BGAppRefreshTask background launch and deferred migrations.

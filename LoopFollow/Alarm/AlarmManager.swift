@@ -2,6 +2,7 @@
 // AlarmManager.swift
 
 import Foundation
+import UIKit
 import UserNotifications
 
 class AlarmManager {
@@ -45,6 +46,11 @@ class AlarmManager {
 
     @MainActor func checkAlarms(data: AlarmData) {
         let now = Date()
+        #if !targetEnvironment(macCatalyst)
+            if #available(iOS 26, *), UIApplication.shared.applicationState == .active {
+                HubAlarmKit.setOnScreen(true)
+            }
+        #endif
         var alarmTriggered = false
 
         // No alarm activity while onboarding is on screen — existing or
