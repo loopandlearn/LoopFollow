@@ -247,7 +247,9 @@ platform :ios do
       issuer_id: "#{FASTLANE_ISSUER_ID}",
       key_content: "#{FASTLANE_KEY}"
     )
-    
+
+    ensure_watch_identifiers_exist
+
     match(
       type: "appstore",
       force: false,
