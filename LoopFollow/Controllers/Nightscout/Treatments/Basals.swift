@@ -87,9 +87,10 @@ extension MainViewController {
             let startDot = basalGraphStruct(basalRate: basalRate, date: dateTimeStamp)
             basalData.append(startDot)
 
-            // End dot
+            // End dot. A duration of 0 is a temp that ended where it started, such as one
+            // cancelled within its first minute; only a missing duration is taken as still running.
             var lastDot = dateTimeStamp + (duration * 60)
-            if i == tempArray.count - 1, duration == 0.0 {
+            if i == tempArray.count - 1, currentEntry["duration"] == nil {
                 lastDot = dateTimeStamp + (30 * 60)
             }
             latestBasal = Localizer.formatToLocalizedString(basalRate, maxFractionDigits: 2, minFractionDigits: 0)
