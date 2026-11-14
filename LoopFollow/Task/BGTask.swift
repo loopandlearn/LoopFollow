@@ -27,6 +27,24 @@ extension MainViewController {
             BannerManager.shared.clear(.nightscout)
         }
 
+        // Hub mode: the bundle's entries are the BG the hub already merged from
+        // Dexcom and Nightscout. Without a current copy the BG comes from this
+        // app's own sources.
+        if HubBundle.shared.isActive {
+            Task {
+                if await HubBundle.shared.data(for: .entries) != nil {
+                    self.webLoadNSBGData()
+                } else {
+                    self.loadBGFromSources()
+                }
+            }
+            return
+        }
+
+        loadBGFromSources()
+    }
+
+    private func loadBGFromSources() {
         // If no Dexcom credentials and no Nightscout, schedule a retry in 60 seconds.
         if Storage.shared.shareUserName.value == "",
            Storage.shared.sharePassword.value == "",

@@ -34,11 +34,17 @@ struct BackgroundRefreshSettingsView: View {
     private var refreshTypeSection: some View {
         Section {
             Picker("Background Refresh Type", selection: $viewModel.backgroundRefreshType) {
-                ForEach(BackgroundRefreshType.allCases, id: \.self) { type in
+                // LoopFollow Hub is offered on iOS 26 or later once the app is connected to a hub.
+                ForEach(BackgroundRefreshType.allCases.filter {
+                    $0 != .hub || HubClient.isSupported
+                        && (HubClient.shared.isConnected || viewModel.backgroundRefreshType == .hub)
+                }, id: \.self) { type in
                     Text(type.rawValue).tag(type)
                 }
             }
             .pickerStyle(MenuPickerStyle())
+
+            HubModeWarning()
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Adjust the background refresh type.")
@@ -48,6 +54,11 @@ struct BackgroundRefreshSettingsView: View {
                 switch viewModel.backgroundRefreshType {
                 case .none:
                     Text("No background refresh. Alarms and updates will not work unless the app is open in the foreground.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+
+                case .hub:
+                    Text("LF Hub sends the alarms, badge and Live Activity, so LoopFollow can stay closed. Alarms depend on the network and Apple's push service. Until the hub confirms, LoopFollow runs as with Silent Tune. If the hub stops working, LoopFollow alarms by itself only when iOS lets it run, which can take a long time while the phone is locked. Requires a hub under Settings → LF Hub.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
 
