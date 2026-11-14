@@ -65,7 +65,7 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         switch self {
         case .omnipodDash:
             return true
-        case .rileyLink, .dexcom, .silentTune, .none:
+        case .rileyLink, .dexcom, .silentTune, .none, .hub:
             return false
         }
     }
