@@ -110,7 +110,7 @@ class AlarmSound {
     /// releases the session instead. While Silent Tune's loop holds the session,
     /// it stays active with the mixable category that loop uses.
     static func releaseAudioSession() {
-        guard !isPlaying, MainViewController.shared?.speechSynthesizer.isSpeaking != true else { return }
+        guard !isPlaying, !SpeechOutput.shared.isSpeaking else { return }
 
         let session = AVAudioSession.sharedInstance()
         do {

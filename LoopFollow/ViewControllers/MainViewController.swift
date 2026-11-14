@@ -49,8 +49,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     private var setupNightscoutButton: UIButton!
     private var setupDexcomButton: UIButton!
 
-    let speechSynthesizer = AVSpeechSynthesizer()
-
     // Variables for BG Charts
     var firstGraphLoad: Bool = true
     var currentOverride = 1.0
@@ -407,8 +405,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .store(in: &cancellables)
 
         updateQuickActions()
-
-        speechSynthesizer.delegate = self
 
         // Check configuration and show appropriate UI
         if isDataSourceConfigured() {
@@ -1261,11 +1257,5 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
                 self.refresh()
             }
         }
-    }
-}
-
-extension MainViewController: AVSpeechSynthesizerDelegate {
-    func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
-        AlarmSound.releaseAudioSession()
     }
 }
