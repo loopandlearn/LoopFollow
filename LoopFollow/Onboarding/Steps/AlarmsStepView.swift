@@ -122,10 +122,11 @@ struct AlarmsStepView: View {
         case .cob:
             doubleStepper(seed, label: "Alert above", range: 0 ... 200, step: 5, unit: "g", keyPath: \.threshold)
         case .sensorChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 15, step: 1, unit: "days", keyPath: \.threshold)
+            intStepper(seed, label: "Sensor lifetime", range: 7 ... 15, step: 1, unit: "days", keyPath: \.sensorLifetimeDays)
+            doubleStepper(seed, label: "Remind before", range: 1 ... 24, step: 1, unit: "hours", keyPath: \.threshold)
             activePicker(seed)
         case .pumpChange:
-            doubleStepper(seed, label: "Remind after", range: 1 ... 7, step: 1, unit: "days", keyPath: \.threshold)
+            doubleStepper(seed, label: "Remind before", range: 1 ... 24, step: 1, unit: "hours", keyPath: \.threshold)
             activePicker(seed)
         case .pump:
             doubleStepper(seed, label: "Alert below", range: 0 ... 100, step: 5, unit: "U", keyPath: \.threshold)
@@ -174,7 +175,8 @@ struct AlarmsStepView: View {
 
     /// Plain-language summary of what a recommended alarm will do, shown as the
     /// section footer. Fast drop earns one because its per-reading-times-window
-    /// behaviour isn't obvious from the two controls alone.
+    /// behaviour isn't obvious from the two controls alone; the change reminders
+    /// state what their hours count back from.
     private func explanation(for seed: OnboardingViewModel.SeedAlarm) -> String? {
         switch seed.type {
         case .fastDrop:
@@ -193,6 +195,14 @@ struct AlarmsStepView: View {
             let total = Localizer.formatQuantity(delta * Double(window))
             let minutes = window * 5
             return "Warns when glucose falls by at least \(perReading) \(unit) on each of \(window) readings in a row — about \(total) \(unit) over roughly \(minutes) minutes."
+        case .sensorChange:
+            let fallback = Alarm(type: .sensorChange)
+            let days = seed.alarm.sensorLifetimeDays ?? fallback.sensorLifetimeDays ?? 10
+            let hours = formatted(seed.alarm.threshold ?? fallback.threshold ?? 12)
+            return "Reminds \(hours) hours before the sensor’s \(days)-day change-over."
+        case .pumpChange:
+            let hours = formatted(seed.alarm.threshold ?? Alarm(type: .pumpChange).threshold ?? 12)
+            return "Reminds \(hours) hours before the 3-day pump change limit."
         default:
             return nil
         }
