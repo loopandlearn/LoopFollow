@@ -46,9 +46,10 @@ final class LiveActivityManager {
         startPushToStartTokenObservation()
         startActivityUpdatesObservation()
 
+        // dropFirst: @Published emits its current value on subscribe; only react to changes.
         Publishers.Merge(
-            Storage.shared.lowLine.$value.map { _ in () },
-            Storage.shared.highLine.$value.map { _ in () }
+            Storage.shared.lowLine.$value.dropFirst().map { _ in () },
+            Storage.shared.highLine.$value.dropFirst().map { _ in () }
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in

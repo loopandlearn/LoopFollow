@@ -24,7 +24,7 @@ struct GlucoseComplicationView: View {
     private var bgColor: Color {
         guard let state = entry.state, let snapshot else { return .secondary }
         if isStale { return .secondary }
-        return WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, colored: state.colorBGText)
+        return WatchFormat.bgColor(snapshot.glucose, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, unit: snapshot.unit, colored: state.colorBGText)
     }
 
     private var trendText: String {
@@ -106,7 +106,7 @@ struct GlucoseComplicationView: View {
                 ForEach(readings, id: \.t) { reading in
                     PointMark(x: .value("Time", reading.date), y: .value("BG", min(max(reading.v, 40), 300)))
                         .symbolSize(6)
-                        .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+                        .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, unit: state.snapshot?.unit ?? .mgdl))
                 }
             }
             .chartXScale(domain: start ... entry.date)

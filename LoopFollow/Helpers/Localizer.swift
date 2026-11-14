@@ -114,12 +114,7 @@ final class UnitSettingsStore {
     /// Rounds a mg/dL value to the display precision of the current unit, so colors,
     /// stats and alarms match the number shown. Apply to both the reading and the threshold.
     func normalizeToDisplayPrecision(_ mgdl: Double) -> Double {
-        switch glucoseUnit {
-        case .mgdL:
-            return mgdl
-        case .mmolL:
-            return GlucoseConversion.toDisplayedMmol(mgdl)
-        }
+        GlucoseConversion.toDisplayPrecision(mgdl, mmol: glucoseUnit == .mmolL)
     }
 
     /// Band of a mg/dL reading against the selected range (or `thresholds` when given).
