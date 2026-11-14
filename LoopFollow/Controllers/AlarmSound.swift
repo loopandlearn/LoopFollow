@@ -105,10 +105,12 @@ class AlarmSound {
 
     /// Hands the audio session back once LoopFollow has nothing left to play, so
     /// audio from other apps that was ducked or interrupted returns to full volume.
-    /// While Silent Tune's loop holds the session, it stays active with the
-    /// mixable category that loop uses.
+    /// Spoken BG that is still talking keeps the session; deactivating under it
+    /// cuts the speech and leaves the synthesizer stuck, and its didFinish
+    /// releases the session instead. While Silent Tune's loop holds the session,
+    /// it stays active with the mixable category that loop uses.
     static func releaseAudioSession() {
-        guard !isPlaying else { return }
+        guard !isPlaying, MainViewController.shared?.speechSynthesizer.isSpeaking != true else { return }
 
         let session = AVAudioSession.sharedInstance()
         do {
