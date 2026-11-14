@@ -68,7 +68,7 @@ struct BGDisplayPrecisionTests {
         }
     }
 
-    @Test("mg/dL keeps exact integer comparison")
+    @Test("mg/dL compares whole numbers")
     func mgdlUnchanged() {
         let previous = Storage.shared.units.value
         Storage.shared.units.value = GlucoseDisplayUnit.mgdL.rawValue
@@ -78,6 +78,23 @@ struct BGDisplayPrecisionTests {
         #expect(!fires(highAlarm(aboveBG: 180), sgv: 179))
         #expect(fires(Alarm.low(belowBG: 70), sgv: 70))
         #expect(!fires(Alarm.low(belowBG: 70), sgv: 71))
+    }
+
+    @Test("mg/dL: a threshold picked in mmol/L fires at the whole number it displays")
+    func mgdlFractionalThreshold() {
+        let previous = Storage.shared.units.value
+        Storage.shared.units.value = GlucoseDisplayUnit.mgdL.rawValue
+        defer { Storage.shared.units.value = previous }
+
+        // 3.9 mmol/L is stored as 70.2 or 70.26 and displays as 70 mg/dL.
+        for stored in [3.9 * 18, 3.9 * GlucoseConversion.mmolToMgDl] {
+            #expect(fires(Alarm.low(belowBG: stored), sgv: 70))
+            #expect(!fires(Alarm.low(belowBG: stored), sgv: 71))
+        }
+        // 10.0 mmol/L is stored as 180.16 and displays as 180 mg/dL.
+        let high = 10.0 * GlucoseConversion.mmolToMgDl
+        #expect(fires(highAlarm(aboveBG: high), sgv: 180))
+        #expect(!fires(highAlarm(aboveBG: high), sgv: 179))
     }
 
     @Test("every mmol/L picker value round-trips to the value that was picked")
