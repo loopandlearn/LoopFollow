@@ -40,6 +40,17 @@ enum BackgroundRefreshType: String, Codable, CaseIterable {
         }
     }
 
+    /// The DASH heartbeat follows the loop app's pod communication, not the pod's
+    /// advertising, so its delay is only bounded by the heartbeat interval.
+    var delayBoundedByHeartbeatInterval: Bool {
+        switch self {
+        case .omnipodDash:
+            return true
+        case .rileyLink, .dexcom, .silentTune, .none:
+            return false
+        }
+    }
+
     /// Determines if a BLEDevice matches the specific device type
     func matches(_ device: BLEDevice) -> Bool {
         switch self {

@@ -340,9 +340,7 @@ extension BLEManager {
 
         let expectedOffset = sensorOffset + pollingDelay
 
-        // The DASH heartbeat follows the loop app's pod communication, not the pod's
-        // advertising, so its delay is only bounded by the heartbeat interval.
-        if matchedType == .omnipodDash || (heartBeatInterval != 60 && heartBeatInterval != 300) {
+        if matchedType.delayBoundedByHeartbeatInterval || (heartBeatInterval != 60 && heartBeatInterval != 300) {
             return "up to \(Int(heartBeatInterval)) sec"
         }
 

@@ -33,7 +33,7 @@ class OmnipodDashHeartbeatBluetoothTransmitter: BluetoothDevice {
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {
-        return 5 * 60
+        return BackgroundRefreshType.omnipodDash.heartBeatInterval
     }
 
     /// The loop app skips pod communication on some cycles, so a single
