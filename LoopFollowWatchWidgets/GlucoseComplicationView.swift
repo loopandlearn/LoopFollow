@@ -12,11 +12,13 @@ struct GlucoseComplicationView: View {
     private var snapshot: GlucoseSnapshot? { entry.state?.snapshot }
 
     private var isStale: Bool {
+        if entry.isPlaceholder { return false }
         guard let snapshot else { return true }
         return entry.date.timeIntervalSince(snapshot.updatedAt) >= WatchFormat.staleAfter
     }
 
     private var bgText: String {
+        if entry.isPlaceholder { return "120" }
         guard let snapshot else { return "--" }
         return WatchFormat.glucose(snapshot.glucose, unit: snapshot.unit)
     }
@@ -28,15 +30,18 @@ struct GlucoseComplicationView: View {
     }
 
     private var trendText: String {
-        snapshot.map { WatchFormat.trendArrow($0.trend) } ?? ""
+        if entry.isPlaceholder { return WatchFormat.trendArrow(.flat) }
+        return snapshot.map { WatchFormat.trendArrow($0.trend) } ?? ""
     }
 
     private var deltaText: String {
-        snapshot.map { WatchFormat.delta($0.delta, unit: $0.unit) } ?? ""
+        if entry.isPlaceholder { return "+2" }
+        return snapshot.map { WatchFormat.delta($0.delta, unit: $0.unit) } ?? ""
     }
 
     private var ageText: String {
-        snapshot.map { WatchFormat.minutesAgo($0.updatedAt, now: entry.date) } ?? ""
+        if entry.isPlaceholder { return WatchFormat.minutesAgo(entry.date, now: entry.date) }
+        return snapshot.map { WatchFormat.minutesAgo($0.updatedAt, now: entry.date) } ?? ""
     }
 
     var body: some View {
@@ -127,6 +132,6 @@ struct GlucoseComplicationView: View {
     }
 
     private var inline: some View {
-        Text(snapshot == nil ? "LoopFollow --" : "\(bgText) \(trendText) \(deltaText) · \(ageText)")
+        Text(snapshot == nil && !entry.isPlaceholder ? "LoopFollow --" : "\(bgText) \(trendText) \(deltaText) · \(ageText)")
     }
 }
