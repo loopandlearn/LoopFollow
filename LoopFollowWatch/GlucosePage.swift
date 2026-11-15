@@ -27,6 +27,11 @@ struct GlucosePage: View {
                 }
             }
             .toolbar {
+                if let name = state.displayName {
+                    ToolbarItem(placement: .topBarLeading) {
+                        DisplayNameLabel(name: name)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     age(now: context.date)
                 }
@@ -259,5 +264,19 @@ struct AlarmBanner: View {
         } message: {
             Text(error ?? "")
         }
+    }
+}
+
+/// The app's display name. Names built from the default `LoopFollow_<suffix>` pattern
+/// truncate at the head so the suffix stays visible.
+struct DisplayNameLabel: View {
+    let name: String
+
+    var body: some View {
+        Text(name)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .truncationMode(name.hasPrefix("LoopFollow") ? .head : .tail)
     }
 }
