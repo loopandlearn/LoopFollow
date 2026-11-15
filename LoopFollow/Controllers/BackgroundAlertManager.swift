@@ -62,7 +62,7 @@ class BackgroundAlertManager {
     /// (Re)schedule all background alerts based on predefined durations.
     /// - Parameter force: When true, the scheduling is executed regardless of throttle constraints.
     func scheduleBackgroundAlert(force: Bool = false) {
-        guard isAlertScheduled, Storage.shared.backgroundRefreshType.value != .none else { return }
+        guard isAlertScheduled, BackgroundRefreshType.inEffect.keepsAppRunning else { return }
 
         // Throttle execution if not forced: only run once every 10 seconds. A forced
         // run stamps the date too, so the next tick doesn't immediately repeat the

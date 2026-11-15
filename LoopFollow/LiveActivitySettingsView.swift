@@ -15,8 +15,11 @@
 
         private let slotLabels = ["Top left", "Top right", "Bottom left", "Bottom right"]
 
+        /// This app's own APN key, or in Hub mode the key an admin shares through LF Hub,
+        /// with which the hub updates the Live Activity.
         private var apnsConfigured: Bool {
             APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey)
+                || (HubClient.shared.isHubMode && HubClient.shared.apnsKeyShared.value)
         }
 
         var body: some View {

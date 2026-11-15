@@ -28,6 +28,6 @@ class DexcomHeartbeatBluetoothDevice: BluetoothDevice {
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {
-        return 5 * 60 // 5 minutes in seconds
+        return BackgroundRefreshType.dexcom.heartBeatInterval
     }
 }

@@ -66,4 +66,13 @@ struct LoopAPNSCommandPayloadTests {
         )
         #expect(withFood["carbs-edit-food-type"] as? String == "🍕")
     }
+
+    @Test("profile switch names the profile and carries its fingerprint")
+    func profileSwitchKeys() {
+        let json = LoopAPNSCommands.profileSwitchCommandPayload(name: "Sport", fingerprint: "fec4f066b5a54ecd", otp: "123456", now: now)
+        #expect(Set(json.keys) == headerKeys.union(["profile-switch", "profile-switch-fingerprint"]))
+        #expect(json["profile-switch"] as? String == "Sport")
+        #expect(json["profile-switch-fingerprint"] as? String == "fec4f066b5a54ecd")
+        #expect(json["alert"] as? String == "Remote Profile Switch: Sport")
+    }
 }

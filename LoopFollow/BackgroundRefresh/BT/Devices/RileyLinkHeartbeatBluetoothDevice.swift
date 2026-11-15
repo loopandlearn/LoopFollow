@@ -35,6 +35,6 @@ class RileyLinkHeartbeatBluetoothDevice: BluetoothDevice {
     }
 
     override func expectedHeartbeatInterval() -> TimeInterval? {
-        return 60
+        return BackgroundRefreshType.rileyLink.heartBeatInterval
     }
 }

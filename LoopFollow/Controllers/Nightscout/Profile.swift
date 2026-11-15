@@ -12,7 +12,7 @@ extension MainViewController {
             "count": "1",
             "find[startDate][$lte]": formatter.string(from: Date().addingTimeInterval(60)),
         ]
-        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters) { (result: Result<[NSProfile], Error>) in
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters, hubPart: .profile) { (result: Result<[NSProfile], Error>) in
             switch result {
             case let .success(profiles):
                 guard let profileData = profiles.first else {

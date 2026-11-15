@@ -90,6 +90,8 @@ extension MainViewController {
 
     // Removes the Loop forecast line. Used when the active system switches away from Loop.
     func clearLoopPredictionGraph() {
+        loopPredBGs = nil
+        loopPredUpdatedTime = nil
         guard !predictionData.isEmpty else { return }
         predictionData.removeAll()
         updatePredictionGraph()

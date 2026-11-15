@@ -73,7 +73,9 @@ extension MainViewController {
             {
                 Observable.shared.predictionText.value = Localizer.toDisplayUnits(String(Int(round(lastPrediction))))
                 Observable.shared.predictionColor.value = .purple
-                if Storage.shared.downloadPrediction.value, previousLastLoopTime < lastLoopTime || predictionData.isEmpty {
+                loopPredBGs = prediction
+                loopPredUpdatedTime = lastLoopTime
+                if previousLastLoopTime < lastLoopTime || predictionData.isEmpty {
                     predictionData.removeAll()
                     var predictionTime = lastLoopTime
                     let toLoad = Int(Storage.shared.predictionToLoad.value * 12)
@@ -101,6 +103,8 @@ extension MainViewController {
                     updatePredictionGraph()
                 }
             } else {
+                loopPredBGs = nil
+                loopPredUpdatedTime = nil
                 predictionData.removeAll()
                 infoManager.clearInfoData(type: .minMax)
                 updatePredictionGraph()
@@ -108,11 +112,18 @@ extension MainViewController {
             if let recBolus = lastLoopRecord["recommendedBolus"] as? Double {
                 infoManager.updateInfoData(type: .recBolus, value: InsulinFormatter.shared.string(recBolus), numericValue: recBolus)
                 Observable.shared.deviceRecBolus.value = recBolus
+                let cycleTime = (lastLoopRecord["timestamp"] as? String).flatMap { formatter.date(from: $0)?.timeIntervalSince1970 }
+                Observable.shared.deviceRecBolusAt.value = cycleTime ?? lastLoopTime
             } else {
                 infoManager.clearInfoData(type: .recBolus)
                 Observable.shared.deviceRecBolus.value = nil
+                Observable.shared.deviceRecBolusAt.value = nil
             }
-            if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
+            // Loop uploads its Closed Loop toggle as loopSettings.dosingEnabled in the profile
+            if profileManager.loopDosingEnabled == false {
+                Observable.shared.loopStatusText.value = "⏀"
+                latestLoopStatusString = "⏀"
+            } else if let loopStatus = lastLoopRecord["recommendedTempBasal"] as? [String: AnyObject] {
                 if let tempBasalString = loopStatus["timestamp"] as? String,
                    let tempBasalTime = formatter.date(from: tempBasalString)?.timeIntervalSince1970
                 {

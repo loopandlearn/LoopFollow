@@ -8,7 +8,7 @@ import SwiftUI
 extension MainViewController {
     func webLoadNSDeviceStatus() {
         let parameters = ["count": "1"]
-        NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters) { result in
+        NightscoutUtils.executeDynamicRequest(eventType: .deviceStatus, parameters: parameters, hubPart: .devicestatus) { result in
             switch result {
             case let .success(json):
                 if let jsonDeviceStatus = json as? [[String: AnyObject]] {
@@ -117,8 +117,9 @@ extension MainViewController {
                     pumpID: lastPumpRecord["pumpID"] as? String,
                     manufacturer: lastPumpRecord["manufacturer"] as? String,
                     model: lastPumpRecord["model"] as? String,
+                    displayOverride: lastPumpRecord["reservoir_display_override"] as? String,
                     cache: Storage.shared.pumpReservoirCache.value,
-                    now: Date()
+                    date: Date(timeIntervalSince1970: lastPumpTime)
                 )
                 Storage.shared.pumpReservoirCache.value = reservoir.cache
 
@@ -132,6 +133,10 @@ extension MainViewController {
                     // for the volume alarm and for the info row's coloring.
                     latestPumpVolume = 50.0
                     infoManager.updateInfoData(type: .pump, value: "50+U", numericValue: 50.0)
+                    Storage.shared.lastPumpReservoirU.value = nil
+                case let .status(status):
+                    latestPumpVolume = nil
+                    infoManager.updateInfoData(type: .pump, value: status)
                     Storage.shared.lastPumpReservoirU.value = nil
                 case .unknown:
                     // The row stays cleared, which the info table renders as an em dash.
@@ -274,7 +279,7 @@ extension MainViewController {
         // Mark device status as loaded for initial loading state
         markDataLoaded("deviceStatus")
 
-        if Storage.shared.contactEnabled.value, Storage.shared.contactIOB.value != .off,
+        if Storage.shared.contactEnabled.value, !HubClient.shared.isHubMode, Storage.shared.contactIOB.value != .off,
            Observable.shared.iobText.value != previousIOBText
         {
             contactImageUpdater.updateContactImage(

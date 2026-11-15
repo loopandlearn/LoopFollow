@@ -79,14 +79,17 @@ extension MainViewController {
     /// Builds the forward glucose series the low alarm looks ahead in,
     /// oldest .. newest at 5-minute spacing.
     ///
-    /// Loop reports a single forecast, already stored in `predictionData`. Trio
-    /// reports four forecasts, collapsed into the lowest value per point in time
-    /// by `lowestForecast(forecasts:start:cap:)`.
+    /// Both series come from the full forecast as uploaded, independent of the
+    /// graph settings. Loop reports a single forecast; Trio reports four,
+    /// collapsed into the lowest value per point in time by
+    /// `lowestForecast(forecasts:start:cap:)`.
     func alarmPredictionData() -> [GlucoseValue] {
         if Storage.shared.device.value == "Loop" {
-            return predictionData
-                .prefix(MainViewController.alarmForecastPointCap)
-                .map { GlucoseValue(sgv: $0.sgv, date: Date(timeIntervalSince1970: $0.date)) }
+            guard let predBGs = loopPredBGs else { return [] }
+            return MainViewController.lowestForecast(
+                forecasts: [predBGs],
+                start: loopPredUpdatedTime ?? Date().timeIntervalSince1970
+            )
         }
 
         guard let predBGs = openAPSPredBGs else { return [] }

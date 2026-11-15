@@ -82,4 +82,27 @@ struct RemoteCommandTrackerTests {
         #expect(LoopCarbAckAdapter.resolution(for: ["command_type": "meal", "command_status": "success", "sync_identifier": "SYNC-1"]) == nil)
         #expect(LoopCarbAckAdapter.resolution(for: ["command_type": "carbs_delete", "command_status": "failed"]) == nil)
     }
+
+    @Test("Loop profile switch acks resolve the profile named in the message")
+    func loopProfileAdapter() {
+        let tracker = RemoteCommandTracker(timeout: 60)
+        let sickDay = LoopProfileAckAdapter.key(for: "Sick Day")
+        tracker.begin(key: sickDay)
+        let lateSport: [AnyHashable: Any] = [
+            "command_type": "profile_switch",
+            "command_status": "success",
+            "aps": ["alert": ["title": "Command Successful", "body": "Profile 'Sport' activated"]],
+        ]
+        #expect(tracker.handleNotification(userInfo: lateSport) == false)
+        #expect(tracker.isBusy(key: sickDay))
+        let failed: [AnyHashable: Any] = [
+            "command_type": "profile_switch",
+            "command_status": "failed",
+            "aps": ["alert": ["title": "Command Failed", "body": "Command failed: Profile 'Sick Day' not activated: Communication Failure"]],
+        ]
+        #expect(tracker.handleNotification(userInfo: failed) == true)
+        #expect(tracker.states[sickDay] == .done(success: false, message: "Command failed: Profile 'Sick Day' not activated: Communication Failure"))
+        #expect(LoopProfileAckAdapter.resolution(for: ["command_type": "profile_switch", "command_status": "failed"]) == nil)
+        #expect(LoopProfileAckAdapter.resolution(for: ["command_type": "carbs_edit", "command_status": "success"]) == nil)
+    }
 }

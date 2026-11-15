@@ -20,6 +20,8 @@ class Storage {
 
     var lfApnsKey = StorageValue<String>(key: "lfApnsKey", defaultValue: "")
     var lfKeyId = StorageValue<String>(key: "lfKeyId", defaultValue: "")
+
+    var hubURL = StorageValue<String>(key: "hubURL", defaultValue: "")
     var bundleId = StorageValue<String>(key: "bundleId", defaultValue: "")
     var user = StorageValue<String>(key: "user", defaultValue: "")
     /// Remote command types the AID app advertises in its Nightscout profile.
@@ -128,6 +130,8 @@ class Storage {
     // Live Activity
     var laEnabled = StorageValue<Bool>(key: "laEnabled", defaultValue: false)
     var laRenewBy = StorageValue<TimeInterval>(key: "laRenewBy", defaultValue: 0)
+    /// The activity `laRenewBy` belongs to.
+    var laBoundActivityId = StorageValue<String>(key: "laBoundActivityId", defaultValue: "")
     var laRenewalFailed = StorageValue<Bool>(key: "laRenewalFailed", defaultValue: false)
     var laPushToStartToken = StorageValue<String>(key: "laPushToStartToken", defaultValue: "")
     var laLastPushToStartAt = StorageValue<TimeInterval>(key: "laLastPushToStartAt", defaultValue: 0)
@@ -185,7 +189,6 @@ class Storage {
     // MARK: - Advanced settings ---------------------------------------------------
 
     var downloadTreatments = StorageValue<Bool>(key: "downloadTreatments", defaultValue: true)
-    var downloadPrediction = StorageValue<Bool>(key: "downloadPrediction", defaultValue: true)
     var graphOtherTreatments = StorageValue<Bool>(key: "graphOtherTreatments", defaultValue: true)
     var graphBasal = StorageValue<Bool>(key: "graphBasal", defaultValue: true)
     var graphBolus = StorageValue<Bool>(key: "graphBolus", defaultValue: true)
@@ -206,6 +209,10 @@ class Storage {
     var lastBlacklistNotificationShown = StorageValue<Date?>(key: "lastBlacklistNotificationShown", defaultValue: nil)
     var lastVersionUpdateNotificationShown = StorageValue<Date?>(key: "lastVersionUpdateNotificationShown", defaultValue: nil)
     var lastExpirationNotificationShown = StorageValue<Date?>(key: "lastExpirationNotificationShown", defaultValue: nil)
+    var hubLatestVersion = StorageValue<String?>(key: "hubLatestVersion", defaultValue: nil)
+    var hubLatestVersionBranch = StorageValue<String?>(key: "hubLatestVersionBranch", defaultValue: nil)
+    var hubLatestVersionChecked = StorageValue<Date?>(key: "hubLatestVersionChecked", defaultValue: nil)
+    var lastHubVersionUpdateNotificationShown = StorageValue<Date?>(key: "lastHubVersionUpdateNotificationShown", defaultValue: nil)
 
     // MARK: - Telemetry -----------------------------------------------------------
 
@@ -260,6 +267,7 @@ class Storage {
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
+    var loopMaxFutureCarbHours = StorageValue<Int>(key: "loopMaxFutureCarbHours", defaultValue: 1)
 
     var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))
     var bolusIncrementDetected = StorageValue<Bool>(key: "bolusIncrementDetected", defaultValue: false)

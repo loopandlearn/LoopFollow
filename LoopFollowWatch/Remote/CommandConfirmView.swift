@@ -7,10 +7,17 @@ import WatchKit
 
 /// Final step for every command: shows what will be sent, asks for confirmation
 /// and shows the phone's reply. Insulin needs a full turn of the Digital Crown
-/// and an unlocked watch on the wrist. A sent command is not yet delivered:
-/// Loop or Trio confirms it later with a notification.
+/// and an unlocked watch on the wrist. A bolus taken from the recommendation
+/// says so, and is checked against the latest one the watch has before
+/// sending. A sent command is not yet delivered: Loop or Trio confirms it
+/// later with a notification.
 struct CommandConfirmView: View {
-    let request: CommandRequest
+    /// Replaced when the user switches to a lowered recommendation.
+    @State private var request: CommandRequest
+
+    init(request: CommandRequest) {
+        _request = State(initialValue: request)
+    }
 
     @EnvironmentObject private var session: WatchSession
     @EnvironmentObject private var navigator: WatchNavigator
@@ -22,6 +29,8 @@ struct CommandConfirmView: View {
     @State private var phase: Phase = .confirm
     @State private var crownProgress = 0.0
     @State private var lastCrownChange = Date()
+    @State private var lowerRecommendation: BolusRecommendation?
+    @State private var showLowerRecommendation = false
     @FocusState private var crownFocused: Bool
 
     enum Phase: Equatable {
@@ -73,6 +82,23 @@ struct CommandConfirmView: View {
         }
         .navigationTitle(request.title)
         .navigationBarBackButtonHidden(phase != .confirm)
+        .onAppear {
+            if request.recommendation != nil { session.requestState() }
+        }
+        .alert("Recommendation Lowered", isPresented: $showLowerRecommendation, presenting: lowerRecommendation) { latest in
+            if latest.units > 0 {
+                // A new amount needs its own turn of the crown.
+                Button("Change to \(WatchFormat.insulin(latest.units)) U") {
+                    request = BolusAmountView.request(latest.units, recommendation: latest)
+                }
+            }
+            Button("Send Anyway") {
+                Task { await authenticateAndSend() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { latest in
+            Text("The recommendation is now \(WatchFormat.insulin(latest.units)) U, down from \(WatchFormat.insulin(request.recommendation?.units ?? 0)) U. New treatments may have occurred.")
+        }
     }
 
     private var summary: some View {
@@ -81,6 +107,14 @@ struct CommandConfirmView: View {
                 Text(line)
                     .font(.headline)
                     .multilineTextAlignment(.center)
+            }
+            if let rec = request.recommendation {
+                TimelineView(.periodic(from: .now, by: 10)) { context in
+                    let age = context.date.timeIntervalSince(rec.at)
+                    Label("Recommended, \(Int(age / 60)) min ago", systemImage: "wand.and.stars")
+                        .font(.footnote)
+                        .foregroundStyle(age >= BolusPresetsView.recommendationWarnAge ? .red : .secondary)
+                }
             }
         }
     }
@@ -111,7 +145,7 @@ struct CommandConfirmView: View {
             lastCrownChange = Date()
             if value >= 1 {
                 WKInterfaceDevice.current().play(.success)
-                Task { await authenticateAndSend() }
+                Task { await checkRecommendationThenSend() }
             } else {
                 resetCrownIfIdle()
             }
@@ -126,6 +160,24 @@ struct CommandConfirmView: View {
                 withAnimation { crownProgress = 0 }
             }
         }
+    }
+
+    /// Stops before sending when a newer loop cycle lowered the recommendation
+    /// this amount came from. The screens ask the phone for fresh state when
+    /// they open, so this uses what the watch already has and never waits.
+    private func checkRecommendationThenSend() async {
+        if let basis = request.recommendation {
+            let latest = session.state?.remote.flatMap(BolusPresetsView.latestRecommendation)
+            if let latest, latest.at > basis.at, latest.units < basis.units {
+                crownProgress = 0
+                phase = .confirm
+                lowerRecommendation = latest
+                showLowerRecommendation = true
+                WKInterfaceDevice.current().play(.notification)
+                return
+            }
+        }
+        await authenticateAndSend()
     }
 
     private func authenticateAndSend() async {

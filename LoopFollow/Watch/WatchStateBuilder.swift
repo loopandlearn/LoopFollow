@@ -138,10 +138,7 @@ enum WatchStateBuilder {
         let maxCarbs = Storage.shared.maxCarbs.value.doubleValue(for: .gram())
         let mealWithFatProtein = kind == .trio && Storage.shared.mealWithFatProtein.value
         let now = Date()
-
-        let recommendedAt: TimeInterval? = kind == .trio
-            ? Observable.shared.enactedOrSuggested.value
-            : Observable.shared.alertLastLoopTime.value
+        let recommended = RecommendedBolus.current()
 
         return WatchRemoteConfig(
             kind: kind,
@@ -152,8 +149,8 @@ enum WatchStateBuilder {
             maxProtein: Storage.shared.maxProtein.value.doubleValue(for: .gram()),
             mealWithBolus: kind == .trio && Storage.shared.mealWithBolus.value,
             mealWithFatProtein: mealWithFatProtein,
-            recommendedBolus: Observable.shared.deviceRecBolus.value,
-            recommendedBolusAt: recommendedAt.map { Date(timeIntervalSince1970: $0) },
+            recommendedBolus: recommended?.units,
+            recommendedBolusAt: recommended.map { Date(timeIntervalSince1970: $0.at) },
             overridePresets: kind == .trio ? trioOverridePresets() : loopOverridePresets(),
             tempTargetPresets: kind == .trio ? tempTargetPresets() : [],
             quickPickBoluses: QuickPickBolusesManager.computeQuickPickBoluses(

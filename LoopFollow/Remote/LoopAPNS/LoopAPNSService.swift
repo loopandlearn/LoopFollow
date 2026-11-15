@@ -92,7 +92,7 @@ class LoopAPNSService {
         return hasFullSetup
     }
 
-    private static let returnNotificationRequiredMessage = "Editing or deleting a carb entry needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
+    private static let returnNotificationRequiredMessage = "This command needs LoopFollow's own APNS credentials so Loop can confirm the result. Configure them in App Settings → APN."
 
     /// The return-notification block encrypted with the OTP, when LoopFollow's own credentials are configured.
     private func encryptedReturnNotification(otp: String) -> String? {
@@ -161,6 +161,12 @@ class LoopAPNSService {
         sendConfirmedCommand(payload, otp: otp, completion: completion)
     }
 
+    /// Switches Loop to the saved profile `name`. Requires the Loop remote profile patch.
+    func sendProfileSwitch(name: String, fingerprint: String, otp: String, completion: @escaping (Bool, String?) -> Void) {
+        LogManager.shared.log(category: .apns, message: "Sending profile switch to \(name) fingerprint=\(fingerprint)")
+        sendConfirmedCommand(LoopAPNSCommands.profileSwitchCommandPayload(name: name, fingerprint: fingerprint, otp: otp), otp: otp, completion: completion)
+    }
+
     /// Sends carbs via APNS push notification
     /// - Parameters:
     ///   - payload: The carbs payload to send
@@ -171,7 +177,7 @@ class LoopAPNSService {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
         LogManager.shared.log(category: .apns, message: "Sending carbs: \(String(format: "%.1f", payload.carbsAmount ?? 0.0))g, absorption: \(String(format: "%.1f", payload.absorptionTime ?? 3.0))h")
-        sendRemoteCommand(finalPayload, completion: completion)
+        sendRemoteCommand(finalPayload, completion: RemoteCommandRefresh.following(.meal(grams: payload.carbsAmount ?? 0, bolus: 0), completion))
     }
 
     /// Sends bolus via APNS push notification
@@ -184,7 +190,7 @@ class LoopAPNSService {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
         LogManager.shared.log(category: .apns, message: "Sending bolus: \(String(format: "%.2f", payload.bolusAmount ?? 0.0))U")
-        sendRemoteCommand(finalPayload, completion: completion)
+        sendRemoteCommand(finalPayload, completion: RemoteCommandRefresh.following(.bolus(units: payload.bolusAmount ?? 0), completion))
     }
 
     /// Validates APNS credentials similar to PushNotificationManager
@@ -473,7 +479,7 @@ class LoopAPNSService {
             apnsKey: creds.apnsKey,
             teamId: creds.teamId,
             payload: payload,
-            completion: completion
+            completion: RemoteCommandRefresh.following(.override, completion)
         )
     }
 
@@ -505,7 +511,7 @@ class LoopAPNSService {
             apnsKey: creds.apnsKey,
             teamId: creds.teamId,
             payload: payload,
-            completion: completion
+            completion: RemoteCommandRefresh.following(.override, completion)
         )
     }
 }

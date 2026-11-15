@@ -70,6 +70,14 @@ enum LoopAPNSCommands {
         return fields
     }
 
+    /// Keys are prefixed so an unpatched Loop rejects the command. The fingerprint identifies the previewed profile values.
+    static func profileSwitchCommandPayload(name: String, fingerprint: String, otp: String, now: Date = Date()) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Profile Switch: \(name)", now: now)
+        fields["profile-switch"] = name
+        fields["profile-switch-fingerprint"] = fingerprint
+        return fields
+    }
+
     /// Creates a properly formatted ISO8601 date string with milliseconds (matching Nightscout's format)
     /// - Parameter date: The date to format
     /// - Returns: Formatted date string like "2022-12-24T21:34:02.090Z"
