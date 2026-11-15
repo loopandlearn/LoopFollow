@@ -19,6 +19,8 @@ struct WatchCommand: Codable, Equatable {
         case startTempTarget(presetID: String)
         case cancelTempTarget
         case snoozeAlarm
+        /// Snoozes all alarms until the date, as the phone's "Snooze all" does; nil ends the snooze.
+        case snoozeAll(until: Date?)
     }
 
     let id: UUID
@@ -43,6 +45,7 @@ extension WatchCommand.Action {
         case .startTempTarget: "startTempTarget"
         case .cancelTempTarget: "cancelTempTarget"
         case .snoozeAlarm: "snoozeAlarm"
+        case .snoozeAll: "snoozeAll"
         }
     }
 

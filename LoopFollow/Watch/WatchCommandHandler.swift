@@ -56,6 +56,30 @@ final class WatchCommandHandler {
             return
         }
 
+        // Snoozing ahead needs no remote control: it changes LoopFollow's own alarms, like the
+        // Snoozer's "Snooze all".
+        if case let .snoozeAll(until) = command.action {
+            var configuration = Storage.shared.alarmConfiguration.value
+            if let until {
+                guard until > Date(), until <= Date().addingTimeInterval(24 * 3600) else {
+                    finish(false, "Choose a snooze of up to 24 hours.")
+                    return
+                }
+                // As on the phone: an alarm sounding now is snoozed as well.
+                if Observable.shared.currentAlarm.value != nil {
+                    AlarmManager.shared.performSnooze()
+                }
+                configuration.snoozeUntil = until
+                Storage.shared.alarmConfiguration.value = configuration
+                finish(true, "All alarms snoozed until \(until.formatted(date: .omitted, time: .shortened)).")
+            } else {
+                configuration.snoozeUntil = nil
+                Storage.shared.alarmConfiguration.value = configuration
+                finish(true, "Snooze ended. Alarms are active.")
+            }
+            return
+        }
+
         guard Storage.shared.watchRemoteCommands.value else {
             finish(false, "Commands from Apple Watch are turned off in LoopFollow's Remote settings.")
             return
@@ -130,7 +154,7 @@ final class WatchCommandHandler {
         case .cancelOverride:
             service.sendCancelOverrideNotification(completion: sent)
 
-        case .startTempTarget, .cancelTempTarget, .snoozeAlarm:
+        case .startTempTarget, .cancelTempTarget, .snoozeAlarm, .snoozeAll:
             finish(false, "This command is not available for Loop.")
         }
     }
@@ -206,7 +230,7 @@ final class WatchCommandHandler {
         case .cancelTempTarget:
             manager.sendCancelTempTargetPushNotification(completion: sent)
 
-        case .snoozeAlarm:
+        case .snoozeAlarm, .snoozeAll:
             finish(false, "Unknown request.")
         }
     }
