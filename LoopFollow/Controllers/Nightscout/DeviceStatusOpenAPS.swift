@@ -10,10 +10,12 @@ extension MainViewController {
         if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
+            clearOpenAPSInsulinActivity()
         } else {
             guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
                 Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
+                clearOpenAPSInsulinActivity()
                 return
             }
 
@@ -263,5 +265,10 @@ extension MainViewController {
             Storage.shared.lastIOB.value = latestIOB?.value
             Storage.shared.lastCOB.value = latestCOB?.value
         }
+    }
+
+    private func clearOpenAPSInsulinActivity() {
+        insulinForecast = nil
+        infoManager.clearInfoData(type: .insulinActivity)
     }
 }

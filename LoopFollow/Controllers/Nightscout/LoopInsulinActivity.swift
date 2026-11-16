@@ -29,7 +29,7 @@ enum LoopInsulinActivity {
     static let step: TimeInterval = 5 * 60
 
     /// Net basal doses from the delivered rates (`basalData`) and the scheduled
-    /// rates (`basalScheduleData`). Both are rate steps in chronological order:
+    /// rates. Both are rate steps in chronological order:
     /// each dot's rate holds until the next dot.
     static func netBasalDoses(
         delivered: [MainViewController.basalGraphStruct],
@@ -114,6 +114,14 @@ extension MainViewController {
             return
         }
 
+        guard Storage.shared.downloadTreatments.value, !profileManager.basalSchedule.isEmpty else {
+            loopInsulinActivity = []
+            insulinForecast = nil
+            infoManager.clearInfoData(type: .insulinActivity)
+            chartModel.rebuild()
+            return
+        }
+
         let model = Storage.shared.loopInsulinModel.value
         let now = dateTimeUtils.getNowTimeIntervalUTC()
         // Treatments are fetched from this time on; earlier doses are unknown,
@@ -125,7 +133,11 @@ extension MainViewController {
         }
         // The running temp basal counts until its set end.
         let basalEnd = max(now, basalData.last?.date ?? now)
-        let basal = LoopInsulinActivity.netBasalDoses(delivered: basalData, scheduled: basalScheduleData, overrides: overrides, until: basalEnd)
+        let scheduled = profileManager.scheduledBasalSegments(
+            from: Date(timeIntervalSince1970: basalData.first?.date ?? now),
+            to: Date(timeIntervalSince1970: basalEnd)
+        ).map { basalGraphStruct(basalRate: $0.rate, date: $0.start.timeIntervalSince1970) }
+        let basal = LoopInsulinActivity.netBasalDoses(delivered: basalData, scheduled: scheduled, overrides: overrides, until: basalEnd)
         let doses = boluses + basal
 
         let times = LoopInsulinActivity.times(from: fetchStart + model.effectDuration, to: now)

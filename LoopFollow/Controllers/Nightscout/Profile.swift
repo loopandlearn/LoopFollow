@@ -31,7 +31,14 @@ extension MainViewController {
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
             return
         }
+        let previousBasalSchedule = profileManager.basalSchedule.map { [Double($0.timeAsSeconds), $0.value] }
         profileManager.loadProfile(from: profileData)
+        // Gaps between temp basals are filled from the schedule.
+        if !basalData.isEmpty,
+           profileManager.basalSchedule.map({ [Double($0.timeAsSeconds), $0.value] }) != previousBasalSchedule
+        {
+            TaskScheduler.shared.rescheduleTask(id: .treatments, to: Date())
+        }
         infoManager.updateInfoData(type: .profile, value: profileData.defaultProfile)
         Storage.shared.lastProfileName.value = profileData.defaultProfile
 
