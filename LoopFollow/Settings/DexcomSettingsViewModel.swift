@@ -79,6 +79,21 @@ class DexcomSettingsViewModel: ObservableObject {
             .store(in: &cancellables)
 
         scheduleVerification()
+
+        // A change made elsewhere while the screen is open, such as LF Hub putting its
+        // data source back, shows in the fields.
+        Storage.shared.shareUserName.$value
+            .merge(with: Storage.shared.sharePassword.$value, Storage.shared.shareServer.$value)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.followStorage() }
+            .store(in: &cancellables)
+    }
+
+    private func followStorage() {
+        let storage = Storage.shared
+        if storage.shareUserName.value != userName { userName = storage.shareUserName.value }
+        if storage.sharePassword.value != password { password = storage.sharePassword.value }
+        if storage.shareServer.value != server { server = storage.shareServer.value }
     }
 
     /// Resets status to "checking" and queues a debounced verification.
@@ -100,42 +115,53 @@ class DexcomSettingsViewModel: ObservableObject {
         guard hasCredentials else { return }
 
         let generation = verifyGeneration
+        Self.checkLogin(userName: userName, password: password, server: server) { [weak self] result in
+            guard let self, generation == self.verifyGeneration else { return }
+            switch result {
+            case .rejected:
+                self.statusKind = .error
+                self.statusMessage = "Username or password not accepted"
+                self.isVerified = false
+                self.loginRejected = true
+            case .unreachable:
+                self.statusKind = .error
+                self.statusMessage = "Network error — check your connection"
+                self.isVerified = false
+                self.loginRejected = false
+            case .accepted:
+                self.statusKind = .connected
+                self.statusMessage = "Connected"
+                self.isVerified = true
+                self.loginRejected = false
+            }
+        }
+    }
+
+    enum LoginCheck {
+        case accepted
+        case rejected
+        case unreachable
+    }
+
+    /// Logs in to Dexcom Share with the credentials; `completion` runs on the main queue.
+    static func checkLogin(userName: String, password: String, server: String,
+                           completion: @escaping (LoginCheck) -> Void)
+    {
         let serverURL = server == "US"
             ? KnownShareServers.US.rawValue
             : KnownShareServers.NON_US.rawValue
         let client = ShareClient(username: userName, password: password, shareServer: serverURL)
 
-        client.fetchData(1) { [weak self] error, _ in
-            DispatchQueue.main.async {
-                guard let self, generation == self.verifyGeneration else { return }
-
-                if let error = error {
-                    switch error {
-                    case .loginError:
-                        self.statusKind = .error
-                        self.statusMessage = "Username or password not accepted"
-                        self.isVerified = false
-                        self.loginRejected = true
-                    case .httpError:
-                        self.statusKind = .error
-                        self.statusMessage = "Network error — check your connection"
-                        self.isVerified = false
-                        self.loginRejected = false
-                    default:
-                        // Login succeeded but there's no recent reading yet; the
-                        // credentials are valid, which is all we're confirming.
-                        self.statusKind = .connected
-                        self.statusMessage = "Connected"
-                        self.isVerified = true
-                        self.loginRejected = false
-                    }
-                } else {
-                    self.statusKind = .connected
-                    self.statusMessage = "Connected"
-                    self.isVerified = true
-                    self.loginRejected = false
-                }
+        client.fetchData(1) { error, _ in
+            let result: LoginCheck
+            switch error {
+            case .loginError: result = .rejected
+            case .httpError: result = .unreachable
+            // Login succeeded but there's no recent reading yet; the
+            // credentials are valid, which is all we're confirming.
+            default: result = .accepted
             }
+            DispatchQueue.main.async { completion(result) }
         }
     }
 }

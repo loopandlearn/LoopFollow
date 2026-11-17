@@ -45,9 +45,9 @@ struct LoopCarbTreatment: Codable, Equatable {
         absorptionMinutes.map { $0 / 60 }
     }
 
-    func isWithinEditWindow(now: Date = Date()) -> Bool {
+    func isWithinEditWindow(now: Date = Date(), maxFutureHours: Int = Storage.shared.loopMaxFutureCarbHours.value) -> Bool {
         let age = now.timeIntervalSince1970 - date
-        return age <= Self.editWindow && age >= -3600
+        return age <= Self.editWindow && age >= -TimeInterval(maxFutureHours) * 3600
     }
 
     /// Loop APNS targets a Loop device, whatever commands that build advertises.

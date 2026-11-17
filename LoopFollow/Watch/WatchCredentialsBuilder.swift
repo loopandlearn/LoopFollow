@@ -12,7 +12,8 @@ enum WatchCredentialsBuilder {
             dexcomUsername: Storage.shared.shareUserName.value,
             dexcomPassword: Storage.shared.sharePassword.value,
             dexcomServer: Storage.shared.shareServer.value,
-            remote: remote()
+            remote: remote(),
+            phoneSleeps: BackgroundRefreshType.inEffect == .hub
         )
     }
 

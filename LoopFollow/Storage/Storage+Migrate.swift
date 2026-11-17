@@ -186,18 +186,6 @@ extension Storage {
         }
     }
 
-    func migrateStep2() {
-        // Migrate from old system to new position-based system
-        if remoteType.value != .none {
-            remotePosition.value = .position2
-            alarmsPosition.value = .menu
-        } else {
-            alarmsPosition.value = .position2
-            remotePosition.value = .menu
-        }
-        nightscoutPosition.value = .position4
-    }
-
     // MARK: - Migration helpers (can be removed when step 5 is removed)
 
     /// Check whether a tab item's position was explicitly stored in UserDefaults

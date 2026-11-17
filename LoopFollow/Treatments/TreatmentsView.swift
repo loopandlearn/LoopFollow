@@ -687,7 +687,9 @@ struct TreatmentDetailView: View {
     }
 
     private func loopRemoteActionsFooter(withinWindow: Bool) -> Text? {
-        withinWindow ? nil : Text("Carb entries can be changed remotely for 23 hours.")
+        guard !withinWindow else { return nil }
+        let futureHours = Storage.shared.loopMaxFutureCarbHours.value
+        return Text("Carb entries can be changed remotely up to 23 hours after and \(futureHours) \(futureHours == 1 ? "hour" : "hours") before their time.")
     }
 
     @ViewBuilder

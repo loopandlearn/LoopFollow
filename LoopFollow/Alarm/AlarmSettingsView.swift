@@ -139,7 +139,7 @@ struct AlarmSettingsView: View {
                     .datePickerStyle(.compact)
                 }
 
-                Section(header: Text("Alarm Settings")) {
+                Section(header: Text("Alarm Settings"), footer: hubFooter) {
                     Toggle(
                         "Override System Volume",
                         isOn: Binding(
@@ -196,5 +196,11 @@ struct AlarmSettingsView: View {
         }
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationBarTitle("Alarm Settings", displayMode: .inline)
+    }
+
+    @ViewBuilder private var hubFooter: some View {
+        if HubClient.shared.isHubMode {
+            Text("In LF Hub mode, alarms ring as system alarms: at the phone's alarm volume and through silent mode. Override System Volume, Volume Level and Audio During Calls do not apply to them. Stop or snooze them with the alarm's own buttons; the volume buttons may not snooze them.")
+        }
     }
 }

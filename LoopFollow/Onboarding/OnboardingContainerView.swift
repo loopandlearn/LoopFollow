@@ -69,6 +69,8 @@ struct OnboardingContainerView: View {
                     DexcomConnectStepView(viewModel: viewModel.dexcomViewModel, onboarding: viewModel)
                 case .copyFromPhone:
                     ConnectImportStepView(viewModel: viewModel)
+                case .hub:
+                    HubJoinStepView(viewModel: viewModel)
                 default:
                     NightscoutConnectStepView(viewModel: viewModel.nightscoutViewModel, onboarding: viewModel)
                 }
@@ -84,6 +86,8 @@ struct OnboardingContainerView: View {
                 NotificationsStepView(viewModel: viewModel)
             case .telemetry:
                 TelemetryStepView(viewModel: viewModel)
+            case .hubPermissions:
+                HubPermissionsStepView(viewModel: viewModel)
             case .completion:
                 CompletionStepView(viewModel: viewModel)
             }

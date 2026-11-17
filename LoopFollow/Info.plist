@@ -66,6 +66,8 @@
 	<string></string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>LoopFollow uses alarms so urgent glucose alerts from LF Hub reach you even when the phone is silenced or a Focus is on.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
