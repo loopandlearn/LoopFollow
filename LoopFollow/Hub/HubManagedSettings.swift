@@ -105,6 +105,7 @@ extension HubSourceSync.State {
 }
 
 /// The APN settings while LF Hub pushes to this phone with the APN key an admin added.
+/// The key here stays this phone's own: remote control signs with it.
 struct HubManagedApnKey<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -112,19 +113,18 @@ struct HubManagedApnKey<Content: View>: View {
     @ObservedObject private var apnsKeyShared = HubClient.shared.apnsKeyShared
 
     private var shared: Bool {
-        HubClient.shared.isConnected && apnsKeyShared.value && !HubClient.hasOwnApnKey
+        HubClient.shared.isConnected && apnsKeyShared.value
     }
 
     var body: some View {
         if shared {
             Section {
-                Label("Managed by LF Hub", systemImage: "lock.fill")
-                Text("LF Hub notifies this phone with the APN key an admin added.")
+                Label("Shared by LF Hub", systemImage: "person.2.fill")
+                Text("LF Hub notifies this phone with the APN key an admin added. Remote Control needs a key here as well.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
         }
-        Group { content }
-            .disabled(shared)
+        content
     }
 }

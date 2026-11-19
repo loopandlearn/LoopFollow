@@ -231,7 +231,7 @@ final class LiveActivityManager {
             await activity.update(content)
             LogManager.shared.log(category: .general, message: "[LA] resign-active flush sent seq=\(nextSeq)", isDebug: true)
             // Also send APNs so the extension receives the latest token-based update.
-            if let token = pushToken {
+            if let token = pushToken, APNsCredentialValidator.hasValidLoopFollowKey {
                 await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
             }
         }
@@ -714,8 +714,9 @@ final class LiveActivityManager {
     /// deadline has passed, working around Apple's 8-hour maximum LA lifetime.
     /// Returns true if renewal was performed (caller should return early).
     private func renewIfNeeded(snapshot: GlucoseSnapshot) -> Bool {
-        // LF Hub renews through push-to-start when it drives the activity.
-        guard !HubClient.shared.drivesLiveActivity, let oldActivity = current else { return false }
+        // LF Hub renews through push-to-start when it drives the activity or pushes with the key an admin shares.
+        guard !HubClient.shared.drivesLiveActivity, !HubClient.shared.expectsSharedApnKey,
+              let oldActivity = current else { return false }
 
         let renewBy = Storage.shared.laRenewBy.value
         guard renewBy > 0, Date().timeIntervalSince1970 >= renewBy else { return false }
@@ -772,17 +773,16 @@ final class LiveActivityManager {
 
     /// Foreground-only local creation via Activity.request(pushType: .token).
     /// Returns false when creation is not possible; the caller decides whether
-    /// to fall back to push-to-start. APNs credentials stay a hard prerequisite
-    /// even here — background renewal and updates depend on them.
+    /// to fall back to push-to-start. APNs credentials, this app's own or the key
+    /// LF Hub holds, stay a hard prerequisite even here — background renewal and
+    /// updates depend on them.
     @MainActor
     private func attemptLocalCreate(
         reason: String,
         oldActivity: Activity<GlucoseLiveActivityAttributes>?,
         snapshot: GlucoseSnapshot? = nil
     ) -> Bool {
-        let keyId = Storage.shared.lfKeyId.value
-        let apnsKey = Storage.shared.lfApnsKey.value
-        guard APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey) else {
+        guard APNsCredentialValidator.hasValidLoopFollowKey || HubClient.shared.liveActivityUsesSharedKey else {
             LogManager.shared.log(
                 category: .general,
                 message: "[LA] local create (\(reason)) blocked — APNs credentials missing"
@@ -876,11 +876,21 @@ final class LiveActivityManager {
         oldActivity: Activity<GlucoseLiveActivityAttributes>?,
         snapshot: GlucoseSnapshot? = nil
     ) {
+        // The app cannot sign a push-to-start with the key LF Hub holds; the hub renews
+        // the activity, and the app starts one locally the next time it is open.
+        if HubClient.shared.expectsSharedApnKey {
+            LogManager.shared.log(
+                category: .general,
+                message: "[LA] push-to-start (\(reason)) skipped — LF Hub pushes with the key an admin shares (shared=\(HubClient.shared.apnsKeyShared.value))"
+            )
+            return
+        }
+
         // Validate APNs credentials up-front — push-to-start is the only
         // transport, so missing/invalid creds mean the LA will never display.
         let keyId = Storage.shared.lfKeyId.value
         let apnsKey = Storage.shared.lfApnsKey.value
-        guard APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey) else {
+        guard APNsCredentialValidator.hasValidLoopFollowKey else {
             LogManager.shared.log(
                 category: .general,
                 message: "[LA] push-to-start (\(reason)) blocked — APNs credentials missing or invalid (keyId valid=\(APNsCredentialValidator.isValidKeyId(keyId)), apnsKey valid=\(APNsCredentialValidator.isValidApnsKey(apnsKey)))"
@@ -1229,7 +1239,13 @@ final class LiveActivityManager {
             lastUpdateTime = Date()
             LogManager.shared.log(category: .general, message: "[LA] updated id=\(activityID) seq=\(nextSeq) reason=\(reason)", isDebug: true)
 
-            if let token = pushToken {
+            if !APNsCredentialValidator.hasValidLoopFollowKey {
+                LogManager.shared.log(
+                    category: .general,
+                    message: "[LA] update seq=\(nextSeq) reason=\(reason) — no APN key of this app's own, APNs skipped",
+                    isDebug: true
+                )
+            } else if let token = pushToken {
                 await APNSClient.shared.sendLiveActivityUpdate(pushToken: token, state: state)
             } else {
                 LogManager.shared.log(
@@ -1367,7 +1383,9 @@ final class LiveActivityManager {
     private func scheduleApnsCredentialsMissingNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Live Activity Setup Needed"
-        content.body = "APNs credentials are missing or invalid. Configure them in Settings → APN."
+        content.body = HubClient.shared.isConnected && HubClient.shared.apnsKeyShared.value
+            ? "LF Hub updates the Live Activity only while Background Refresh uses LF Hub. Choose LF Hub there, or add an APN key in Settings → APN."
+            : "APNs credentials are missing or invalid. Configure them in Settings → APN."
         content.sound = .default
         let request = UNNotificationRequest(
             identifier: LiveActivityManager.apnsCredentialsNotificationID,

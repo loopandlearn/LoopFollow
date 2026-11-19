@@ -12,10 +12,7 @@
         func perform() async throws -> some IntentResult & ProvidesDialog {
             Storage.shared.laEnabled.value = true
 
-            let keyId = Storage.shared.lfKeyId.value
-            let apnsKey = Storage.shared.lfApnsKey.value
-
-            if keyId.isEmpty || apnsKey.isEmpty {
+            if !APNsCredentialValidator.hasValidLoopFollowKey, !HubClient.shared.liveActivityUsesSharedKey {
                 if let url = URL(string: "loopfollow://settings/live-activity") {
                     await MainActor.run { UIApplication.shared.open(url) }
                 }

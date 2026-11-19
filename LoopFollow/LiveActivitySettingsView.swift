@@ -19,7 +19,7 @@
         /// with which the hub updates the Live Activity.
         private var apnsConfigured: Bool {
             APNsCredentialValidator.isFullyConfigured(keyId: keyId, apnsKey: apnsKey)
-                || (HubClient.shared.isHubMode && HubClient.shared.apnsKeyShared.value)
+                || HubClient.shared.liveActivityUsesSharedKey
         }
 
         var body: some View {
