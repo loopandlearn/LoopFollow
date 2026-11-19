@@ -37,6 +37,52 @@ extension MainViewController {
         return rawDate.flatMap(NightscoutUtils.parseDate)
     }
 
+    /// The greatest 24-hex-digit `_id` among the entries. Nightscout `_id`s are Mongo ObjectIds, which sort by server insert time
+    /// (first 8 hex digits, seconds); ids dated more than 5 minutes after `now` are skipped.
+    static func knownThroughID(_ entries: [[String: AnyObject]], now: Date = Date()) -> String? {
+        let latest = now.addingTimeInterval(5 * 60).timeIntervalSince1970
+        return entries
+            .compactMap { $0["_id"] as? String }
+            .filter { $0.count == 24 && $0.allSatisfy { $0.isASCII && $0.isHexDigit } }
+            .filter { UInt32($0.prefix(8), radix: 16).map { TimeInterval($0) <= latest } ?? false }
+            .map { $0.lowercased() }
+            .max()
+    }
+
+    /// The Nightscout site and hub a treatments download reads from; the marker is cleared when any of them changes.
+    struct TreatmentsSite: Equatable {
+        let url: String
+        let token: String
+        let hubURL: String
+        var hubMode = false
+        var deviceKey = ""
+
+        static var current: TreatmentsSite {
+            TreatmentsSite(
+                url: Storage.shared.url.value,
+                token: Storage.shared.token.value,
+                hubURL: Storage.shared.hubURL.value,
+                hubMode: HubClient.shared.isHubMode,
+                deviceKey: HubClient.shared.deviceKey.value
+            )
+        }
+    }
+
+    /// Stores the marker of a download that started at `site`, provided the site is still `current` and treatments are still downloaded.
+    static func storeKnownThroughID(
+        _ entries: [[String: AnyObject]],
+        fetchedFrom site: TreatmentsSite,
+        current: TreatmentsSite = .current,
+        downloadsTreatments: Bool = Storage.shared.downloadTreatments.value,
+        now: Date = Date()
+    ) {
+        guard site == current, downloadsTreatments else {
+            LogManager.shared.log(category: .nightscout, message: "Treatments marker skipped: the site or the treatment download changed during the download")
+            return
+        }
+        Observable.shared.treatmentsKnownThroughID.value = knownThroughID(entries, now: now)
+    }
+
     // NS Treatments Web Call
     // Downloads Basal, Bolus, Carbs, BG Check, Notes, Overrides
     func WebLoadNSTreatments() {
@@ -50,12 +96,13 @@ extension MainViewController {
             "find[created_at][$lte]": endTimeString,
             "count": "\(estimatedCount)",
         ]
+        let site = TreatmentsSite.current
         NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters, hubPart: .treatments) { (result: Result<Any, Error>) in
             switch result {
             case let .success(data):
                 if let entries = data as? [[String: AnyObject]] {
                     DispatchQueue.main.async {
-                        self.updateTreatments(entries: entries)
+                        self.updateTreatments(entries: entries, site: site)
                     }
                 } else {
                     LogManager.shared.log(category: .nightscout, message: "WebLoadNSTreatments, Unexpected data structure")
@@ -67,7 +114,8 @@ extension MainViewController {
     }
 
     // Process and split out treatments to individual tasks
-    func updateTreatments(entries: [[String: AnyObject]]) {
+    func updateTreatments(entries: [[String: AnyObject]], site: TreatmentsSite) {
+        Self.storeKnownThroughID(entries, fetchedFrom: site)
         let uniqueEntries = Self.deduplicatedTreatmentEntries(entries)
 
         var tempBasal: [[String: AnyObject]] = []

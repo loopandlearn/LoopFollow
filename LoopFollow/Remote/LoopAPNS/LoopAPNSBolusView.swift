@@ -22,6 +22,8 @@ struct LoopAPNSBolusView: View {
     @State private var otpTimeRemaining: Int? = nil
     @State private var showOldCalculationWarning = false
     @State private var showTOTPWarning = false
+    /// The treatments marker as the user sees it on this screen.
+    @State private var origin = RemoteCommandOrigin.phoneScreenAppeared()
     private let otpPeriod: TimeInterval = 30
     private var otpTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -202,6 +204,7 @@ struct LoopAPNSBolusView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
 
+            .remoteCommandOrigin($origin)
             .onAppear {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
@@ -400,7 +403,7 @@ struct LoopAPNSBolusView: View {
         )
 
         let apnsService = LoopAPNSService()
-        apnsService.sendBolusViaAPNS(payload: payload) { success, errorMessage in
+        apnsService.sendBolusViaAPNS(payload: payload, origin: origin) { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {

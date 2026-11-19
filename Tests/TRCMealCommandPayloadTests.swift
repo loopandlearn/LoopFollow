@@ -53,6 +53,47 @@ struct TRCMealCommandPayloadTests {
         #expect(json["bolus_amount"] == nil)
     }
 
+    @Test("known_through_id is sent when set and omitted when nil")
+    func knownThroughID() throws {
+        let marker = "6566a3c0a1b2c3d4e5f60718"
+        let bolus = try encode(CommandPayload(user: "u", commandType: .bolus, timestamp: 0, bolusAmount: 1, knownThroughID: marker))
+        let meal = try encode(CommandPayload(user: "u", commandType: .meal, timestamp: 0, carbs: 10, knownThroughID: marker))
+        let unknown = try encode(CommandPayload(user: "u", commandType: .bolus, timestamp: 0, bolusAmount: 1))
+        #expect(bolus["known_through_id"] as? String == marker)
+        #expect(meal["known_through_id"] as? String == marker)
+        #expect(unknown.keys.contains("known_through_id") == false)
+    }
+
+    @Test("bolus and meal commands carry a fresh command id and the marker")
+    func bolusAndMealCommandIDs() throws {
+        let marker = "6566a3c0a1b2c3d4e5f60718"
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        func bolus() throws -> [String: Any] {
+            try encode(PushNotificationManager.bolusPayload(user: "u", bolusAmount: 1, knownThroughID: marker, returnNotification: nil, now: now))
+        }
+        func meal() throws -> [String: Any] {
+            try encode(PushNotificationManager.mealPayload(
+                user: "u", bolusAmount: 1, carbs: 10, protein: nil, fat: nil, scheduledTime: nil,
+                knownThroughID: marker, returnNotification: nil, now: now
+            ))
+        }
+        let ids = try [bolus(), bolus(), meal(), meal()].map { try #require($0["command_id"] as? String) }
+        #expect(Set(ids).count == 4)
+        #expect(ids.allSatisfy { UUID(uuidString: $0) != nil })
+
+        let first = try bolus()
+        #expect(first["command_type"] as? String == "bolus")
+        #expect(first["known_through_id"] as? String == marker)
+        #expect(first["timestamp"] as? Double == 1_700_000_000)
+        let second = try meal()
+        #expect(second["command_type"] as? String == "meal")
+        #expect(second["known_through_id"] as? String == marker)
+        #expect(PushNotificationManager.mealPayload(
+            user: "u", bolusAmount: nil, carbs: 10, protein: nil, fat: nil, scheduledTime: nil,
+            knownThroughID: nil, returnNotification: nil
+        ).apnsCollapseID == "meal")
+    }
+
     @Test("collapse id is the command id for meal mutations only")
     func collapseID() {
         let edit = CommandPayload(user: "u", commandType: .editMeal, timestamp: 0, commandID: "CMD", mealID: "M")

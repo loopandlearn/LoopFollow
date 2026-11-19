@@ -35,6 +35,8 @@ struct MealView: View {
     @State private var selectedTime: Date? = nil
     @State private var isScheduling: Bool = false
     @State private var showFatProteinOrderBanner = false
+    /// The treatments marker as the user sees it on this screen.
+    @State private var origin = RemoteCommandOrigin.phoneScreenAppeared()
 
     enum AlertType {
         case confirmMeal
@@ -187,6 +189,7 @@ struct MealView: View {
                 .navigationTitle("Meal")
                 .navigationBarTitleDisplayMode(.inline)
             }
+            .remoteCommandOrigin($origin)
             .onAppear {
                 selectedTime = nil
                 isScheduling = false
@@ -318,7 +321,8 @@ struct MealView: View {
             protein: protein,
             fat: fat,
             bolusAmount: bolusAmount,
-            scheduledTime: scheduledDate
+            scheduledTime: scheduledDate,
+            origin: origin
         ) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
