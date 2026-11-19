@@ -20,6 +20,8 @@ struct BolusView: View {
     @State private var alertMessage: String? = nil
     @State private var isLoading = false
     @State private var statusMessage: String? = nil
+    /// The treatments marker as the user sees it on this screen.
+    @State private var origin = RemoteCommandOrigin.phoneScreenAppeared()
 
     private let pushNotificationManager = PushNotificationManager()
 
@@ -141,6 +143,7 @@ struct BolusView: View {
                 .navigationTitle("Bolus")
                 .navigationBarTitleDisplayMode(.inline)
             }
+            .remoteCommandOrigin($origin)
             .onAppear {
                 quickPickBoluses.refresh(
                     stepIncrement: stepU,
@@ -312,7 +315,7 @@ struct BolusView: View {
 
     private func sendBolus() {
         isLoading = true
-        pushNotificationManager.sendBolusPushNotification(bolusAmount: bolusAmount) { success, errorMessage in
+        pushNotificationManager.sendBolusPushNotification(bolusAmount: bolusAmount, origin: origin) { success, errorMessage in
             DispatchQueue.main.async {
                 isLoading = false
                 if success {

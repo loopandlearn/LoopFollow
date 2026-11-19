@@ -171,8 +171,8 @@ class LoopAPNSService {
     /// - Parameters:
     ///   - payload: The carbs payload to send
     ///   - completion: Completion handler with success status and error message
-    func sendCarbsViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
-        var finalPayload = LoopAPNSCommands.carbsCommandPayload(payload)
+    func sendCarbsViaAPNS(payload: LoopAPNSPayload, origin: RemoteCommandOrigin, completion: @escaping (Bool, String?) -> Void) {
+        var finalPayload = LoopAPNSCommands.carbsCommandPayload(payload, knownThroughID: origin.knownThroughID)
         if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }
@@ -184,8 +184,8 @@ class LoopAPNSService {
     /// - Parameters:
     ///   - payload: The bolus payload to send
     ///   - completion: Completion handler with success status and error message
-    func sendBolusViaAPNS(payload: LoopAPNSPayload, completion: @escaping (Bool, String?) -> Void) {
-        var finalPayload = LoopAPNSCommands.bolusCommandPayload(payload)
+    func sendBolusViaAPNS(payload: LoopAPNSPayload, origin: RemoteCommandOrigin, completion: @escaping (Bool, String?) -> Void) {
+        var finalPayload = LoopAPNSCommands.bolusCommandPayload(payload, knownThroughID: origin.knownThroughID)
         if let encryptedReturnInfo = encryptedReturnNotification(otp: payload.otp) {
             finalPayload["encrypted_return_notification"] = encryptedReturnInfo
         }

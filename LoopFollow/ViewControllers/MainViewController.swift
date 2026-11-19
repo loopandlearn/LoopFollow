@@ -340,6 +340,19 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             }
             .store(in: &cancellables)
 
+        // The treatments marker belongs to the site it was read from, and to a treatment download that is on.
+        Publishers.MergeMany(
+            Storage.shared.url.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.token.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.hubURL.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            HubClient.shared.deviceKey.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.backgroundRefreshType.$value.removeDuplicates().dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            Storage.shared.downloadTreatments.$value.removeDuplicates().dropFirst().filter { !$0 }.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { Observable.shared.treatmentsKnownThroughID.value = nil }
+        .store(in: &cancellables)
+
         // ShareClient captures the credentials at init, so it's rebuilt on any change.
         Publishers.MergeMany(
             Storage.shared.shareUserName.$value.map { _ in () }.eraseToAnyPublisher(),

@@ -90,7 +90,7 @@ final class WatchCommandHandler {
         case let .bolus(units):
             guard service.validateSetup() else { return finish(false, loopSetupIncomplete) }
             guard let otp = loopOTP(finish: finish) else { return }
-            service.sendBolusViaAPNS(payload: LoopAPNSPayload(type: .bolus, bolusAmount: units, otp: otp)) { success, error in
+            service.sendBolusViaAPNS(payload: LoopAPNSPayload(type: .bolus, bolusAmount: units, otp: otp), origin: .watch) { success, error in
                 DispatchQueue.main.async {
                     if success {
                         TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
@@ -110,7 +110,7 @@ final class WatchCommandHandler {
                 consumedDate: consumedAt.dateUsingCurrentSeconds(),
                 otp: otp
             )
-            service.sendCarbsViaAPNS(payload: payload) { success, error in
+            service.sendCarbsViaAPNS(payload: payload, origin: .watch) { success, error in
                 DispatchQueue.main.async {
                     if success {
                         TOTPService.shared.markTOTPAsUsed(qrCodeURL: Storage.shared.loopAPNSQrCodeURL.value)
@@ -165,7 +165,7 @@ final class WatchCommandHandler {
 
         switch action {
         case let .bolus(units):
-            manager.sendBolusPushNotification(bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: units)) { success, error in
+            manager.sendBolusPushNotification(bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: units), origin: .watch) { success, error in
                 if success {
                     DispatchQueue.main.async { QuickPickBolusesManager.shared.recordBolus(units: units) }
                 }
@@ -178,7 +178,8 @@ final class WatchCommandHandler {
                 protein: HKQuantity(unit: .gram(), doubleValue: protein),
                 fat: HKQuantity(unit: .gram(), doubleValue: fat),
                 bolusAmount: HKQuantity(unit: .internationalUnit(), doubleValue: bolus),
-                scheduledTime: WatchCommand.trioScheduledTime(consumedAt)
+                scheduledTime: WatchCommand.trioScheduledTime(consumedAt),
+                origin: .watch
             ) { success, error in
                 if success, carbs > 0 {
                     DispatchQueue.main.async {

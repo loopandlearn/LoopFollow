@@ -5,37 +5,49 @@ import Foundation
 
 /// Loop remote command payloads, matching Nightscout's loop.js format.
 enum LoopAPNSCommands {
+    /// How long Loop may accept a bolus or carb command after it is sent.
+    static let treatmentCommandLifetime: TimeInterval = 12 * 60
+
     /// Fields every Loop remote command carries.
-    static func commandHeader(otp: String, alert: String, now: Date) -> [String: Any] {
+    static func commandHeader(otp: String, alert: String, now: Date, lifetime: TimeInterval = 5 * 60) -> [String: Any] {
         [
             "otp": otp,
             "remote-address": "LoopFollow",
             "notes": "Sent via LoopFollow APNS",
             "entered-by": "LoopFollow",
             "sent-at": formatDateForAPNS(now),
-            "expiration": formatDateForAPNS(now.addingTimeInterval(5 * 60)),
+            "expiration": formatDateForAPNS(now.addingTimeInterval(lifetime)),
             "alert": alert,
         ]
     }
 
-    static func carbsCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
+    /// `knownThroughID` is the newest Nightscout treatment `_id` the sender had seen; Loop rejects the command when newer insulin or carbs exist.
+    static func carbsCommandPayload(_ payload: LoopAPNSPayload, knownThroughID: String? = nil, now: Date = Date()) -> [String: Any] {
         let carbsAmount = payload.carbsAmount ?? 0.0
         let absorptionTime = payload.absorptionTime ?? 3.0
         var fields = commandHeader(
             otp: payload.otp,
             alert: "Remote Carbs Entry: \(String(format: "%.1f", carbsAmount)) grams\nAbsorption Time: \(String(format: "%.1f", absorptionTime)) hours",
-            now: now
+            now: now,
+            lifetime: treatmentCommandLifetime
         )
         fields["carbs-entry"] = carbsAmount
         fields["absorption-time"] = absorptionTime
         fields["start-time"] = formatDateForAPNS(payload.consumedDate ?? now)
+        fields["known-through-id"] = knownThroughID
         return fields
     }
 
-    static func bolusCommandPayload(_ payload: LoopAPNSPayload, now: Date = Date()) -> [String: Any] {
+    static func bolusCommandPayload(_ payload: LoopAPNSPayload, knownThroughID: String? = nil, now: Date = Date()) -> [String: Any] {
         let bolusAmount = payload.bolusAmount ?? 0.0
-        var fields = commandHeader(otp: payload.otp, alert: "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U", now: now)
+        var fields = commandHeader(
+            otp: payload.otp,
+            alert: "Remote Bolus Entry: \(String(format: "%.2f", bolusAmount)) U",
+            now: now,
+            lifetime: treatmentCommandLifetime
+        )
         fields["bolus-entry"] = bolusAmount
+        fields["known-through-id"] = knownThroughID
         return fields
     }
 
