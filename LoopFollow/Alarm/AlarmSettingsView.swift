@@ -200,7 +200,7 @@ struct AlarmSettingsView: View {
 
     @ViewBuilder private var hubFooter: some View {
         if HubClient.shared.isHubMode {
-            Text("In LF Hub mode, alarms ring as system alarms: at the phone's alarm volume and through silent mode. Override System Volume, Volume Level and Audio During Calls do not apply to them. Stop or snooze them with the alarm's own buttons; the volume buttons may not snooze them.")
+            Text("In LF Hub mode, alarms ring as system alarms: at the phone's alarm volume and through silent mode. Override System Volume, Volume Level and Audio During Calls do not apply to them. Stop or snooze them with the alarm's own Stop and Snooze buttons. Don't count on the volume buttons to snooze them.")
         }
     }
 }
