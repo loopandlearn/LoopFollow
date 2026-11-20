@@ -58,9 +58,51 @@ private var TrendTable: [String] = [
     "RATE OUT OF RANGE", // 9
 ]
 
+/// Share locks an account after repeated bad logins, so a login it rejects for the account or
+/// password blocks further logins with the same credentials for `interval`. Other failures are
+/// tried again at the next fetch.
+enum ShareLoginBackoff {
+    static let interval: TimeInterval = 15 * 60
+
+    private static let lock = NSLock()
+    private static var blocks: [String: (until: Date, code: String)] = [:]
+
+    private static func key(_ username: String, _ password: String) -> String {
+        "\(username)\n\(password)"
+    }
+
+    /// The rejection code while logins with these credentials are blocked, else nil.
+    static func blockedCode(username: String, password: String, now: Date = Date()) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let block = blocks[key(username, password)], now < block.until else { return nil }
+        return block.code
+    }
+
+    static func block(username: String, password: String, code: String, now: Date = Date()) {
+        lock.lock()
+        defer { lock.unlock() }
+        blocks[key(username, password)] = (now.addingTimeInterval(interval), code)
+    }
+
+    /// Share's codes for an unknown account, a wrong password or too many attempts.
+    static func rejectsCredentials(_ code: String) -> Bool {
+        [
+            "AccountPasswordInvalid", "AccountNotFound", "SSO_AuthenticatePasswordInvalid",
+            "SSO_AuthenticateAccountNotFound", "SSO_AuthenticateMaxAttemptsExceeed", "SSO_AuthenticateMaxAttemptsExceeded",
+        ].contains(code)
+    }
+}
+
 public extension ShareClient {
     func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {
-        fetchLast(entries) { error, result in
+        if let code = ShareLoginBackoff.blockedCode(username: username, password: password) {
+            return callback(.loginError(errorCode: code), nil)
+        }
+        fetchLast(entries) { [username, password] error, result in
+            if case let .loginError(code)? = error, ShareLoginBackoff.rejectsCredentials(code) {
+                ShareLoginBackoff.block(username: username, password: password, code: code)
+            }
             guard error == nil, let result = result else {
                 return callback(error ?? .fetchError, nil)
             }
