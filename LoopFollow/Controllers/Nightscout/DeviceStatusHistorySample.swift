@@ -10,6 +10,9 @@ struct DeviceStatusHistorySample: Codable, Equatable {
     /// Time of the loop cycle that produced the record.
     let date: TimeInterval
     var iob: Double?
+    /// OpenAPS/Trio `iob.activity` in U/h: the insulin acting at that moment,
+    /// net of the scheduled basal.
+    var insulinActivity: Double?
     var cob: Double?
     /// Glucose the OpenAPS/Trio algorithm ran on (`suggested.bg`); smoothed in Trio.
     var smoothedBG: Double?
@@ -89,7 +92,8 @@ enum DeviceStatusHistoryParser {
             guard let date = determinationDate ?? createdAt else { return nil }
 
             var sample = DeviceStatusHistorySample(date: date.timeIntervalSince1970)
-            sample.iob = openAPSIOB(openAPS["iob"])
+            sample.iob = openAPSIOB(openAPS["iob"], key: "iob")
+            sample.insulinActivity = openAPSIOB(openAPS["iob"], key: "activity").map { $0 * 60 }
             sample.cob = number(determination["COB"]) ?? reasonValue("COB", in: determination["reason"] as? String)
             sample.smoothedBG = number(determination["bg"]).flatMap { $0 > 0 ? $0 : nil }
             sample.isf = number(determination["ISF"]).flatMap { $0 > 0 ? $0 : nil }
@@ -124,9 +128,9 @@ enum DeviceStatusHistoryParser {
 
     /// `openaps.iob` is a dictionary on Trio/AAPS and an array of projections on
     /// oref0 rigs, where the first element is the current value.
-    private static func openAPSIOB(_ value: Any?) -> Double? {
-        if let dict = value as? [String: Any] { return number(dict["iob"]) }
-        if let array = value as? [[String: Any]] { return array.first.flatMap { number($0["iob"]) } }
+    private static func openAPSIOB(_ value: Any?, key: String) -> Double? {
+        if let dict = value as? [String: Any] { return number(dict[key]) }
+        if let array = value as? [[String: Any]] { return array.first.flatMap { number($0[key]) } }
         return nil
     }
 

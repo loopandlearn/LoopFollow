@@ -62,6 +62,16 @@ struct BGChartHistoryPaneCanvas: View, Equatable {
                 .lineStyle(StrokeStyle(lineWidth: 1.5))
                 .interpolationMethod(.linear)
             }
+            ForEach(chartWindowedLine(pane.forecast, windowStart: windowStart, windowEnd: windowEnd) { $0.date }) { pt in
+                LineMark(
+                    x: .value("time", pt.date),
+                    y: .value(pane.kind.title, pt.value),
+                    series: .value("series", "forecast")
+                )
+                .foregroundStyle(color)
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                .interpolationMethod(.linear)
+            }
         }
         .chartXScale(domain: windowStart ... windowEnd)
         .chartYScale(domain: pane.yDomain)
