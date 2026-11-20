@@ -87,7 +87,7 @@ struct ChartScrubView: View {
             HStack(spacing: 3) {
                 if let reading {
                     Circle()
-                        .fill(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+                        .fill(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, unit: state.snapshot?.unit ?? .mgdl))
                         .frame(width: 7, height: 7)
                     Text(WatchFormat.glucose(reading.v, unit: state.snapshot?.unit ?? .mgdl))
                 } else {
