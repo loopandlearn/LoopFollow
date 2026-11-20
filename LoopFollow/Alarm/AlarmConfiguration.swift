@@ -31,4 +31,17 @@ struct AlarmConfiguration: Codable, Equatable {
         autoSnoozeCGMStart: false,
         enableVolumeButtonSnooze: false
     )
+
+    /// Night runs from `nightStart` up to the next `dayStart`, wrapping past midnight
+    /// when `nightStart` is later in the day than `dayStart`.
+    func isNight(at date: Date, calendar: Calendar = .current) -> Bool {
+        let comps = calendar.dateComponents([.hour, .minute], from: date)
+        let now = comps.hour! * 60 + comps.minute!
+        let day = dayStart.minutesSinceMidnight
+        let night = nightStart.minutesSinceMidnight
+        if night >= day {
+            return now >= night || now < day
+        }
+        return now >= night && now < day
+    }
 }
