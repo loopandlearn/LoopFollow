@@ -146,7 +146,7 @@ enum HubChecklist {
 
         var alarmKit = Item(id: .alarmKit, title: "Alarms ring through silent mode")
         if HubClient.alarmKitProblem(authorized: facts.alarmKit == .allowed) != nil {
-            alarmKit.problem = "Alarms follow the ringer switch."
+            alarmKit.problem = "LF Hub sends this phone's alarms only when they may ring through silent mode. Until then, LoopFollow checks the alarms itself."
             alarmKit.fix = facts.alarmKit == .notAsked ? .askAlarmKit : .openSettings
         }
         items.append(alarmKit)
