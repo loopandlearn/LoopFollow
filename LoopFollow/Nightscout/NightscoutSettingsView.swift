@@ -13,8 +13,10 @@ struct NightscoutSettingsView: View {
 
     var body: some View {
         Form {
-            urlSection
-            tokenSection
+            HubManagedSources {
+                urlSection
+                tokenSection
+            }
             statusSection
             webSocketSection
 
@@ -22,7 +24,9 @@ struct NightscoutSettingsView: View {
                 continueSection
             }
 
-            importSection
+            if !HubSourceSync.shared.hidesImport {
+                importSection
+            }
         }
         .navigationDestination(isPresented: $showUnitsSetup) {
             UnitsOnboardingView {

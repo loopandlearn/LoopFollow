@@ -18,6 +18,7 @@ final class ProfileManager {
     var targetHighSchedule: [TimeValue<HKQuantity>]
     var loopOverrides: [LoopOverride]
     var trioOverrides: [TrioOverride]
+    var loopDosingEnabled: Bool?
     var units: HKUnit
     var timezone: TimeZone
     var defaultProfile: String
@@ -63,10 +64,11 @@ final class ProfileManager {
 
     func loadProfile(from profileData: NSProfile) {
         guard let store = profileData.store[profileData.defaultProfile] else {
+            LogManager.shared.log(category: .nightscout, message: "Profile document not loaded, its active entry could not be read")
             return
         }
 
-        units = store.units.lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
+        units = profileData.units(of: store).lowercased() == "mg/dl" ? .milligramsPerDeciliter : .millimolesPerLiter
         defaultProfile = profileData.defaultProfile
 
         timezone = getTimeZone(from: store.timezone)
@@ -93,6 +95,8 @@ final class ProfileManager {
         } else {
             loopOverrides = []
         }
+
+        loopDosingEnabled = profileData.loopSettings?.dosingEnabled
 
         if let trioOverrides = profileData.trioOverrides {
             self.trioOverrides = trioOverrides.map { entry in
@@ -123,7 +127,7 @@ final class ProfileManager {
 
         Storage.shared.teamId.value = profileData.teamID ?? Storage.shared.teamId.value ?? ""
         Storage.shared.remoteCommands.value = profileData.remoteCommands ?? []
-        Observable.shared.loopProfiles.set(LoopProfileSet(profileData))
+        Observable.shared.therapyProfiles.set(TherapyProfileSet(profileData))
     }
 
     func currentISF() -> HKQuantity? {
@@ -152,9 +156,46 @@ final class ProfileManager {
     }
 
     func basal(at date: Date) -> String? {
-        value(from: basalSchedule, at: date).map {
+        basalRate(at: date).map {
             Localizer.formatToLocalizedString($0, maxFractionDigits: 2, minFractionDigits: 0)
         }
+    }
+
+    func basalRate(at date: Date) -> Double? {
+        value(from: basalSchedule, at: date)
+    }
+
+    /// Scheduled basal from `start` to `end`, one segment per schedule entry crossed.
+    func scheduledBasalSegments(from start: Date, to end: Date) -> [(start: Date, rate: Double)] {
+        guard start < end, let firstRate = basalRate(at: start) else { return [] }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timezone
+
+        var boundaries: [Date] = []
+        var day = calendar.startOfDay(for: start)
+        while day < end {
+            for entry in basalSchedule {
+                guard let boundary = calendar.date(bySettingHour: entry.timeAsSeconds / 3600,
+                                                   minute: entry.timeAsSeconds % 3600 / 60,
+                                                   second: entry.timeAsSeconds % 60,
+                                                   of: day)
+                else { continue }
+                if boundary > start, boundary < end {
+                    boundaries.append(boundary)
+                }
+            }
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = nextDay
+        }
+
+        var segments = [(start: start, rate: firstRate)]
+        for boundary in boundaries.sorted() {
+            if let rate = basalRate(at: boundary), rate != segments.last?.rate {
+                segments.append((start: boundary, rate: rate))
+            }
+        }
+        return segments
     }
 
     func carbRatio(at date: Date) -> Double? {
@@ -228,6 +269,6 @@ final class ProfileManager {
         units = .millimolesPerLiter
         timezone = TimeZone.current
         defaultProfile = ""
-        Observable.shared.loopProfiles.set(nil)
+        Observable.shared.therapyProfiles.set(nil)
     }
 }

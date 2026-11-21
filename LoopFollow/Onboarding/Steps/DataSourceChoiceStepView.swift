@@ -35,6 +35,14 @@ struct DataSourceChoiceStepView: View {
                         title: "Copy from another phone",
                         detail: "Already using LoopFollow on another phone? Scan its QR code to copy the connection here."
                     )
+                    if HubClient.isSupported {
+                        choiceCard(
+                            source: .hub,
+                            icon: "person.2.fill",
+                            title: "Join a Family Hub",
+                            detail: "Someone in your family uses LF Hub? Scan their invite code to follow with the same data source."
+                        )
+                    }
                 }
                 .padding(.horizontal)
             }
