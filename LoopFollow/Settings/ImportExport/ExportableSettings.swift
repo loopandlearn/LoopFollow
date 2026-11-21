@@ -243,6 +243,7 @@ struct RemoteSettingsExport: Codable {
     let productionEnvironment: Bool
     let loopAPNSQrCodeURL: String
     let loopLollipopAbsorptionMinutes: Int?
+    let loopMaxFutureCarbHours: Int?
     let device: String
 
     static func fromCurrentStorage() -> RemoteSettingsExport {
@@ -264,6 +265,7 @@ struct RemoteSettingsExport: Codable {
             productionEnvironment: storage.productionEnvironment.value,
             loopAPNSQrCodeURL: storage.loopAPNSQrCodeURL.value,
             loopLollipopAbsorptionMinutes: storage.loopLollipopAbsorptionMinutes.value,
+            loopMaxFutureCarbHours: storage.loopMaxFutureCarbHours.value,
             device: storage.device.value
         )
     }
@@ -287,6 +289,9 @@ struct RemoteSettingsExport: Codable {
         storage.loopAPNSQrCodeURL.value = loopAPNSQrCodeURL
         if let loopLollipopAbsorptionMinutes {
             storage.loopLollipopAbsorptionMinutes.value = loopLollipopAbsorptionMinutes
+        }
+        if let loopMaxFutureCarbHours {
+            storage.loopMaxFutureCarbHours.value = loopMaxFutureCarbHours
         }
 
         // Set device temporarily from import (will be overridden by Nightscout connection)

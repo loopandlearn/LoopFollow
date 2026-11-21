@@ -6,6 +6,7 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @ObservedObject var colorBGText = Storage.shared.colorBGText
     @ObservedObject var appBadge = Storage.shared.appBadge
+    @ObservedObject var backgroundRefreshType = Storage.shared.backgroundRefreshType
     @ObservedObject var appearanceMode = Storage.shared.appearanceMode
     @ObservedObject var showStats = Storage.shared.showStats
     @ObservedObject var showTIRBand = Storage.shared.showTIRBand
@@ -33,11 +34,21 @@ struct GeneralSettingsView: View {
     // Telemetry — see LoopFollow/Helpers/Telemetry.swift
     @ObservedObject var telemetryEnabled = Storage.shared.telemetryEnabled
 
+    private var hubMode: Bool {
+        backgroundRefreshType.value == .hub && HubClient.shared.isConnected
+    }
+
     var body: some View {
         Form {
-            Section("App Settings") {
+            Section {
                 Toggle("Display App Badge", isOn: $appBadge.value)
                 Toggle("Persistent Notification", isOn: $persistentNotification.value)
+            } header: {
+                Text("App Settings")
+            } footer: {
+                if hubMode {
+                    Text("In LoopFollow Hub mode the hub sets the badge.")
+                }
             }
 
             Section("Display") {

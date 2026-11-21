@@ -45,6 +45,11 @@ struct CommandPayload: Encodable {
     var scheduledTime: TimeInterval?
     var commandID: String?
     var mealID: String?
+    var profileName: String?
+    var originalProfileName: String?
+    var baseFingerprint: String?
+    var profile: TherapyProfileValues?
+    var scheduledSwitches: [ScheduledProfileSwitch]?
     var returnNotification: ReturnNotificationInfo?
 
     var apnsCollapseID: String {
@@ -68,6 +73,11 @@ struct CommandPayload: Encodable {
         case scheduledTime = "scheduled_time"
         case commandID = "command_id"
         case mealID = "meal_id"
+        case profileName = "profile_name"
+        case originalProfileName = "original_profile_name"
+        case baseFingerprint = "base_fingerprint"
+        case profile
+        case scheduledSwitches = "scheduled_switches"
         case returnNotification = "return_notification"
     }
 }

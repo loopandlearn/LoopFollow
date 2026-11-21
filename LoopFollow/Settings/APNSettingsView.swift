@@ -17,50 +17,8 @@ struct APNSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("LoopFollow APNs Credentials")) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("APNS Key ID")
-                        TogglableSecureInput(
-                            placeholder: "Enter APNS Key ID",
-                            text: $keyId,
-                            style: .singleLine
-                        )
-                        if !keyId.isEmpty {
-                            Image(systemName: keyIdValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                                .foregroundColor(keyIdValid ? .green : .orange)
-                                .accessibilityLabel(keyIdValid ? "Valid Key ID" : "Invalid Key ID")
-                        }
-                    }
-                    if !keyId.isEmpty, !keyIdValid {
-                        Text("Key ID must be exactly 10 uppercase letters or digits.")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("APNS Key")
-                        Spacer()
-                        if !apnsKey.isEmpty {
-                            Image(systemName: apnsKeyValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                                .foregroundColor(apnsKeyValid ? .green : .orange)
-                                .accessibilityLabel(apnsKeyValid ? "Valid APNs key" : "Invalid APNs key")
-                        }
-                    }
-                    TogglableSecureInput(
-                        placeholder: "Paste APNS Key",
-                        text: $apnsKey,
-                        style: .multiLine
-                    )
-                    .frame(minHeight: 110)
-                    if !apnsKey.isEmpty, !apnsKeyValid {
-                        Text("Paste the full .p8 contents — must include the BEGIN PRIVATE KEY and END PRIVATE KEY lines.")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-                }
+            HubManagedApnKey {
+                credentialsSection
             }
         }
         .onChange(of: keyId) { newValue in
@@ -80,5 +38,53 @@ struct APNSettingsView: View {
         .preferredColorScheme(Storage.shared.appearanceMode.value.colorScheme)
         .navigationTitle("APN")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var credentialsSection: some View {
+        Section(header: Text("LoopFollow APNs Credentials")) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("APNS Key ID")
+                    TogglableSecureInput(
+                        placeholder: "Enter APNS Key ID",
+                        text: $keyId,
+                        style: .singleLine
+                    )
+                    if !keyId.isEmpty {
+                        Image(systemName: keyIdValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundColor(keyIdValid ? .green : .orange)
+                            .accessibilityLabel(keyIdValid ? "Valid Key ID" : "Invalid Key ID")
+                    }
+                }
+                if !keyId.isEmpty, !keyIdValid {
+                    Text("Key ID must be exactly 10 uppercase letters or digits.")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("APNS Key")
+                    Spacer()
+                    if !apnsKey.isEmpty {
+                        Image(systemName: apnsKeyValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundColor(apnsKeyValid ? .green : .orange)
+                            .accessibilityLabel(apnsKeyValid ? "Valid APNs key" : "Invalid APNs key")
+                    }
+                }
+                TogglableSecureInput(
+                    placeholder: "Paste APNS Key",
+                    text: $apnsKey,
+                    style: .multiLine
+                )
+                .frame(minHeight: 110)
+                if !apnsKey.isEmpty, !apnsKeyValid {
+                    Text("Paste the full .p8 contents — must include the BEGIN PRIVATE KEY and END PRIVATE KEY lines.")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
     }
 }

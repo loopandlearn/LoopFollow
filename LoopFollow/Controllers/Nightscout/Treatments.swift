@@ -50,7 +50,7 @@ extension MainViewController {
             "find[created_at][$lte]": endTimeString,
             "count": "\(estimatedCount)",
         ]
-        NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters) { (result: Result<Any, Error>) in
+        NightscoutUtils.executeDynamicRequest(eventType: .treatments, parameters: parameters, hubPart: .treatments) { (result: Result<Any, Error>) in
             switch result {
             case let .success(data):
                 if let entries = data as? [[String: AnyObject]] {
