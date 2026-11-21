@@ -8,7 +8,7 @@ import SwiftUI
 /// arrive in mg/dL and are rendered in the unit chosen on the phone.
 enum WatchFormat {
     /// A reading this old is shown struck through, as on the phone.
-    static let staleAfter: TimeInterval = 12 * 60
+    static let staleAfter = GlucoseSnapshot.staleAfter
 
     private static let mgdlFormatter: NumberFormatter = {
         let nf = NumberFormatter()
