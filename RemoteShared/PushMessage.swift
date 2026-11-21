@@ -47,6 +47,11 @@ struct CommandPayload: Encodable {
     var mealID: String?
     /// Newest Nightscout treatment `_id` the sender had seen; Trio rejects bolus and meal commands when newer insulin or carbs exist.
     var knownThroughID: String?
+    var profileName: String?
+    var originalProfileName: String?
+    var baseFingerprint: String?
+    var profile: TherapyProfileValues?
+    var scheduledSwitches: [ScheduledProfileSwitch]?
     var returnNotification: ReturnNotificationInfo?
 
     var apnsCollapseID: String {
@@ -71,6 +76,11 @@ struct CommandPayload: Encodable {
         case commandID = "command_id"
         case mealID = "meal_id"
         case knownThroughID = "known_through_id"
+        case profileName = "profile_name"
+        case originalProfileName = "original_profile_name"
+        case baseFingerprint = "base_fingerprint"
+        case profile
+        case scheduledSwitches = "scheduled_switches"
         case returnNotification = "return_notification"
     }
 }

@@ -12,10 +12,17 @@ enum TRCCommandType: String, Encodable {
     case cancelOverride = "cancel_override"
     case editMeal = "edit_meal"
     case deleteMeal = "delete_meal"
+    case switchProfile = "switch_profile"
+    case saveProfile = "save_profile"
+    case deleteProfile = "delete_profile"
+    case saveScheduledSwitches = "save_scheduled_switches"
 
     /// One collapse id per command.
     var usesCommandIDAsCollapseID: Bool {
-        self == .editMeal || self == .deleteMeal
+        switch self {
+        case .editMeal, .deleteMeal, .switchProfile, .saveProfile, .deleteProfile, .saveScheduledSwitches: return true
+        default: return false
+        }
     }
 
     var displayName: String {
@@ -28,6 +35,10 @@ enum TRCCommandType: String, Encodable {
         case .cancelOverride: return "Cancel Override"
         case .editMeal: return "Edit Meal"
         case .deleteMeal: return "Delete Meal"
+        case .switchProfile: return "Switch Profile"
+        case .saveProfile: return "Save Profile"
+        case .deleteProfile: return "Delete Profile"
+        case .saveScheduledSwitches: return "Save Scheduled Switches"
         }
     }
 }
