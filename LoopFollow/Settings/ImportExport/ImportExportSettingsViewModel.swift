@@ -177,7 +177,16 @@ class ImportExportSettingsViewModel: ObservableObject {
         }
 
         if let apns = settings.apns {
-            if apns.hasValidSettings() {
+            if !apns.matchesThisBuild {
+                // A Remote Settings export of another team carries its LoopFollow key too.
+                guard settings.remote != nil else {
+                    throw NSError(domain: "SettingsImport", code: 4, userInfo: [NSLocalizedDescriptionKey: "The APNS settings in \(source) belong to a LoopFollow built with another Apple Developer account"])
+                }
+                LogManager.shared.log(category: .general, message: "APNS settings from \(source) skipped: team \(apns.teamId ?? "") is not this build's")
+            } else if settings.remote != nil, APNsCredentialValidator.hasValidLoopFollowKey {
+                // The key that goes along with Remote Settings never replaces this phone's own.
+                LogManager.shared.log(category: .general, message: "APNS settings from \(source) skipped: this phone has its own key")
+            } else if apns.hasValidSettings() {
                 apns.applyToStorage()
                 importedComponents.append("APNS settings")
                 LogManager.shared.log(category: .general, message: "APNS settings imported from \(source) (version: \(apns.version), keyId: \(apns.keyId))")
@@ -218,8 +227,14 @@ class ImportExportSettingsViewModel: ObservableObject {
                 }
                 return nil
             }
+            // Commands to an app of another team are signed with the remote key, so
+            // LoopFollow's own key, which confirmations need, goes along.
+            let apnsSettings = APNSSettingsExport.fromCurrentStorage()
+            let otherTeam = RemoteSigningKey.otherTeam(lfTeamID: BuildDetails.default.teamID ?? "",
+                                                       remoteTeamID: remoteSettings.teamId ?? "")
             settings = CombinedSettingsExport(
                 remote: remoteSettings,
+                apns: otherTeam && apnsSettings.hasValidSettings() ? apnsSettings : nil,
                 exportType: exportType.rawValue
             )
         case .alarms:

@@ -59,10 +59,19 @@ enum RemoteSigningKey {
         lfKey: (key: String, keyID: String),
         remoteKey: (key: String, keyID: String)
     ) -> (key: String, keyID: String, teamID: String) {
-        let sameTeam = !lfTeamID.isEmpty && !remoteTeamID.isEmpty && lfTeamID == remoteTeamID
-        if sameTeam || remoteTeamID.isEmpty {
+        if sameTeam(lfTeamID: lfTeamID, remoteTeamID: remoteTeamID) || remoteTeamID.isEmpty {
             return (lfKey.key, lfKey.keyID, lfTeamID)
         }
         return (remoteKey.key, remoteKey.keyID, remoteTeamID)
+    }
+
+    /// Both teams are known and the same.
+    static func sameTeam(lfTeamID: String, remoteTeamID: String) -> Bool {
+        !lfTeamID.isEmpty && !remoteTeamID.isEmpty && lfTeamID == remoteTeamID
+    }
+
+    /// Both teams are known and differ.
+    static func otherTeam(lfTeamID: String, remoteTeamID: String) -> Bool {
+        !lfTeamID.isEmpty && !remoteTeamID.isEmpty && lfTeamID != remoteTeamID
     }
 }

@@ -737,6 +737,12 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             Storage.shared.migrateStep10()
             Storage.shared.migrationStep.value = 10
         }
+
+        // Step 11: Added in dev 8.0.8 (2026-11-19). Can be removed after 2027-11-19.
+        if Storage.shared.migrationStep.value < 11 {
+            Storage.shared.migrateStep11()
+            Storage.shared.migrationStep.value = 11
+        }
     }
 
     @objc func appDidBecomeActive() {

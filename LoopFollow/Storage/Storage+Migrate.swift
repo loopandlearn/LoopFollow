@@ -106,6 +106,25 @@ extension Storage {
         debugLogLevel.value = true
     }
 
+    /// Commands to a Loop or Trio app of LoopFollow's own team are signed with LoopFollow's
+    /// key: without a valid one, the remote key becomes it when the remote team is known
+    /// and is this build's team.
+    func adoptRemoteKeyAsLoopFollowKey() {
+        let lfTeamId = BuildDetails.default.teamID ?? ""
+        guard RemoteSigningKey.sameTeam(lfTeamID: lfTeamId, remoteTeamID: teamId.value ?? ""),
+              !APNsCredentialValidator.hasValidLoopFollowKey,
+              APNsCredentialValidator.isFullyConfigured(keyId: remoteKeyId.value, apnsKey: remoteApnsKey.value)
+        else { return }
+        LogManager.shared.log(category: .general, message: "Remote APN key of team \(lfTeamId) taken as LoopFollow's own key")
+        lfKeyId.value = remoteKeyId.value
+        lfApnsKey.value = LoopAPNSService().validateAndFixAPNSKey(remoteApnsKey.value)
+    }
+
+    func migrateStep11() {
+        LogManager.shared.log(category: .general, message: "Running migrateStep11 — LoopFollow APN key from a same-team remote key")
+        adoptRemoteKeyAsLoopFollowKey()
+    }
+
     func migrateStep6() {
         // APNs credential separation
         LogManager.shared.log(category: .general, message: "Running migrateStep6 — APNs credential separation")

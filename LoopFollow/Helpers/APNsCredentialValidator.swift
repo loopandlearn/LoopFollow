@@ -29,4 +29,9 @@ enum APNsCredentialValidator {
     static func isFullyConfigured(keyId: String, apnsKey: String) -> Bool {
         isValidKeyId(keyId) && isValidApnsKey(apnsKey)
     }
+
+    /// LoopFollow's own key under Settings → APN is valid.
+    static var hasValidLoopFollowKey: Bool {
+        isFullyConfigured(keyId: Storage.shared.lfKeyId.value, apnsKey: Storage.shared.lfApnsKey.value)
+    }
 }

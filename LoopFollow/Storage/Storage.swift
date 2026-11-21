@@ -246,7 +246,7 @@ class Storage {
     // When adding a new migration step in `runMigrationsIfNeeded()`, bump this default
     // to the new latest step number so fresh installs skip all migrations. Other defaults
     // in this file must reflect the post-migration final state for a fresh install.
-    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 10)
+    var migrationStep = StorageValue<Int>(key: "migrationStep", defaultValue: 11)
 
     var persistentNotification = StorageValue<Bool>(key: "persistentNotification", defaultValue: false)
     var persistentNotificationLastBGTime = StorageValue<Date>(key: "persistentNotificationLastBGTime", defaultValue: .distantPast)

@@ -245,15 +245,23 @@ struct RemoteSettingsExport: Codable {
     let loopMaxFutureCarbHours: Int?
     let device: String
 
+    /// The key fields carry the key that signs commands, so a phone of the same team
+    /// gets LoopFollow's own key from them; without one, the remote key as stored.
     static func fromCurrentStorage() -> RemoteSettingsExport {
         let storage = Storage.shared
+        let signing = RemoteSigningKey.resolve(
+            lfTeamID: BuildDetails.default.teamID ?? "",
+            remoteTeamID: storage.teamId.value ?? "",
+            lfKey: (storage.lfApnsKey.value, storage.lfKeyId.value),
+            remoteKey: (storage.remoteApnsKey.value, storage.remoteKeyId.value)
+        )
         return RemoteSettingsExport(
             version: AppVersionManager().version(),
             remoteType: storage.remoteType.value,
             user: storage.user.value,
             sharedSecret: storage.sharedSecret.value,
-            remoteApnsKey: storage.remoteApnsKey.value,
-            remoteKeyId: storage.remoteKeyId.value,
+            remoteApnsKey: signing.key.isEmpty ? storage.remoteApnsKey.value : signing.key,
+            remoteKeyId: signing.key.isEmpty ? storage.remoteKeyId.value : signing.keyID,
             teamId: storage.teamId.value,
             maxBolus: storage.maxBolus.value.doubleValue(for: .internationalUnit()),
             maxCarbs: storage.maxCarbs.value.doubleValue(for: .gram()),
@@ -277,6 +285,7 @@ struct RemoteSettingsExport: Codable {
         storage.remoteApnsKey.value = remoteApnsKey
         storage.remoteKeyId.value = remoteKeyId
         storage.teamId.value = teamId
+        storage.adoptRemoteKeyAsLoopFollowKey()
         storage.maxBolus.value = HKQuantity(unit: .internationalUnit(), doubleValue: maxBolus)
         storage.maxCarbs.value = HKQuantity(unit: .gram(), doubleValue: maxCarbs)
         storage.maxProtein.value = HKQuantity(unit: .gram(), doubleValue: maxProtein)
@@ -400,14 +409,22 @@ struct APNSSettingsExport: Codable {
     let version: String
     let keyId: String
     let apnsKey: String
+    /// The exporting LoopFollow's team; nil from versions that did not send it.
+    let teamId: String?
 
     static func fromCurrentStorage() -> APNSSettingsExport {
         let storage = Storage.shared
         return APNSSettingsExport(
             version: AppVersionManager().version(),
             keyId: storage.lfKeyId.value,
-            apnsKey: storage.lfApnsKey.value
+            apnsKey: storage.lfApnsKey.value,
+            teamId: BuildDetails.default.teamID
         )
+    }
+
+    /// The key belongs to this LoopFollow's team, or one of the teams is not known.
+    var matchesThisBuild: Bool {
+        !RemoteSigningKey.otherTeam(lfTeamID: BuildDetails.default.teamID ?? "", remoteTeamID: teamId ?? "")
     }
 
     func applyToStorage() {

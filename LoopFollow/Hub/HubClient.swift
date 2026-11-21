@@ -338,13 +338,19 @@ final class HubClient {
         isConnected && hubInfo.value?.features.contains(feature) == true
     }
 
-    /// This app holds an APN key of its own under Settings → APN.
-    static var hasOwnApnKey: Bool {
-        !Storage.shared.lfKeyId.value.isEmpty && !Storage.shared.lfApnsKey.value.isEmpty
+    /// In Hub mode this phone registers with the hub for the key an admin shares: it
+    /// joined with an invite or has no key of its own, and the hub shares keys. Until
+    /// the hub's status says the key is shared, the hub checklist tells why it is not.
+    var expectsSharedApnKey: Bool {
+        guard isHubMode else { return false }
+        return Self.apnsKeyUse(keyId: Storage.shared.lfKeyId.value, key: Storage.shared.lfApnsKey.value,
+                               sentFingerprint: "", hubSharesKeys: offers("sharedApnsKey"),
+                               ownKeyAllowed: !joinedWithInvite.value) == .shared
     }
 
-    /// The hub can push to this phone with a key: this app's own or one an admin shares.
-    var hasApnKey: Bool { Self.hasOwnApnKey || (isConnected && apnsKeyShared.value) }
+    /// The hub updates and renews the Live Activity with the key an admin shares, and
+    /// the app starts one only while it is open.
+    var liveActivityUsesSharedKey: Bool { expectsSharedApnKey && apnsKeyShared.value }
 
     /// LF Hub needs iOS 26: its alarms ring through silent mode as AlarmKit alarms.
     static var isSupported: Bool {
@@ -1322,7 +1328,13 @@ final class HubClient {
     @MainActor private func record(_ status: Status) {
         if hubInfo.value != status.hub { hubInfo.value = status.hub }
         role.value = Self.role(reported: status.device.role, joinedWithInvite: joinedWithInvite.value)
+        let keyBecameShared = !apnsKeyShared.value && status.device.apnsKeyShared == true
         apnsKeyShared.value = status.device.apnsKeyShared == true
+        #if !targetEnvironment(macCatalyst)
+            if keyBecameShared, liveActivityUsesSharedKey {
+                LiveActivityManager.shared.startFromCurrentState()
+            }
+        #endif
         patientName.value = status.patient.name
         guard isHubMode else {
             setConfirmed(false, problems: [])
