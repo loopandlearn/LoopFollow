@@ -12,7 +12,7 @@ extension MainViewController {
             "count": "1",
             "find[startDate][$lte]": formatter.string(from: Date().addingTimeInterval(60)),
         ]
-        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters) { (result: Result<[NSProfile], Error>) in
+        NightscoutUtils.executeRequest(eventType: .profile, parameters: parameters, hubPart: .profile) { (result: Result<[NSProfile], Error>) in
             switch result {
             case let .success(profiles):
                 guard let profileData = profiles.first else {
@@ -29,6 +29,7 @@ extension MainViewController {
     // NS Profile Response Processor
     func updateProfile(profileData: NSProfile) {
         guard let store = profileData.store["default"] ?? profileData.store["Default"] else {
+            LogManager.shared.log(category: .nightscout, message: "Profile document not loaded, its Default entry could not be read")
             return
         }
         profileManager.loadProfile(from: profileData)

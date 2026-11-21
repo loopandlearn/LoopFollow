@@ -78,6 +78,48 @@ enum LoopAPNSCommands {
         return fields
     }
 
+    /// Creates the profile `name` when `originalName` is nil. Otherwise updates (and, when the names differ, renames)
+    /// `originalName`, which Loop only changes while its values still have `baseFingerprint`.
+    static func profileSaveCommandPayload(
+        name: String,
+        originalName: String?,
+        baseFingerprint: String?,
+        values: TherapyProfileValues,
+        otp: String,
+        now: Date = Date()
+    ) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Profile Save: \(name)", now: now)
+        fields["profile-save"] = name
+        if let originalName {
+            fields["profile-save-original-name"] = originalName
+        }
+        if let baseFingerprint {
+            fields["profile-save-base-fingerprint"] = baseFingerprint
+        }
+        fields["profile-save-values"] = values.jsonObject
+        return fields
+    }
+
+    static func profileDeleteCommandPayload(name: String, fingerprint: String, otp: String, now: Date = Date()) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Profile Delete: \(name)", now: now)
+        fields["profile-delete"] = name
+        fields["profile-delete-fingerprint"] = fingerprint
+        return fields
+    }
+
+    /// Replaces the scheduled switches, which Loop only does while its list has `baseFingerprint`.
+    static func scheduledSwitchesSaveCommandPayload(
+        entries: [ScheduledProfileSwitch],
+        baseFingerprint: String,
+        otp: String,
+        now: Date = Date()
+    ) -> [String: Any] {
+        var fields = commandHeader(otp: otp, alert: "Remote Scheduled Switches Save", now: now)
+        fields["profile-scheduled-switches-save"] = entries.map(\.jsonObject)
+        fields["profile-scheduled-switches-base-fingerprint"] = baseFingerprint
+        return fields
+    }
+
     /// Creates a properly formatted ISO8601 date string with milliseconds (matching Nightscout's format)
     /// - Parameter date: The date to format
     /// - Returns: Formatted date string like "2022-12-24T21:34:02.090Z"
@@ -137,7 +179,7 @@ enum LoopAPNSCommands {
         for (key, value) in payload where key != "alert" && key != "content-available" && key != "interruption-level" {
             body[key] = value
         }
-        return try JSONSerialization.data(withJSONObject: body)
+        return try JSONSerialization.data(withJSONObject: body, options: .withoutEscapingSlashes)
     }
 
     static func formatDateForAPNS(_ date: Date) -> String {

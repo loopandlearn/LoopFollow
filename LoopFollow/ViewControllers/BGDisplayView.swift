@@ -28,8 +28,11 @@ struct BGDisplayView: View {
 
         ScrollView {
             VStack(spacing: 0) {
-                Text(serverText.value)
-                    .font(.system(size: 13))
+                HStack(spacing: 4) {
+                    HubIndicator()
+                    Text(serverText.value)
+                }
+                .font(.system(size: 13))
 
                 Text(snapshot?.bgText ?? bgText.value)
                     .font(.system(size: 85, weight: .black))

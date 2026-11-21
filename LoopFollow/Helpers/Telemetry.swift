@@ -345,6 +345,9 @@ final class TelemetryClient {
         }
 
         payload["backgroundRefreshMethod"] = storage.backgroundRefreshType.value.rawValue
+        let hub = HubClient.shared
+        payload.merge(Self.hubFields(connected: hub.isConnected, drivesAlarms: hub.drivesAlarms,
+                                     hub: hub.hubInfo.value)) { $1 }
 
         // Selected user-preference fields. Picked for product-decision value;
         // none reveal personal or health information.
@@ -357,6 +360,18 @@ final class TelemetryClient {
         payload["coldLaunches7d"] = storage.telemetryColdLaunchTimes.value.count
 
         return payload
+    }
+
+    /// While connected to LF Hub: whether the hub delivers the alarms, and the hub's
+    /// version and API version from its last answer. Never the hub's address.
+    static func hubFields(connected: Bool, drivesAlarms: Bool, hub: HubClient.Status.Hub?) -> [String: Any] {
+        guard connected else { return [:] }
+        var fields: [String: Any] = ["hubConfirmed": drivesAlarms]
+        if let hub {
+            fields["hubVersion"] = hub.version
+            fields["hubApi"] = hub.api
+        }
+        return fields
     }
 
     // MARK: - Send
@@ -540,7 +555,7 @@ struct TelemetryPrivacyView: View {
                 Group {
                     Text("What is sent")
                         .font(.headline)
-                    Text("App version, build commit and build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), the platform (iPhone, iPad or Mac), the iOS version, and how many times the app was started from scratch in the last 7 days. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). The full JSON is visible under Diagnostics → What's sent.")
+                    Text("App version, build commit and build date, whether this is a TestFlight build, the install instance number, an Apple-supplied per-vendor identifier (IDFV) that resets when all this developer's apps are removed from the device, the hardware identifier (e.g. iPhone15,2), the platform (iPhone, iPad or Mac), the iOS version, and how many times the app was started from scratch in the last 7 days. Whether Nightscout and Dexcom are configured (yes/no — no URLs or usernames). Which app you're following (Loop, Trio, etc), if known. A small set of preference flags (units, appearance mode, calendar/contact integration enabled, remote-command type, background refresh method). When connected to LF Hub, whether it delivers the alarms and its version (not its address). The full JSON is visible under Diagnostics → What's sent.")
                 }
 
                 Group {
