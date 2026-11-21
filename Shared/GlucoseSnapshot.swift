@@ -57,6 +57,13 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     /// indefinite (no countdown).
     let overrideEndAt: TimeInterval?
 
+    /// Insulin needs of the active override as a percentage (nil if none or 100 %)
+    let overridePercent: Int?
+
+    /// Target range of the active override in mg/dL (nil if none or not set)
+    let overrideRangeLowMgdl: Double?
+    let overrideRangeHighMgdl: Double?
+
     /// Active temporary target in mg/dL (nil if no active temp target)
     let tempTargetMgdl: Double?
 
@@ -150,6 +157,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         projected: Double?,
         override: String? = nil,
         overrideEndAt: TimeInterval? = nil,
+        overridePercent: Int? = nil,
+        overrideRangeLowMgdl: Double? = nil,
+        overrideRangeHighMgdl: Double? = nil,
         tempTargetMgdl: Double? = nil,
         tempTargetEndAt: TimeInterval? = nil,
         recBolus: Double? = nil,
@@ -184,6 +194,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         self.projected = projected
         self.override = override
         self.overrideEndAt = overrideEndAt
+        self.overridePercent = overridePercent
+        self.overrideRangeLowMgdl = overrideRangeLowMgdl
+        self.overrideRangeHighMgdl = overrideRangeHighMgdl
         self.tempTargetMgdl = tempTargetMgdl
         self.tempTargetEndAt = tempTargetEndAt
         self.recBolus = recBolus
@@ -217,6 +230,67 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         Date().timeIntervalSince(updatedAt)
     }
 
+    /// A reading this old is shown struck through, as on the main screen and the watch.
+    static let staleAfter: TimeInterval = 12 * 60
+
+    /// True once the reading is old enough to be shown struck through.
+    func isStale(at now: Date = Date()) -> Bool {
+        now.timeIntervalSince(updatedAt) >= Self.staleAfter
+    }
+
+    /// The date to give ActivityKit, so the system redraws the Live Activity as
+    /// out of date even when no further update can reach it: no network, or the
+    /// app was killed. A reading that is already stale gets a date just ahead of
+    /// `now` rather than one in the past, whose handling Apple does not document.
+    /// Views rely on `isStale(at:)` for that case.
+    func staleDate(now: Date = Date()) -> Date {
+        let date = updatedAt.addingTimeInterval(Self.staleAfter)
+        return date > now ? date : now.addingTimeInterval(60)
+    }
+
+    /// The rate running now. `basalRate` reads "scheduled → actual" while a temp
+    /// basal differs from the schedule.
+    var activeBasalRate: String {
+        basalRate.components(separatedBy: "→").last?.trimmingCharacters(in: .whitespaces) ?? basalRate
+    }
+
+    /// The active override's insulin needs, target range and end time, each
+    /// formatted, in that order. Parts that are unknown or don't apply are left
+    /// out: 100 % insulin needs, no range of its own, or no end time. The end
+    /// is a clock time rather than a countdown, so it doesn't tick in CarPlay.
+    func overrideDetails(now: Date = Date()) -> [String] {
+        var parts: [String] = []
+        if let percent = overridePercent {
+            parts.append("\(percent)%")
+        }
+        if let low = overrideRangeLowMgdl, let high = overrideRangeHighMgdl {
+            let lowText = Self.formatGlucose(low, unit: unit)
+            let highText = Self.formatGlucose(high, unit: unit)
+            parts.append(lowText == highText ? lowText : "\(lowText)–\(highText)")
+        }
+        if let end = overrideEndAt, end > now.timeIntervalSince1970 {
+            parts.append(Self.clock(Date(timeIntervalSince1970: end), now: now))
+        }
+        return parts
+    }
+
+    /// "14:05" today, "Sat 14:05" on another day, in the user's clock format.
+    static func clock(_ date: Date, now: Date = Date()) -> String {
+        if Calendar.current.isDate(date, inSameDayAs: now) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+    }
+
+    static func formatGlucose(_ mgdl: Double, unit: Unit) -> String {
+        switch unit {
+        case .mgdl:
+            "\(Int(mgdl.rounded()))"
+        case .mmol:
+            GlucoseConversion.toMmol(mgdl).formatted(.number.precision(.fractionLength(1)))
+        }
+    }
+
     /// Returns a copy of this snapshot with `showRenewalOverlay` set to the given value.
     /// All other fields are preserved exactly. Use this instead of manually copying
     /// every field when only the overlay flag needs to change.
@@ -231,6 +305,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
             projected: projected,
             override: override,
             overrideEndAt: overrideEndAt,
+            overridePercent: overridePercent,
+            overrideRangeLowMgdl: overrideRangeLowMgdl,
+            overrideRangeHighMgdl: overrideRangeHighMgdl,
             tempTargetMgdl: tempTargetMgdl,
             tempTargetEndAt: tempTargetEndAt,
             recBolus: recBolus,
@@ -271,6 +348,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         try container.encodeIfPresent(projected, forKey: .projected)
         try container.encodeIfPresent(override, forKey: .override)
         try container.encodeIfPresent(overrideEndAt, forKey: .overrideEndAt)
+        try container.encodeIfPresent(overridePercent, forKey: .overridePercent)
+        try container.encodeIfPresent(overrideRangeLowMgdl, forKey: .overrideRangeLowMgdl)
+        try container.encodeIfPresent(overrideRangeHighMgdl, forKey: .overrideRangeHighMgdl)
         try container.encodeIfPresent(tempTargetMgdl, forKey: .tempTargetMgdl)
         try container.encodeIfPresent(tempTargetEndAt, forKey: .tempTargetEndAt)
         try container.encodeIfPresent(recBolus, forKey: .recBolus)
@@ -308,6 +388,9 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
         projected = try container.decodeIfPresent(Double.self, forKey: .projected)
         override = try container.decodeIfPresent(String.self, forKey: .override)
         overrideEndAt = try container.decodeIfPresent(Double.self, forKey: .overrideEndAt)
+        overridePercent = try container.decodeIfPresent(Int.self, forKey: .overridePercent)
+        overrideRangeLowMgdl = try container.decodeIfPresent(Double.self, forKey: .overrideRangeLowMgdl)
+        overrideRangeHighMgdl = try container.decodeIfPresent(Double.self, forKey: .overrideRangeHighMgdl)
         tempTargetMgdl = try container.decodeIfPresent(Double.self, forKey: .tempTargetMgdl)
         tempTargetEndAt = try container.decodeIfPresent(Double.self, forKey: .tempTargetEndAt)
         recBolus = try container.decodeIfPresent(Double.self, forKey: .recBolus)
@@ -337,7 +420,8 @@ struct GlucoseSnapshot: Codable, Equatable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case glucose, delta, trend, updatedAt
         case iob, cob, projected
-        case override, overrideEndAt, tempTargetMgdl, tempTargetEndAt
+        case override, overrideEndAt, overridePercent, overrideRangeLowMgdl, overrideRangeHighMgdl
+        case tempTargetMgdl, tempTargetEndAt
         case recBolus, battery, pumpBattery, basalRate, pumpReservoirU
         case autosens, tdd, targetLowMgdl, targetHighMgdl, isfMgdlPerU, carbRatio, carbsToday
         case profileName, sageInsertTime, cageInsertTime, iageInsertTime, minBgMgdl, maxBgMgdl
