@@ -94,7 +94,7 @@ struct ProfileValidationTests {
         #expect(ProfileValidation.problems(values(basal: basal), limits: limits).count == 1)
     }
 
-    @Test("a pure rename is not checked against today's limits, a changed save is")
+    @Test("a save of an existing profile is checked only in the schedules it changes")
     func renameSkipsValueChecks() throws {
         let limits = try ProfileEditLimitsTests.limits()
         let json = """
@@ -112,9 +112,29 @@ struct ProfileValidationTests {
 
         var draft = ProfileDraft(stored.values)
         draft.carbRatio[0].value = 12
-        #expect(ProfileValidation.problems(for: .save(name: "Old Sport", original: stored, values: draft.values), limits: limits).count == 2)
+        #expect(ProfileValidation.problems(for: .save(name: "Old Sport", original: stored, values: draft.values), limits: limits).isEmpty)
+        draft.carbRatio[0].value = 151
+        #expect(ProfileValidation.problems(for: .save(name: "Old Sport", original: stored, values: draft.values), limits: limits).count == 1)
+        draft.carbRatio[0].value = 12
+        draft.basal[0].value = 0.15
+        #expect(ProfileValidation.problems(for: .save(name: "Old Sport", original: stored, values: draft.values), limits: limits).isEmpty)
+        draft.basal[0].value = 3.05
+        #expect(ProfileValidation.problems(for: .save(name: "Old Sport", original: stored, values: draft.values), limits: limits).count == 1)
         #expect(ProfileValidation.problems(for: .save(name: "Copy", original: nil, values: stored.values), limits: limits).count == 2)
         #expect(ProfileValidation.problems(for: .activate(stored), limits: limits).isEmpty)
+        #expect(ProfileValidation.activationProblems(stored.values, limits: limits).count == 2)
+        #expect(ProfileValidation.activationProblems(draft.values, limits: nil).isEmpty)
+    }
+
+    @Test("changed schedules are found per schedule, and a single-target range shown as low-only is unchanged")
+    func changedSchedules() {
+        let original = values(target: [(0, 100, 110)])
+        #expect(ProfileValidation.changedSchedules(from: original, to: original).isEmpty)
+        #expect(ProfileValidation.changedSchedules(from: original, to: values(basal: [(0, 0.85)], target: [(0, 100, 110)])) == [.basal])
+        #expect(ProfileValidation.changedSchedules(from: original, to: values(sens: [(0, 55)], target: [(0, 100, 110)])) == [.sensitivity])
+        #expect(ProfileValidation.changedSchedules(from: original, to: values(target: [(0, 100, 100)])) == [.correctionRange])
+        #expect(ProfileValidation.changedSchedules(from: original, to: values(target: [(0, 100, 100)]), singleTarget: true).isEmpty)
+        #expect(ProfileValidation.changedSchedules(from: original, to: values(target: [(0, 105, 105)]), singleTarget: true) == [.correctionRange])
     }
 
     @Test("new segments go one step after the last, or into the first free slot")

@@ -80,7 +80,7 @@ struct ProfileReviewView: View {
 
     private var problems: [String] {
         guard let limits else { return ["Profiles can not be changed without the limits from \(remote.appName)."] }
-        return ProfileValidation.problems(for: command, limits: limits)
+        return ProfileValidation.problems(for: command, limits: limits, singleTarget: remote.hasSingleTarget)
     }
 
     private static func computePushSize(_ command: ProfileCommand, remote: ProfileRemote) -> Int? {

@@ -67,6 +67,9 @@ struct ProfileValuesEditor: View {
     let limits: ProfileEditLimits?
     /// One target value per time, for Trio.
     var singleTarget = false
+    /// True while the schedule keeps the values of the stored profile, which may be saved unchanged although they
+    /// no longer fit the limits.
+    var isUnchanged = false
 
     private var isRange: Bool { kind.isRange && !singleTarget }
 
@@ -121,7 +124,9 @@ struct ProfileValuesEditor: View {
                 }
                 switch status {
                 case .notAllowed:
-                    Text("Outside what is allowed. Change this value before sending.")
+                    Text(isUnchanged
+                        ? "Outside what is allowed now. The profile can't be activated until this value is changed."
+                        : "Outside what is allowed. Change this value before sending.")
                         .font(.caption)
                         .foregroundColor(.red)
                 case .outsideRecommended:
