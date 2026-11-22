@@ -93,12 +93,15 @@ enum WatchFormat {
         return "\(minutes) min"
     }
 
-    /// Phone semantics: yellow at or above high, red at or below low, green in
-    /// range. White when the phone's "Color BG Text" setting is off.
-    static func bgColor(_ mgdl: Double, lowMgdl: Double, highMgdl: Double, colored: Bool = true) -> Color {
+    /// Phone semantics: yellow above high, red below low, green in range, with a
+    /// reading on a line in range. Compared at the precision shown in `unit`, so the
+    /// color matches the displayed number. Primary when "Color BG Text" is off.
+    static func bgColor(_ mgdl: Double, lowMgdl: Double, highMgdl: Double, unit: GlucoseSnapshot.Unit, colored: Bool = true) -> Color {
         guard colored else { return .primary }
-        if mgdl >= highMgdl { return .yellow }
-        if mgdl <= lowMgdl { return .red }
-        return .green
+        switch GlucoseBand.of(mgdl, low: lowMgdl, high: highMgdl, mmol: unit == .mmol) {
+        case .high: return .yellow
+        case .low: return .red
+        case .inRange: return .green
+        }
     }
 }

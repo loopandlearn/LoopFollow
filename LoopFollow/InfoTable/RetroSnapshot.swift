@@ -101,13 +101,10 @@ extension MainViewController {
                 bgText = Localizer.toDisplayUnits(String(reading.sgv))
             }
             if Storage.shared.colorBGText.value {
-                let thresholds = UnitSettingsStore.shared.effectiveThresholds()
-                if Double(reading.sgv) >= thresholds.high {
-                    bgColor = .yellow
-                } else if Double(reading.sgv) <= thresholds.low {
-                    bgColor = .red
-                } else {
-                    bgColor = .green
+                switch UnitSettingsStore.shared.glucoseBand(for: Double(reading.sgv)) {
+                case .high: bgColor = .yellow
+                case .low: bgColor = .red
+                case .inRange: bgColor = .green
                 }
             }
             if let direction = reading.direction {

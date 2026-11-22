@@ -14,8 +14,11 @@ struct HighBGCondition: AlarmCondition {
         // ────────────────────────────────
         guard let high = alarm.aboveBG else { return false }
 
+        let normalize = UnitSettingsStore.shared.normalizeToDisplayPrecision
+        let highLimit = normalize(high)
+
         func isHigh(_ g: GlucoseValue) -> Bool {
-            g.sgv > 0 && Double(g.sgv) >= high
+            g.sgv > 0 && normalize(Double(g.sgv)) >= highLimit
         }
 
         // we already know from `passesBGLimits` that the **latest** reading is ≥ high,
