@@ -24,6 +24,9 @@ struct MainHomeView: View {
     var onStatsTap: (() -> Void)?
     var onHubBannerTap: (() -> Void)?
 
+    /// The BG display's height, which the info table takes as its own.
+    @State private var bgDisplayHeight: CGFloat = 0
+
     private var timeZoneOverride: String? {
         guard graphTimeZoneEnabled.value,
               let tz = TimeZone(identifier: graphTimeZoneIdentifier.value)
@@ -48,11 +51,13 @@ struct MainHomeView: View {
             // Top section: BG display + info table
             HStack(spacing: 10) {
                 BGDisplayView(onRefresh: onRefresh)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bgDisplayHeight = $0 }
 
                 if isNightscoutEnabled && !hideInfoTable.value {
                     InfoTableView(infoManager: infoManager, timeZoneOverride: timeZoneOverride)
                         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .frame(minWidth: 160, maxWidth: 250)
+                        .frame(height: bgDisplayHeight)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
