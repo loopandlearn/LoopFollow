@@ -167,6 +167,8 @@ struct GeneralSettingsView: View {
                 Toggle("Send anonymous usage stats", isOn: $telemetryEnabled.value)
                     .onChange(of: telemetryEnabled.value) { newValue in
                         if newValue {
+                            TelemetryClient.shared.sharingEnabled()
+                        } else {
                             TelemetryClient.shared.scheduleRecurring()
                         }
                     }

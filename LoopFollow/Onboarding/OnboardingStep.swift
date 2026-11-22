@@ -25,7 +25,6 @@ enum OnboardingStep: CaseIterable, Hashable {
     case alarms
     case tabOrder
     case notifications
-    case telemetry
     case hubPermissions
     case completion
 
@@ -42,7 +41,7 @@ enum OnboardingStep: CaseIterable, Hashable {
 
     /// Steps that use the shared Back / Continue footer. Phases that contain their
     /// own internal pages or custom primary buttons (overview, connect, units,
-    /// alarms, notifications, telemetry) supply their own footer instead, as do the
+    /// alarms, notifications) supply their own footer instead, as do the
     /// full-bleed welcome and completion screens.
     var usesSharedFooter: Bool {
         switch self {
@@ -65,7 +64,6 @@ enum OnboardingStep: CaseIterable, Hashable {
         case .alarms: return "Alarms"
         case .tabOrder: return "Tabs"
         case .notifications: return "Notifications"
-        case .telemetry: return "Privacy"
         case .hubPermissions: return "Permissions"
         }
     }

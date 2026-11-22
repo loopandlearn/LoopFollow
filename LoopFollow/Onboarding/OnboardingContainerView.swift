@@ -84,8 +84,6 @@ struct OnboardingContainerView: View {
                 TabOrderStepView()
             case .notifications:
                 NotificationsStepView(viewModel: viewModel)
-            case .telemetry:
-                TelemetryStepView(viewModel: viewModel)
             case .hubPermissions:
                 HubPermissionsStepView(viewModel: viewModel)
             case .completion:
