@@ -48,6 +48,7 @@ struct ContentView: View {
                 TabView {
                     GlucosePage(state: state)
                     ChartPage(state: state)
+                    SnoozePage(state: state)
                     if let stats = state.stats {
                         StatsPage(state: state, stats: stats)
                     }
