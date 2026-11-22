@@ -70,6 +70,8 @@ struct ProfileValuesEditor: View {
     /// True while the schedule keeps the values of the stored profile, which may be saved unchanged although they
     /// no longer fit the limits.
     var isUnchanged = false
+    /// True when the schedule belongs to the active profile.
+    var isActiveProfile = false
 
     private var isRange: Bool { kind.isRange && !singleTarget }
 
@@ -124,9 +126,11 @@ struct ProfileValuesEditor: View {
                 }
                 switch status {
                 case .notAllowed:
-                    Text(isUnchanged
-                        ? "Outside what is allowed now. The profile can't be activated until this value is changed."
-                        : "Outside what is allowed. Change this value before sending.")
+                    Text(!isUnchanged
+                        ? "Outside what is allowed. Change this value before sending."
+                        : isActiveProfile
+                        ? "Outside what is allowed now. Once another profile is activated, this one can't be activated again until this value is changed."
+                        : "Outside what is allowed now. The profile can't be activated until this value is changed.")
                         .font(.caption)
                         .foregroundColor(.red)
                 case .outsideRecommended:

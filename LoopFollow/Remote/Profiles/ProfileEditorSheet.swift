@@ -155,7 +155,7 @@ struct ProfileEditorSheet: View {
                 }
 
                 ForEach(ProfileScheduleKind.allCases) { kind in
-                    ProfileValuesEditor(kind: kind, segments: Binding(get: { draft[kind] }, set: { draft[kind] = $0 }), units: draft.units, limits: editableLimits, singleTarget: remote.hasSingleTarget, isUnchanged: !changedSchedules.contains(kind))
+                    ProfileValuesEditor(kind: kind, segments: Binding(get: { draft[kind] }, set: { draft[kind] = $0 }), units: draft.units, limits: editableLimits, singleTarget: remote.hasSingleTarget, isUnchanged: !changedSchedules.contains(kind), isActiveProfile: isEditingActive)
                 }
 
                 if !problems.isEmpty {

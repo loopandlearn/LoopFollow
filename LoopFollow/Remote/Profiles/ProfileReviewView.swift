@@ -108,6 +108,10 @@ struct ProfileReviewView: View {
                 if appliesNow {
                     ActiveProfileWarning(remote: remote)
                 }
+                if !ProfileValidation.unchangedProblems(for: command, limits: limits, singleTarget: remote.hasSingleTarget).isEmpty {
+                    Label("Schedules this change leaves alone stay outside the limits \(remote.appName) shared, so \(remote.appName) would refuse to activate this profile until they are changed too.", systemImage: "exclamationmark.triangle")
+                        .foregroundColor(.orange)
+                }
                 if !increases.isEmpty {
                     MoreInsulinWarning(
                         increases: increases,

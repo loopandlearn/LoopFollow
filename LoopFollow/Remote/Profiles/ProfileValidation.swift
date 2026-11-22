@@ -186,11 +186,22 @@ enum ProfileValidation {
         return problems(values, limits: limits, schedules: changed)
     }
 
-    /// Why Loop or Trio would refuse to activate `values` under `limits`, or empty when nothing in the limits stands in
-    /// the way. Empty when the profile and the limits are in different units, since they can't be compared.
-    static func activationProblems(_ values: TherapyProfileValues, limits: ProfileEditLimits?) -> [String] {
-        guard let limits, values.units == limits.normalizedUnits else { return [] }
-        return problems(values, limits: limits)
+    /// Why Loop or Trio would refuse to activate `profile` under `limits`, or empty when nothing in the limits stands in
+    /// the way. Empty when the limits are not usable, the profile could not be read completely, or the two are in
+    /// different units, since the profile can't be judged then.
+    static func activationProblems(_ profile: TherapyProfile, limits: ProfileEditLimits?) -> [String] {
+        guard let limits, limits.isUsable, profile.isWellFormed, profile.values.units == limits.normalizedUnits else { return [] }
+        return problems(profile.values, limits: limits)
+    }
+
+    /// The problems of the schedules a save of an existing profile leaves unchanged; they stay stored as they are.
+    static func unchangedProblems(for command: ProfileCommand, limits: ProfileEditLimits?, singleTarget: Bool = false) -> [String] {
+        guard case let .save(_, original?, values) = command, let limits, limits.isUsable, original.isWellFormed,
+              values.units == limits.normalizedUnits
+        else { return [] }
+        let unchanged = Set(ProfileScheduleKind.allCases).subtracting(changedSchedules(from: original.values, to: values, singleTarget: singleTarget))
+        if unchanged.isEmpty { return [] }
+        return problems(values, limits: limits, schedules: unchanged)
     }
 
     static func scheduleProblems(_ starts: [Int], kind: ProfileScheduleKind, limits: ProfileEditLimits) -> [String] {
@@ -200,7 +211,7 @@ enum ProfileValidation {
         if zip(starts, starts.dropFirst()).contains(where: { $0 >= $1 }) {
             problems.append("\(kind.title): each time must be later than the one before.")
         }
-        if starts.contains(where: { $0 < 0 || $0 >= 86400 || $0 % limits.segmentSeconds != 0 }) {
+        if starts.contains(where: { $0 < 0 || $0 >= 86400 || limits.segmentSeconds <= 0 || $0 % limits.segmentSeconds != 0 }) {
             problems.append("\(kind.title): times must be on the \(limits.segmentSeconds / 60)-minute grid.")
         }
         let segmentLimit = limits.segmentLimit(for: kind)

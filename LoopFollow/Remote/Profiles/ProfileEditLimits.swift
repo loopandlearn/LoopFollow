@@ -78,7 +78,7 @@ struct ProfileEditLimits: Decodable, Equatable {
 
     /// The most segments a schedule may have: the published maximum, never more than one per segment slot.
     var segmentLimit: Int {
-        min(maxSegments, 86400 / segmentSeconds)
+        segmentSeconds > 0 ? min(maxSegments, 86400 / segmentSeconds) : 0
     }
 
     /// The most segments a schedule of `kind` may have; basal also stays within the pump's entry limit.
