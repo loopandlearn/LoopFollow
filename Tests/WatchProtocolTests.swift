@@ -45,7 +45,8 @@ struct WatchProtocolTests {
                 tempTargetPresets: [],
                 quickPickBoluses: [1, 2.5],
                 quickPickMeals: [WatchMealPick(carbs: 45, fat: 0, protein: 0, bolus: 0)]
-            )
+            ),
+            displayName: "Emma"
         )
     }
 
@@ -54,6 +55,16 @@ struct WatchProtocolTests {
         let original = state(alarm: WatchAlarm(id: UUID(), name: "Low"))
         let data = try #require(original.encoded())
         #expect(WatchState.decode(data) == original)
+    }
+
+    @Test("A state without a display name decodes with none")
+    func stateWithoutDisplayName() throws {
+        let data = try #require(state().encoded())
+        var json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json["displayName"] = nil
+        let decoded = try #require(WatchState.decode(JSONSerialization.data(withJSONObject: json)))
+        #expect(decoded.displayName == nil)
+        #expect(decoded.snapshot == state().snapshot)
     }
 
     @Test("The active override is the one whose period contains the time")
