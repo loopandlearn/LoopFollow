@@ -59,30 +59,30 @@ private var TrendTable: [String] = [
 ]
 
 /// Share locks an account after repeated bad logins, so a login it rejects for the account or
-/// password blocks further logins with the same credentials for `interval`. Other failures are
-/// tried again at the next fetch.
+/// password blocks further logins with the same credentials on the same Share server for
+/// `interval`. Other failures are tried again at the next fetch.
 enum ShareLoginBackoff {
     static let interval: TimeInterval = 15 * 60
 
     private static let lock = NSLock()
     private static var blocks: [String: (until: Date, code: String)] = [:]
 
-    private static func key(_ username: String, _ password: String) -> String {
-        "\(username)\n\(password)"
+    private static func key(_ server: String, _ username: String, _ password: String) -> String {
+        "\(server)\n\(username)\n\(password)"
     }
 
     /// The rejection code while logins with these credentials are blocked, else nil.
-    static func blockedCode(username: String, password: String, now: Date = Date()) -> String? {
+    static func blockedCode(server: String, username: String, password: String, now: Date = Date()) -> String? {
         lock.lock()
         defer { lock.unlock() }
-        guard let block = blocks[key(username, password)], now < block.until else { return nil }
+        guard let block = blocks[key(server, username, password)], now < block.until else { return nil }
         return block.code
     }
 
-    static func block(username: String, password: String, code: String, now: Date = Date()) {
+    static func block(server: String, username: String, password: String, code: String, now: Date = Date()) {
         lock.lock()
         defer { lock.unlock() }
-        blocks[key(username, password)] = (now.addingTimeInterval(interval), code)
+        blocks[key(server, username, password)] = (now.addingTimeInterval(interval), code)
     }
 
     /// Share's codes for an unknown account, a wrong password or too many attempts.
@@ -95,13 +95,19 @@ enum ShareLoginBackoff {
 }
 
 public extension ShareClient {
+    /// The Share server URL this client logs in to. ShareClient keeps it private.
+    private var serverURL: String {
+        Mirror(reflecting: self).children.first { $0.label == "shareServer" }?.value as? String ?? ""
+    }
+
     func fetchData(_ entries: Int, callback: @escaping (ShareError?, [ShareGlucoseData]?) -> Void) {
-        if let code = ShareLoginBackoff.blockedCode(username: username, password: password) {
+        let server = serverURL
+        if let code = ShareLoginBackoff.blockedCode(server: server, username: username, password: password) {
             return callback(.loginError(errorCode: code), nil)
         }
         fetchLast(entries) { [username, password] error, result in
             if case let .loginError(code)? = error, ShareLoginBackoff.rejectsCredentials(code) {
-                ShareLoginBackoff.block(username: username, password: password, code: code)
+                ShareLoginBackoff.block(server: server, username: username, password: password, code: code)
             }
             guard error == nil, let result = result else {
                 return callback(error ?? .fetchError, nil)
