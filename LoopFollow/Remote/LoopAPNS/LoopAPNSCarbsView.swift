@@ -23,6 +23,8 @@ struct LoopAPNSCarbsView: View {
     @State private var alertType: AlertType = .success
     @State private var otpTimeRemaining: Int? = nil
     @State private var showTOTPWarning = false
+    /// The treatments marker as the user sees it on this screen.
+    @State private var origin = RemoteCommandOrigin.phoneScreenAppeared()
     private let otpPeriod: TimeInterval = 30
     private let timeAdjustmentStepMinutes = 5
     private let maxPastHours = 12
@@ -405,6 +407,7 @@ struct LoopAPNSCarbsView: View {
                     normalizeAbsorptionTime()
                 }
             }
+            .remoteCommandOrigin($origin)
             .onAppear {
                 // Validate APNS setup
                 let apnsService = LoopAPNSService()
@@ -565,7 +568,7 @@ struct LoopAPNSCarbsView: View {
         )
 
         let apnsService = LoopAPNSService()
-        apnsService.sendCarbsViaAPNS(payload: payload) { success, errorMessage in
+        apnsService.sendCarbsViaAPNS(payload: payload, origin: origin) { success, errorMessage in
             DispatchQueue.main.async {
                 self.isLoading = false
                 if success {

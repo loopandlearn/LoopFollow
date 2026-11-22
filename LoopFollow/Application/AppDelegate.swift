@@ -323,6 +323,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
 
+        // Loop's and Trio's replies to remote commands stay in Notification Center to be read later.
+        // Alarms are handled on screen, and a listed alarm's snooze action would act on the current alarm.
+        if content.userInfo["command_status"] != nil {
+            completionHandler([.banner, .list, .sound, .badge])
+            return
+        }
+
         completionHandler([.banner, .sound, .badge])
     }
 }

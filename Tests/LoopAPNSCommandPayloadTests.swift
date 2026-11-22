@@ -21,7 +21,7 @@ struct LoopAPNSCommandPayloadTests {
         #expect(json["entered-by"] as? String == "LoopFollow")
         #expect(json["notes"] as? String == "Sent via LoopFollow APNS")
         #expect(json["sent-at"] as? String == "2023-11-14T22:13:20.000Z")
-        #expect(json["expiration"] as? String == "2023-11-14T22:18:20.000Z")
+        #expect(json["expiration"] as? String == "2023-11-14T22:25:20.000Z")
         #expect(json["start-time"] as? String == "2023-11-14T22:03:20.000Z")
         #expect(json["alert"] as? String == "Remote Carbs Entry: 30.0 grams\nAbsorption Time: 3.0 hours")
     }
@@ -32,6 +32,25 @@ struct LoopAPNSCommandPayloadTests {
         #expect(Set(json.keys) == headerKeys.union(["bolus-entry"]))
         #expect(json["bolus-entry"] as? Double == 1.25)
         #expect(json["alert"] as? String == "Remote Bolus Entry: 1.25 U")
+        #expect(json["expiration"] as? String == "2023-11-14T22:25:20.000Z")
+    }
+
+    @Test("bolus and carbs carry the known-through id when set")
+    func knownThroughID() {
+        let marker = "6566a3c0a1b2c3d4e5f60718"
+        let bolus = LoopAPNSCommands.bolusCommandPayload(LoopAPNSPayload(type: .bolus, bolusAmount: 1, otp: "123456"), knownThroughID: marker, now: now)
+        let carbs = LoopAPNSCommands.carbsCommandPayload(LoopAPNSPayload(type: .carbs, carbsAmount: 20, otp: "123456"), knownThroughID: marker, now: now)
+        #expect(bolus["known-through-id"] as? String == marker)
+        #expect(carbs["known-through-id"] as? String == marker)
+
+        let body = try? JSONSerialization.jsonObject(with: LoopAPNSCommands.apnsBody(bolus)) as? [String: Any]
+        #expect(body?["known-through-id"] as? String == marker)
+    }
+
+    @Test("other commands keep the five minute expiration")
+    func otherCommandsExpiration() {
+        let json = LoopAPNSCommands.carbsDeleteCommandPayload(syncIdentifier: "SYNC-1", otp: "123456", now: now)
+        #expect(json["expiration"] as? String == "2023-11-14T22:18:20.000Z")
     }
 
     @Test("carbs delete addresses the entry by sync identifier")

@@ -52,8 +52,10 @@ enum DirectCommandSender {
         switch action {
         case let .bolus(units):
             payload.bolusAmount = Decimal(units)
+            payload.commandID = UUID().uuidString
         case let .meal(carbs, fat, protein, bolus, consumedAt):
             payload.commandType = .meal
+            payload.commandID = UUID().uuidString
             payload.carbs = carbs > 0 ? Int(carbs) : nil
             payload.fat = fat > 0 ? Int(fat) : nil
             payload.protein = protein > 0 ? Int(protein) : nil

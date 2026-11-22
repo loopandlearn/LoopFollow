@@ -54,13 +54,12 @@ class PushNotificationManager {
         sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.override, completion))
     }
 
-    func sendBolusPushNotification(bolusAmount: HKQuantity, completion: @escaping (Bool, String?) -> Void) {
+    func sendBolusPushNotification(bolusAmount: HKQuantity, origin: RemoteCommandOrigin, completion: @escaping (Bool, String?) -> Void) {
         let bolusAmountDecimal = Decimal(bolusAmount.doubleValue(for: .internationalUnit()))
-        let payload = CommandPayload(
+        let payload = Self.bolusPayload(
             user: user,
-            commandType: .bolus,
-            timestamp: Date().timeIntervalSince1970,
             bolusAmount: bolusAmountDecimal,
+            knownThroughID: origin.knownThroughID,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(.bolus(units: bolusAmount.doubleValue(for: .internationalUnit())), completion))
@@ -96,6 +95,7 @@ class PushNotificationManager {
         fat: HKQuantity,
         bolusAmount: HKQuantity,
         scheduledTime: Date?,
+        origin: RemoteCommandOrigin,
         completion: @escaping (Bool, String?) -> Void
     ) {
         func convertToOptionalInt(_ quantity: HKQuantity) -> Int? {
@@ -116,21 +116,68 @@ class PushNotificationManager {
             completion(false, "No nutrient data provided. At least one of carbs, fat, or protein must be greater than 0.")
             return
         }
-        let payload = CommandPayload(
+        let payload = Self.mealPayload(
             user: user,
-            commandType: .meal,
-            timestamp: Date().timeIntervalSince1970,
             bolusAmount: bolusAmountValue,
             carbs: carbsValue,
             protein: proteinValue,
             fat: fatValue,
             scheduledTime: scheduledTimeInterval,
+            knownThroughID: origin.knownThroughID,
             returnNotification: ReturnNotificationInfo.loopFollow()
         )
         sendEncryptedCommand(payload: payload, completion: RemoteCommandRefresh.following(
             .meal(grams: Double(carbsValue ?? 0), bolus: bolusAmount.doubleValue(for: .internationalUnit())),
             completion
         ))
+    }
+
+    /// A bolus command with a command id of its own, so Trio enacts it at most once.
+    static func bolusPayload(
+        user: String,
+        bolusAmount: Decimal,
+        knownThroughID: String?,
+        returnNotification: ReturnNotificationInfo?,
+        now: Date = Date(),
+        commandID: String = UUID().uuidString
+    ) -> CommandPayload {
+        CommandPayload(
+            user: user,
+            commandType: .bolus,
+            timestamp: now.timeIntervalSince1970,
+            bolusAmount: bolusAmount,
+            commandID: commandID,
+            knownThroughID: knownThroughID,
+            returnNotification: returnNotification
+        )
+    }
+
+    /// A meal command with a command id of its own, so Trio enacts it at most once.
+    static func mealPayload(
+        user: String,
+        bolusAmount: Decimal?,
+        carbs: Int?,
+        protein: Int?,
+        fat: Int?,
+        scheduledTime: TimeInterval?,
+        knownThroughID: String?,
+        returnNotification: ReturnNotificationInfo?,
+        now: Date = Date(),
+        commandID: String = UUID().uuidString
+    ) -> CommandPayload {
+        CommandPayload(
+            user: user,
+            commandType: .meal,
+            timestamp: now.timeIntervalSince1970,
+            bolusAmount: bolusAmount,
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            scheduledTime: scheduledTime,
+            commandID: commandID,
+            knownThroughID: knownThroughID,
+            returnNotification: returnNotification
+        )
     }
 
     /// Trio confirms edit/delete through a return notification, so LoopFollow's own APNs credentials are required.
