@@ -44,41 +44,9 @@ extension MainViewController {
                     let priorDateTimeStamp = priorDateParsed.timeIntervalSince1970
                     let priorDuration = priorEntry?["duration"] as? Double ?? 0.0
 
-                    if (dateTimeStamp - priorDateTimeStamp) > (priorDuration * 60) + 15 {
-                        var scheduled = 0.0
-                        var midGap = false
-                        var midGapTime: TimeInterval = 0
-                        var midGapValue: Double = 0
-
-                        for b in 0 ..< basalScheduleData.count {
-                            let priorEnd = priorDateTimeStamp + (priorDuration * 60)
-                            if priorEnd >= basalScheduleData[b].date {
-                                scheduled = basalScheduleData[b].basalRate
-                                if b < basalScheduleData.count - 1 {
-                                    if dateTimeStamp > basalScheduleData[b + 1].date {
-                                        midGap = true
-                                        midGapTime = basalScheduleData[b + 1].date
-                                        midGapValue = basalScheduleData[b + 1].basalRate
-                                    }
-                                }
-                            }
-                        }
-
-                        let startDot = basalGraphStruct(basalRate: scheduled,
-                                                        date: priorDateTimeStamp + (priorDuration * 60))
-                        basalData.append(startDot)
-
-                        if midGap {
-                            let endDot1 = basalGraphStruct(basalRate: scheduled, date: midGapTime)
-                            basalData.append(endDot1)
-                            let startDot2 = basalGraphStruct(basalRate: midGapValue, date: midGapTime)
-                            basalData.append(startDot2)
-                            let endDot2 = basalGraphStruct(basalRate: midGapValue, date: dateTimeStamp)
-                            basalData.append(endDot2)
-                        } else {
-                            let endDot = basalGraphStruct(basalRate: scheduled, date: dateTimeStamp)
-                            basalData.append(endDot)
-                        }
+                    let priorEnd = priorDateTimeStamp + (priorDuration * 60)
+                    if dateTimeStamp - priorEnd > 15 {
+                        appendScheduledBasal(from: priorEnd, to: dateTimeStamp)
                     }
                 }
             }
@@ -117,23 +85,11 @@ extension MainViewController {
         // If last basal was prior to right now, fill up to now with the scheduled basal
         if lastEndDot <= dateTimeUtils.getNowTimeIntervalUTC() {
             let now = Date()
-            let tailStart = Date(timeIntervalSince1970: max(lastEndDot, dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * Storage.shared.downloadDays.value)))
-            let tailEnd = now.addingTimeInterval(60 * 10)
-
             latestBasal = Localizer.formatToLocalizedString(profileManager.basalRate(at: now) ?? 0.0,
                                                             maxFractionDigits: 2,
                                                             minFractionDigits: 0)
-
-            var segments = profileManager.scheduledBasalSegments(from: tailStart, to: tailEnd)
-            if segments.isEmpty {
-                segments = [(start: tailStart, rate: 0.0)]
-            }
-
-            for (index, segment) in segments.enumerated() {
-                let segmentEnd = index < segments.count - 1 ? segments[index + 1].start : tailEnd
-                basalData.append(basalGraphStruct(basalRate: segment.rate, date: segment.start.timeIntervalSince1970))
-                basalData.append(basalGraphStruct(basalRate: segment.rate, date: segmentEnd.timeIntervalSince1970))
-            }
+            appendScheduledBasal(from: max(lastEndDot, dateTimeUtils.getTimeIntervalNHoursAgo(N: 24 * Storage.shared.downloadDays.value)),
+                                 to: now.timeIntervalSince1970 + 60 * 10)
         }
 
         basalData = PumpSuspension.applying(suspensions, to: basalData)
@@ -152,5 +108,22 @@ extension MainViewController {
         }
         infoManager.updateInfoData(type: .basal, value: latestBasal)
         Storage.shared.lastBasal.value = latestBasal
+    }
+
+    /// Appends the scheduled basal from `start` to `end` as rate steps, split
+    /// at each schedule entry in between.
+    private func appendScheduledBasal(from start: TimeInterval, to end: TimeInterval) {
+        guard end > start else { return }
+        let startDate = Date(timeIntervalSince1970: start)
+        let endDate = Date(timeIntervalSince1970: end)
+        var segments = profileManager.scheduledBasalSegments(from: startDate, to: endDate)
+        if segments.isEmpty {
+            segments = [(start: startDate, rate: 0.0)]
+        }
+        for (index, segment) in segments.enumerated() {
+            let segmentEnd = index < segments.count - 1 ? segments[index + 1].start : endDate
+            basalData.append(basalGraphStruct(basalRate: segment.rate, date: segment.start.timeIntervalSince1970))
+            basalData.append(basalGraphStruct(basalRate: segment.rate, date: segmentEnd.timeIntervalSince1970))
+        }
     }
 }

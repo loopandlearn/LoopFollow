@@ -5,8 +5,8 @@ import Combine
 import Foundation
 
 /// History of the values the looping app reports in Nightscout devicestatus
-/// records (IOB, COB, smoothed BG, sensitivity ratio, forecasts and the info
-/// table values), shared by the history graphs and the scrubbed-time displays.
+/// records (IOB, insulin activity, COB, smoothed BG, sensitivity ratio,
+/// forecasts and the info table values), shared by the history graphs and the scrubbed-time displays.
 ///
 /// Devicestatus records never change once written, so the extracted fields are
 /// cached on disk and only missing spans are fetched: the Show Days Back window
@@ -28,7 +28,7 @@ final class DeviceStatusHistory {
     }
 
     private struct CacheFile: Codable {
-        static let currentVersion = 2
+        static let currentVersion = 3
         let version: Int
         let url: String
         let state: DeviceStatusHistoryState
@@ -82,6 +82,7 @@ final class DeviceStatusHistory {
         Publishers.MergeMany(
             s.showIOBGraph.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             s.showCOBGraph.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            s.showInsulinActivityGraph.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             s.showSensitivityRatioGraph.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             s.showSmoothedBG.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             s.historyCurvePlacement.$value.dropFirst().map { _ in () }.eraseToAnyPublisher(),

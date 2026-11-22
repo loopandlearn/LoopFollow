@@ -10,10 +10,12 @@ extension MainViewController {
         if let failureReason = lastLoopRecord["failureReason"], !(failureReason is NSNull) {
             Observable.shared.loopStatusText.value = "X"
             latestLoopStatusString = "X"
+            clearOpenAPSInsulinActivity()
         } else {
             guard let enactedOrSuggested = lastLoopRecord["suggested"] as? [String: AnyObject] ?? lastLoopRecord["enacted"] as? [String: AnyObject] else {
                 Observable.shared.loopStatusText.value = "↻"
                 latestLoopStatusString = "↻"
+                clearOpenAPSInsulinActivity()
                 return
             }
 
@@ -78,6 +80,12 @@ extension MainViewController {
                 infoManager.updateInfoData(type: .iob, value: iobMetric)
                 latestIOB = iobMetric
                 Observable.shared.iobText.value = iobMetric.formattedValue()
+            }
+            insulinForecast = InsulinForecast.parseOpenAPS(lastLoopRecord)
+            if let activity = (lastLoopRecord["iob"] as? [String: AnyObject])?["activity"] as? Double {
+                infoManager.updateInsulinActivity(activity * 60)
+            } else {
+                infoManager.clearInfoData(type: .insulinActivity)
             }
 
             // COB
@@ -257,5 +265,10 @@ extension MainViewController {
             Storage.shared.lastIOB.value = latestIOB?.value
             Storage.shared.lastCOB.value = latestCOB?.value
         }
+    }
+
+    private func clearOpenAPSInsulinActivity() {
+        insulinForecast = nil
+        infoManager.clearInfoData(type: .insulinActivity)
     }
 }
