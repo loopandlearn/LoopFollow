@@ -390,14 +390,12 @@ final class OnboardingViewModel: ObservableObject {
                  detail: "Reminds you when the CGM sensor is due.",
                  requiresNightscout: true)
             {
-                $0.threshold = 10
                 $0.activeOption = .day
             },
             seed(.pumpChange, title: "Pump change",
                  detail: "Reminds you when the pump site is due.",
                  requiresNightscout: true)
             {
-                $0.threshold = 3
                 $0.activeOption = .day
             },
             seed(.pump, title: "Pump insulin",
