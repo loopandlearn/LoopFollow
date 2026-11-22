@@ -144,8 +144,8 @@ class APNSClient {
         request.setValue("10", forHTTPHeaderField: "apns-priority")
         // 10-minute expiry — long enough to survive a brief connectivity gap
         // while the glucose reading in the payload is still clinically meaningful.
-        // The stale date (8 h) is too generous: delivering a start with hours-old
-        // glucose data is worse than not starting at all.
+        // Longer would risk delivering a start with old glucose data, which is
+        // worse than not starting at all.
         request.setValue("\(Int(Date().timeIntervalSince1970) + 10 * 60)", forHTTPHeaderField: "apns-expiration")
         // Collapse key prevents duplicate LA creation if two sends race (e.g., a
         // refresh tick and a user-initiated restart overlap).
@@ -223,6 +223,7 @@ class APNSClient {
             "aps": [
                 "timestamp": Int(Date().timeIntervalSince1970),
                 "event": "update",
+                "stale-date": Int(state.snapshot.staleDate().timeIntervalSince1970),
                 "content-state": contentState,
             ],
         ]
@@ -248,6 +249,9 @@ class APNSClient {
         if let projected = snapshot.projected { snapshotDict["projected"] = projected }
         if let override = snapshot.override { snapshotDict["override"] = override }
         if let overrideEndAt = snapshot.overrideEndAt { snapshotDict["overrideEndAt"] = overrideEndAt }
+        if let overridePercent = snapshot.overridePercent { snapshotDict["overridePercent"] = overridePercent }
+        if let overrideRangeLowMgdl = snapshot.overrideRangeLowMgdl { snapshotDict["overrideRangeLowMgdl"] = overrideRangeLowMgdl }
+        if let overrideRangeHighMgdl = snapshot.overrideRangeHighMgdl { snapshotDict["overrideRangeHighMgdl"] = overrideRangeHighMgdl }
         if let tempTargetMgdl = snapshot.tempTargetMgdl { snapshotDict["tempTargetMgdl"] = tempTargetMgdl }
         if let tempTargetEndAt = snapshot.tempTargetEndAt { snapshotDict["tempTargetEndAt"] = tempTargetEndAt }
         if let recBolus = snapshot.recBolus { snapshotDict["recBolus"] = recBolus }
