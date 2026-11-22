@@ -244,23 +244,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         }
 
         // Mute this alarm day or night or always
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: now)
-        let dayStart = cal.date(bySettingHour: config.dayStart.hour,
-                                minute: config.dayStart.minute,
-                                second: 0,
-                                of: today)!
-        let nightStart = cal.date(bySettingHour: config.nightStart.hour,
-                                  minute: config.nightStart.minute,
-                                  second: 0,
-                                  of: today)!
-
-        let isNight: Bool
-        if nightStart >= dayStart {
-            isNight = (now >= nightStart) || (now < dayStart)
-        } else {
-            isNight = (now >= nightStart) && (now < dayStart)
-        }
+        let isNight = config.isNight(at: now)
         let isDay = !isNight
 
         switch playSoundOption {
