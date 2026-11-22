@@ -49,4 +49,19 @@ extension AlarmType {
             return false
         }
     }
+
+    /// `true` for alarms whose check only reads its inputs, so it can be run
+    /// again (for the CarPlay widget) without side effects. The others record
+    /// that they fired, to announce each event once.
+    var isStateCondition: Bool {
+        switch self {
+        case .low, .high, .fastDrop, .fastRise, .missedReading, .notLooping, .temporary,
+             .iob, .sensorChange, .pumpChange, .pump, .pumpBattery, .battery, .batteryDrop,
+             .buildExpire, .dbSize:
+            return true
+        case .cob, .recBolus, .missedBolus, .futureCarbs,
+             .overrideStart, .overrideEnd, .tempTargetStart, .tempTargetEnd:
+            return false
+        }
+    }
 }

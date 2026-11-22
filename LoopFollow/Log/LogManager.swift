@@ -33,6 +33,7 @@ class LogManager {
         case websocket = "WebSocket"
         case telemetry = "Telemetry"
         case hub = "Hub"
+        case carPlay = "CarPlay"
     }
 
     init() {

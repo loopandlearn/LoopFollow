@@ -8,6 +8,8 @@ extension MainViewController {
         overrideGraphData.removeAll()
         var activeOverrideNote: String?
         var activeOverrideEndAt: TimeInterval?
+        var activeOverridePercent: Int?
+        var activeOverrideRange: (low: Double, high: Double)?
 
         let sorted = entries.sorted { lhs, rhs in
             guard
@@ -94,11 +96,16 @@ extension MainViewController {
             if now >= start, now < end {
                 activeOverrideNote = e["notes"] as? String ?? e["reason"] as? String
                 activeOverrideEndAt = trueEnd
+                activeOverridePercent = WatchStateBuilder.overridePercent(dot)
+                activeOverrideRange = Self.overrideRangeMgdl(dot.correctionRange)
             }
         }
 
         Observable.shared.override.value = activeOverrideNote
         Observable.shared.overrideEndAt.value = activeOverrideEndAt
+        Observable.shared.overridePercent.value = activeOverridePercent
+        Observable.shared.overrideRangeLowMgdl.value = activeOverrideRange?.low
+        Observable.shared.overrideRangeHighMgdl.value = activeOverrideRange?.high
         if Storage.shared.device.value != "Loop" {
             if let note = activeOverrideNote {
                 infoManager.updateInfoData(type: .override, value: note)
@@ -113,5 +120,13 @@ extension MainViewController {
         #if !targetEnvironment(macCatalyst)
             LiveActivityManager.shared.refreshFromCurrentState(reason: "overrideChanged")
         #endif
+    }
+
+    /// An override's target range in mg/dL, or nil when it sets none (stored as
+    /// [0, 0]). Values this small can only be mmol/L, so they are converted.
+    nonisolated static func overrideRangeMgdl(_ range: [Int]) -> (low: Double, high: Double)? {
+        guard range.count == 2, range[0] > 0, range[1] > 0 else { return nil }
+        let mgdl = range.map { $0 < 30 ? Double($0) * GlucoseConversion.mmolToMgDl : Double($0) }
+        return (min(mgdl[0], mgdl[1]), max(mgdl[0], mgdl[1]))
     }
 }

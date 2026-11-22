@@ -108,10 +108,17 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
 
     /// Options selectable for the lock-screen 2×2 grid. The active override is
     /// excluded — the card has a dedicated override/temp-target countdown row.
-    /// It remains selectable for the single CarPlay/Watch slot, which has no
-    /// such row.
     static var gridCases: [LiveActivitySlotOption] {
         allCases.filter { $0 != .override }
+    }
+
+    /// Shown on the CarPlay/Watch status line, so not offered for the right
+    /// slot while the line is on.
+    static let onSmallWidgetStatusLine: Set<LiveActivitySlotOption> = [.iob, .cob, .override]
+
+    /// Options selectable for the CarPlay/Watch right slot.
+    static func smallWidgetCases(showStatusLine: Bool) -> [LiveActivitySlotOption] {
+        showStatusLine ? allCases.filter { !onSmallWidgetStatusLine.contains($0) } : allCases
     }
 
     /// True when the underlying value may be nil (e.g. Dexcom-only users who have
@@ -143,6 +150,21 @@ enum LiveActivitySlotDefaults {
     }
 }
 
+// MARK: - Small family layout
+
+/// CarPlay and the Watch Smart Stack share the `.small` activity family and no
+/// API tells them apart, so the tight layout depends on available width as well
+/// as the user's setting.
+enum SmallWidgetLayout {
+    /// Apple's sizes: CarPlay is 240 or 170 wide and the Watch at most 198. The
+    /// 240-wide CarPlay layouts clear this; everything else keeps the single slot.
+    static let tightMinWidth: CGFloat = 205
+
+    static func usesTightLayout(enabled: Bool, width: CGFloat) -> Bool {
+        enabled && width >= tightMinWidth
+    }
+}
+
 // MARK: - App Group settings
 
 /// Minimal App Group settings needed by the Live Activity UI.
@@ -155,6 +177,8 @@ enum LAAppGroupSettings {
         static let highLineMgdl = "la.highLine.mgdl"
         static let slots = "la.slots"
         static let smallWidgetSlot = "la.smallWidgetSlot"
+        static let smallWidgetStatusLine = "la.smallWidgetStatusLine"
+        static let smallWidgetTightLayout = "la.smallWidgetTightLayout"
         static let displayName = "la.displayName"
         static let showDisplayName = "la.showDisplayName"
     }
@@ -216,6 +240,28 @@ enum LAAppGroupSettings {
             return LiveActivitySlotDefaults.smallWidgetSlot
         }
         return LiveActivitySlotOption(rawValue: raw) ?? LiveActivitySlotDefaults.smallWidgetSlot
+    }
+
+    // MARK: - Small widget status line
+
+    static func setShowSmallWidgetStatusLine(_ show: Bool) {
+        defaults?.set(show, forKey: Keys.smallWidgetStatusLine)
+    }
+
+    /// On until the user turns it off.
+    static func showSmallWidgetStatusLine() -> Bool {
+        defaults?.object(forKey: Keys.smallWidgetStatusLine) as? Bool ?? true
+    }
+
+    // MARK: - Small widget tight layout
+
+    static func setSmallWidgetTightLayout(_ enabled: Bool) {
+        defaults?.set(enabled, forKey: Keys.smallWidgetTightLayout)
+    }
+
+    /// Off until the user turns it on.
+    static func smallWidgetTightLayout() -> Bool {
+        defaults?.bool(forKey: Keys.smallWidgetTightLayout) ?? false
     }
 
     // MARK: - Display Name
