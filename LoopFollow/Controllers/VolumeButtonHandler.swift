@@ -25,6 +25,7 @@ class VolumeButtonHandler: NSObject {
     private var isMonitoring = false
     private var alarmStartTime: Date?
     private var lastVolumeButtonPressTime: Date?
+    private var ignoreVolumeChangesUntil: Date?
 
     // Button press detection
     private var recentVolumeChanges: [(volume: Float, timestamp: Date)] = []
@@ -50,6 +51,12 @@ class VolumeButtonHandler: NSObject {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    /// Volume changes within `duration` from now come from LoopFollow itself
+    /// (the alarm volume override and its restore) and are not button presses.
+    func ignoreProgrammaticVolumeChange(for duration: TimeInterval = 0.5) {
+        ignoreVolumeChangesUntil = Date().addingTimeInterval(duration)
     }
 
     private func recordVolumeChange(currentVolume: Float, timestamp: Date) {
@@ -242,6 +249,11 @@ class VolumeButtonHandler: NSObject {
 
             let currentVolume = session.outputVolume
             let now = Date()
+
+            if let until = self.ignoreVolumeChangesUntil, now < until {
+                self.lastVolume = currentVolume
+                return
+            }
 
             // On the first observation, capture the initial volume when the audio session
             // becomes active. This solves the race condition. We then return to avoid

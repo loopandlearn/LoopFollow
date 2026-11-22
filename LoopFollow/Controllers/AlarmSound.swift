@@ -105,12 +105,13 @@ class AlarmSound {
 
     /// Hands the audio session back once LoopFollow has nothing left to play, so
     /// audio from other apps that was ducked or interrupted returns to full volume.
+    /// A repeating alarm waiting for its next sound keeps the session.
     /// Spoken BG that is still talking keeps the session; deactivating under it
     /// cuts the speech and leaves the synthesizer stuck, and its didFinish
     /// releases the session instead. While Silent Tune's loop holds the session,
     /// it stays active with the mixable category that loop uses.
     static func releaseAudioSession() {
-        guard !isPlaying, !SpeechOutput.shared.isSpeaking else { return }
+        guard !isPlaying, repeatDelay == 0, !SpeechOutput.shared.isSpeaking else { return }
 
         let session = AVAudioSession.sharedInstance()
         do {
@@ -287,7 +288,7 @@ class AlarmSound {
         if systemOutputVolumeBeforeOverride == nil {
             systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
         }
-        MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
+        setSystemOutputVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
     }
 
     fileprivate static func restoreSystemOutputVolume() {
@@ -300,10 +301,17 @@ class AlarmSound {
 
         // restore system output volume with its value before overriding it
         if let volumeBeforeOverride = systemOutputVolumeBeforeOverride {
-            MPVolumeView.setVolume(volumeBeforeOverride)
+            setSystemOutputVolume(volumeBeforeOverride)
         }
 
         systemOutputVolumeBeforeOverride = nil
+    }
+
+    /// Volume Button Snooze watches the output volume while an alarm plays, so it
+    /// is told to skip the change LoopFollow makes here.
+    private static func setSystemOutputVolume(_ volume: Float) {
+        VolumeButtonHandler.shared.ignoreProgrammaticVolumeChange()
+        MPVolumeView.setVolume(volume)
     }
 
     // Background activation of a non-mixable .playback session is denied by iOS
