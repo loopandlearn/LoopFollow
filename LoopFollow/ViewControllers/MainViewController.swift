@@ -49,8 +49,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
     private var setupNightscoutButton: UIButton!
     private var setupDexcomButton: UIButton!
 
-    let speechSynthesizer = AVSpeechSynthesizer()
-
     // Variables for BG Charts
     var firstGraphLoad: Bool = true
     var currentOverride = 1.0
@@ -410,8 +408,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
             .store(in: &cancellables)
 
         updateQuickActions()
-
-        speechSynthesizer.delegate = self
 
         // Check configuration and show appropriate UI
         if isDataSourceConfigured() {
@@ -1358,24 +1354,6 @@ class MainViewController: UIViewController, UNUserNotificationCenterDelegate {
                 self.setupLoadingState()
                 self.showLoadingOverlay()
                 self.refresh()
-            }
-        }
-    }
-}
-
-extension MainViewController: AVSpeechSynthesizerDelegate {
-    func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
-        let appState = UIApplication.shared.applicationState
-        let isSilentTuneMode = BackgroundRefreshType.inEffect == .silentTune
-
-        if isSilentTuneMode, appState == .background {
-            LogManager.shared.log(category: .general, message: "Silent tune active in background; not deactivating session.", isDebug: true)
-        } else {
-            do {
-                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-                LogManager.shared.log(category: .general, message: "Audio session deactivated after speech.", isDebug: true)
-            } catch {
-                LogManager.shared.log(category: .alarm, message: "Failed to deactivate audio session: \(error)")
             }
         }
     }

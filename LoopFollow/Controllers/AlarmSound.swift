@@ -100,6 +100,30 @@ class AlarmSound {
         audioPlayer = nil
 
         restoreSystemOutputVolume()
+        releaseAudioSession()
+    }
+
+    /// Hands the audio session back once LoopFollow has nothing left to play, so
+    /// audio from other apps that was ducked or interrupted returns to full volume.
+    /// A repeating alarm waiting for its next sound keeps the session.
+    /// Spoken BG that is still talking keeps the session; deactivating under it
+    /// cuts the speech and leaves the synthesizer stuck, and its didFinish
+    /// releases the session instead. While Silent Tune's loop holds the session,
+    /// it stays active with the mixable category that loop uses.
+    static func releaseAudioSession() {
+        guard !isPlaying, repeatDelay == 0, !SpeechOutput.shared.isSpeaking else { return }
+
+        let session = AVAudioSession.sharedInstance()
+        do {
+            if MainViewController.shared?.backgroundTask.isPlaying == true {
+                try session.setCategory(.playback, mode: .default, options: .mixWithOthers)
+            } else {
+                try session.setActive(false, options: .notifyOthersOnDeactivation)
+            }
+        } catch {
+            let nsError = error as NSError
+            LogManager.shared.log(category: .alarm, message: "AlarmSound - audio session release failed [code \(nsError.code)]: \(error.localizedDescription)")
+        }
     }
 
     static func playTest() {
@@ -152,11 +176,6 @@ class AlarmSound {
             // When repeatDelay > 0, we play once and then use the delegate to schedule the next play with delay
             audioPlayer!.numberOfLoops = (repeating && repeatDelay == 0) ? -1 : 0
 
-            // Store existing volume
-            if systemOutputVolumeBeforeOverride == nil {
-                systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
-            }
-
             if !audioPlayer!.prepareToPlay() {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed preparing to play")
             }
@@ -175,9 +194,7 @@ class AlarmSound {
                 LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play")
             }
 
-            if Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume {
-                MPVolumeView.setVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
-            }
+            applySystemOutputVolumeOverride()
         } catch {
             LogManager.shared.log(category: .alarm, message: "AlarmSound - unable to play sound; error: \(error)")
         }
@@ -212,6 +229,7 @@ class AlarmSound {
 
                 if audioPlayer!.play() {
                     Observable.shared.alarmSoundPlaying.value = true
+                    applySystemOutputVolumeOverride()
                 } else {
                     LogManager.shared.log(category: .alarm, message: "AlarmSound - audio player failed to play (delayed repeat)")
                 }
@@ -260,6 +278,19 @@ class AlarmSound {
         }
     }
 
+    /// Raises the output volume of the current route to the configured alarm volume,
+    /// remembering the volume it had so it can be put back between repeats and on stop.
+    fileprivate static func applySystemOutputVolumeOverride() {
+        guard Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume else {
+            return
+        }
+
+        if systemOutputVolumeBeforeOverride == nil {
+            systemOutputVolumeBeforeOverride = AVAudioSession.sharedInstance().outputVolume
+        }
+        setSystemOutputVolume(Storage.shared.alarmConfiguration.value.forcedOutputVolume)
+    }
+
     fileprivate static func restoreSystemOutputVolume() {
         guard Storage.shared.alarmConfiguration.value.overrideSystemOutputVolume else {
             return
@@ -270,10 +301,17 @@ class AlarmSound {
 
         // restore system output volume with its value before overriding it
         if let volumeBeforeOverride = systemOutputVolumeBeforeOverride {
-            MPVolumeView.setVolume(volumeBeforeOverride)
+            setSystemOutputVolume(volumeBeforeOverride)
         }
 
         systemOutputVolumeBeforeOverride = nil
+    }
+
+    /// Volume Button Snooze watches the output volume while an alarm plays, so it
+    /// is told to skip the change LoopFollow makes here.
+    private static func setSystemOutputVolume(_ volume: Float) {
+        VolumeButtonHandler.shared.ignoreProgrammaticVolumeChange()
+        MPVolumeView.setVolume(volume)
     }
 
     // Background activation of a non-mixable .playback session is denied by iOS
@@ -315,9 +353,12 @@ class AudioPlayerDelegate: NSObject, AVAudioPlayerDelegate {
 
         // If we're repeating with delay, schedule the next play
         if AlarmSound.repeatDelay > 0 {
+            AlarmSound.restoreSystemOutputVolume()
             AlarmSound.playNextWithDelay()
         } else {
             Observable.shared.alarmSoundPlaying.value = false
+            AlarmSound.restoreSystemOutputVolume()
+            AlarmSound.releaseAudioSession()
         }
     }
 

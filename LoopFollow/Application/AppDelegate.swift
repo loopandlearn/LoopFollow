@@ -239,8 +239,6 @@ extension Notification.Name {
 /// the window; this class only handles the events UIKit routes to the scene
 /// delegate instead of the application delegate.
 final class AppSceneDelegate: NSObject, UIWindowSceneDelegate {
-    private let speechSynthesizer = AVSpeechSynthesizer()
-
     /// A quick action used to cold-launch the app arrives in the connection
     /// options; windowScene(_:performActionFor:) is not called for that launch.
     func scene(_: UIScene, willConnectTo _: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -264,7 +262,9 @@ final class AppSceneDelegate: NSObject, UIWindowSceneDelegate {
         }
         Storage.shared.speakBG.value.toggle()
         let message = Storage.shared.speakBG.value ? "BG Speak is now on" : "BG Speak is now off"
-        speechSynthesizer.speak(AVSpeechUtterance(string: message))
+        if SpeechOutput.shared.activateAudioSession() {
+            SpeechOutput.shared.speak(AVSpeechUtterance(string: message))
+        }
         return true
     }
 

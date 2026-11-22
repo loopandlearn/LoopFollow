@@ -81,12 +81,7 @@ extension MainViewController {
         }
 
         // 2. Now that we know we need to speak, activate the audio session.
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playback, mode: .default, options: .duckOthers)
-            try audioSession.setActive(true)
-        } catch {
-            LogManager.shared.log(category: .general, message: "speakBG, Failed to set up audio session: \(error)")
+        guard SpeechOutput.shared.activateAudioSession() else {
             return
         }
 
@@ -104,6 +99,6 @@ extension MainViewController {
         // 5. Speak.
         let speechUtterance = AVSpeechUtterance(string: announcementText)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: voiceLanguageCode)
-        speechSynthesizer.speak(speechUtterance)
+        SpeechOutput.shared.speak(speechUtterance)
     }
 }
