@@ -9,6 +9,7 @@ struct LoopAPNSCarbsView: View {
 
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject private var quickPickMeals = QuickPickMealsManager.shared
+    @ObservedObject private var lollipopAbsorptionMinutes = Storage.shared.loopLollipopAbsorptionMinutes
     @ObservedObject private var maxFutureCarbHours = Storage.shared.loopMaxFutureCarbHours
     @State private var carbsAmount = HKQuantity(unit: .gram(), doubleValue: 0.0)
     @State private var absorptionHours = 3
@@ -28,9 +29,12 @@ struct LoopAPNSCarbsView: View {
     private let maxPastHours = 12
     private let minAllowedAbsorptionTime = 0.5
     private let maxAllowedAbsorptionTime = 8.0
-    private let lollipopStandardAbsorption: AbsorptionPreset = (0, 30)
     private let tacoStandardAbsorption: AbsorptionPreset = (3, 0)
     private let pizzaStandardAbsorption: AbsorptionPreset = (5, 0)
+    private var lollipopAbsorption: AbsorptionPreset {
+        (lollipopAbsorptionMinutes.value / 60, lollipopAbsorptionMinutes.value % 60)
+    }
+
     private var maxFutureHours: Int {
         maxFutureCarbHours.value
     }
@@ -195,7 +199,7 @@ struct LoopAPNSCarbsView: View {
                             HStack(spacing: 10) {
                                 Button(action: {
                                     foodType = "🍭"
-                                    setAbsorptionTime(hours: lollipopStandardAbsorption.hours, minutes: lollipopStandardAbsorption.minutes)
+                                    setAbsorptionTime(hours: lollipopAbsorption.hours, minutes: lollipopAbsorption.minutes)
                                 }) {
                                     Text("🍭")
                                         .font(.title3)

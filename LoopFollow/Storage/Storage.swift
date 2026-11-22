@@ -265,6 +265,7 @@ class Storage {
     var treatmentsPosition = StorageValue<TabPosition>(key: "treatmentsPosition", defaultValue: .menu)
 
     var loopAPNSQrCodeURL = StorageValue<String>(key: "loopAPNSQrCodeURL", defaultValue: "")
+    var loopLollipopAbsorptionMinutes = StorageValue<Int>(key: "loopLollipopAbsorptionMinutes", defaultValue: 30)
     var loopMaxFutureCarbHours = StorageValue<Int>(key: "loopMaxFutureCarbHours", defaultValue: 1)
 
     var bolusIncrement = SecureStorageValue<HKQuantity>(key: "bolusIncrement", defaultValue: HKQuantity(unit: .internationalUnit(), doubleValue: 0.05))

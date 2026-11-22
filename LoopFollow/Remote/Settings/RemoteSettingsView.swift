@@ -10,6 +10,7 @@ struct RemoteSettingsView: View {
     @ObservedObject private var device = Storage.shared.device
     @ObservedObject var bolusIncrement = Storage.shared.bolusIncrement
     @ObservedObject private var watchRemoteCommands = Storage.shared.watchRemoteCommands
+    @ObservedObject private var loopLollipopAbsorptionMinutes = Storage.shared.loopLollipopAbsorptionMinutes
     @ObservedObject private var loopMaxFutureCarbHours = Storage.shared.loopMaxFutureCarbHours
 
     @State private var showAlert: Bool = false
@@ -94,8 +95,13 @@ struct RemoteSettingsView: View {
             if viewModel.remoteType == .loopAPNS {
                 Section(
                     header: Text("Meal Settings"),
-                    footer: Text("How far ahead carbs can be entered. Loop accepts up to 1 hr; use 4 hr if Loop is built with the future_carbs_4h customization.")
+                    footer: Text("Absorption time set by the 🍭 button when entering carbs. Loop's own default is 30 min; use 2 hr if Loop is built with the 2hlollipop customization.\n\nHow far ahead carbs can be entered. Loop accepts up to 1 hr; use 4 hr if Loop is built with the future_carbs_4h customization.")
                 ) {
+                    Picker("🍭 Absorption Time", selection: $loopLollipopAbsorptionMinutes.value) {
+                        ForEach(Array(stride(from: 30, through: 180, by: 30)), id: \.self) { minutes in
+                            Text(Self.absorptionText(minutes: minutes)).tag(minutes)
+                        }
+                    }
                     Picker("Max Future Carbs", selection: $loopMaxFutureCarbHours.value) {
                         ForEach(1 ... 4, id: \.self) { hours in
                             Text("\(hours) hr").tag(hours)
@@ -392,6 +398,14 @@ struct RemoteSettingsView: View {
         // If isEnabled is false, user can see the row but not tap it.
         .disabled(!isEnabled)
         .foregroundColor(isEnabled ? .primary : .gray)
+    }
+
+    private static func absorptionText(minutes: Int) -> String {
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        if hours == 0 { return "\(remainder) min" }
+        if remainder == 0 { return "\(hours) hr" }
+        return "\(hours) hr \(remainder) min"
     }
 
     // MARK: - Validation Error Handler
