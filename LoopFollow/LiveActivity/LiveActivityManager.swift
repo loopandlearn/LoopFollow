@@ -552,10 +552,10 @@ final class LiveActivityManager {
         // If an activity is already running and not due for renewal we adopt/reuse it
         // (covers warm starts where the LA survived a relaunch); only truly new
         // starts go through createActivity (local when foreground, APNs otherwise).
-        // The tracked activity comes first, then any active one; the others are orphans.
+        // The tracked activity comes first, then any updatable one; the others are orphans.
         let activities = Activity<GlucoseLiveActivityAttributes>.activities
-        let tracked = activities.first { $0.id == current?.id && $0.activityState == .active }
-        if let existing = tracked ?? activities.first(where: { $0.activityState == .active }) ?? activities.first {
+        let tracked = activities.first { $0.id == current?.id && Self.canTakeUpdates($0) }
+        if let existing = tracked ?? activities.first(where: Self.canTakeUpdates) ?? activities.first {
             let renewBy = Storage.shared.laRenewBy.value
             let now = Date().timeIntervalSince1970
             let renewalFailed = Storage.shared.laRenewalFailed.value
@@ -1165,9 +1165,12 @@ final class LiveActivityManager {
     /// The first activity that can still take updates. `.stale` counts: it only
     /// means the last reading has aged, and the next update clears it.
     private var firstUpdatableActivity: Activity<GlucoseLiveActivityAttributes>? {
-        Activity<GlucoseLiveActivityAttributes>.activities.first {
-            $0.activityState == .active || $0.activityState == .stale
-        }
+        Activity<GlucoseLiveActivityAttributes>.activities.first(where: Self.canTakeUpdates)
+    }
+
+    /// Whether an activity can still take updates: `.active` or `.stale`.
+    private static func canTakeUpdates(_ activity: Activity<GlucoseLiveActivityAttributes>) -> Bool {
+        activity.activityState == .active || activity.activityState == .stale
     }
 
     private func isAppVisibleForLiveActivityStart() -> Bool {

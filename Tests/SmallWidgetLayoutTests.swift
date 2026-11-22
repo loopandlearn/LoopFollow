@@ -35,6 +35,16 @@ struct SmallWidgetLayoutTests {
         #expect(LiveActivitySlotOption.smallWidgetCases(showStatusLine: false) == LiveActivitySlotOption.allCases)
     }
 
+    @Test("The status line starts on for a right slot it doesn't hide", arguments: [LiveActivitySlotOption.projectedBG, .none, .basal])
+    func statusLineDefaultsOn(slot: LiveActivitySlotOption) {
+        #expect(LiveActivitySlotOption.statusLineDefault(rightSlot: slot))
+    }
+
+    @Test("The status line starts off when it would hide the chosen right slot", arguments: [LiveActivitySlotOption.iob, .cob, .override])
+    func statusLineDefaultsOffForHiddenSlot(slot: LiveActivitySlotOption) {
+        #expect(!LiveActivitySlotOption.statusLineDefault(rightSlot: slot))
+    }
+
     private func snapshot(basalRate: String) -> GlucoseSnapshot {
         GlucoseSnapshot(
             glucose: 120,

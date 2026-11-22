@@ -121,6 +121,13 @@ enum LiveActivitySlotOption: String, CaseIterable, Codable {
         showStatusLine ? allCases.filter { !onSmallWidgetStatusLine.contains($0) } : allCases
     }
 
+    /// Whether the status line is on before the user sets it. It starts off when
+    /// the right slot holds a value the line would hide, so that choice and the
+    /// original font sizes are kept.
+    static func statusLineDefault(rightSlot: LiveActivitySlotOption) -> Bool {
+        !onSmallWidgetStatusLine.contains(rightSlot)
+    }
+
     /// True when the underlying value may be nil (e.g. Dexcom-only users who have
     /// no Loop data). The widget renders "—" in those cases.
     var isOptional: Bool {
@@ -230,6 +237,11 @@ enum LAAppGroupSettings {
     // MARK: - Small widget slot (Write)
 
     static func setSmallWidgetSlot(_ slot: LiveActivitySlotOption) {
+        // The status line default follows the slot, so store it first; a new
+        // slot must not turn the line on or off by itself.
+        if defaults?.object(forKey: Keys.smallWidgetStatusLine) == nil {
+            setShowSmallWidgetStatusLine(showSmallWidgetStatusLine())
+        }
         defaults?.set(slot.rawValue, forKey: Keys.smallWidgetSlot)
     }
 
@@ -248,9 +260,11 @@ enum LAAppGroupSettings {
         defaults?.set(show, forKey: Keys.smallWidgetStatusLine)
     }
 
-    /// On until the user turns it off.
+    /// Whether the CarPlay/Watch status line is on. Until the user sets it,
+    /// see `LiveActivitySlotOption.statusLineDefault(rightSlot:)`.
     static func showSmallWidgetStatusLine() -> Bool {
-        defaults?.object(forKey: Keys.smallWidgetStatusLine) as? Bool ?? true
+        defaults?.object(forKey: Keys.smallWidgetStatusLine) as? Bool
+            ?? LiveActivitySlotOption.statusLineDefault(rightSlot: smallWidgetSlot())
     }
 
     // MARK: - Small widget tight layout
