@@ -94,11 +94,20 @@ struct WatchProtocolTests {
         #expect(!WatchFormat.delta(0.5, unit: .mmol).hasPrefix("+"))
     }
 
-    @Test("Range colors match the phone: red at or below low, yellow at or above high")
+    @Test("Range colors match the phone: a reading on a line is in range")
     func rangeColors() {
-        #expect(WatchFormat.bgColor(70, lowMgdl: 70, highMgdl: 180) == .red)
-        #expect(WatchFormat.bgColor(71, lowMgdl: 70, highMgdl: 180) == .green)
-        #expect(WatchFormat.bgColor(180, lowMgdl: 70, highMgdl: 180) == .yellow)
-        #expect(WatchFormat.bgColor(250, lowMgdl: 70, highMgdl: 180, colored: false) == .primary)
+        #expect(WatchFormat.bgColor(69, lowMgdl: 70, highMgdl: 180, unit: .mgdl) == .red)
+        #expect(WatchFormat.bgColor(70, lowMgdl: 70, highMgdl: 180, unit: .mgdl) == .green)
+        #expect(WatchFormat.bgColor(180, lowMgdl: 70, highMgdl: 180, unit: .mgdl) == .green)
+        #expect(WatchFormat.bgColor(181, lowMgdl: 70, highMgdl: 180, unit: .mgdl) == .yellow)
+        #expect(WatchFormat.bgColor(250, lowMgdl: 70, highMgdl: 180, unit: .mgdl, colored: false) == .primary)
+    }
+
+    @Test("Range colors compare at the displayed mmol/L precision")
+    func rangeColorsMmol() {
+        // 181 mg/dL displays 10.0, the high line; 182 displays 10.1.
+        #expect(WatchFormat.bgColor(181, lowMgdl: 70, highMgdl: 180, unit: .mmol) == .green)
+        #expect(WatchFormat.bgColor(182, lowMgdl: 70, highMgdl: 180, unit: .mmol) == .yellow)
+        #expect(WatchFormat.bgColor(69, lowMgdl: 70, highMgdl: 180, unit: .mmol) == .red)
     }
 }

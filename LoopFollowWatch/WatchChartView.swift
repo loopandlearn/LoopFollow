@@ -83,7 +83,7 @@ struct WatchChartView: View {
                     y: .value("BG", min(reading.v, top))
                 )
                 .symbolSize(spanHours <= 3 ? 14 : 6)
-                .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl))
+                .foregroundStyle(WatchFormat.bgColor(reading.v, lowMgdl: state.lowMgdl, highMgdl: state.highMgdl, unit: unit))
             }
 
             ForEach(state.carbs.filter { window.contains($0.date) }, id: \.t) { carb in

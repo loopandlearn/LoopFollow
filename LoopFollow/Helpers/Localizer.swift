@@ -111,6 +111,18 @@ final class UnitSettingsStore {
         )
     }
 
+    /// Rounds a mg/dL value to the display precision of the current unit, so colors,
+    /// stats and alarms match the number shown. Apply to both the reading and the threshold.
+    func normalizeToDisplayPrecision(_ mgdl: Double) -> Double {
+        GlucoseConversion.toDisplayPrecision(mgdl, mmol: glucoseUnit == .mmolL)
+    }
+
+    /// Band of a mg/dL reading against the selected range (or `thresholds` when given).
+    func glucoseBand(for mgdl: Double, thresholds: (low: Double, high: Double)? = nil) -> GlucoseBand {
+        let range = thresholds ?? effectiveThresholds()
+        return GlucoseBand.of(mgdl, low: range.low, high: range.high, mmol: glucoseUnit == .mmolL)
+    }
+
     var glycemicMetricMode: GlycemicMetricMode {
         get {
             Storage.shared.showGMI.value ? .gmi : .ehba1c
