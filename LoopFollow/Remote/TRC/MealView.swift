@@ -211,9 +211,14 @@ struct MealView: View {
                     var message = "Are you sure you want to send the meal data"
 
                     if let selectedTime = selectedTime {
+                        let mealDate = MealTime.nearestDate(to: selectedTime, now: Date())
                         let timeFormatter = DateFormatter()
                         timeFormatter.timeStyle = .short
-                        let timeString = timeFormatter.string(from: selectedTime)
+                        if !Calendar.current.isDateInToday(mealDate) {
+                            timeFormatter.dateStyle = .short
+                            timeFormatter.doesRelativeDateFormatting = true
+                        }
+                        let timeString = timeFormatter.string(from: mealDate)
                         message += " for \(timeString)?"
                     } else {
                         message += " now?"
@@ -303,14 +308,7 @@ struct MealView: View {
 
         var scheduledDate: Date? = nil
         if isScheduling, let selectedTime = selectedTime {
-            let calendar = Calendar.current
-            let now = Date()
-            let selectedDateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
-            let currentSecond = calendar.component(.second, from: now)
-            scheduledDate = calendar.date(bySettingHour: selectedDateComponents.hour ?? 0,
-                                          minute: selectedDateComponents.minute ?? 0,
-                                          second: currentSecond,
-                                          of: now) ?? now
+            scheduledDate = MealTime.nearestDate(to: selectedTime, now: Date())
         }
 
         pushNotificationManager.sendMealPushNotification(
@@ -383,5 +381,31 @@ struct MealView: View {
         alertMessage = message
         alertType = .validationError
         showAlert = true
+    }
+}
+
+enum MealTime {
+    /// The picker gives only an hour and minute. The meal time is the occurrence of
+    /// that time closest to now, at most 12 hours before or after, so 23:50 picked
+    /// at 00:10 is yesterday evening. The seconds come from now.
+    static func nearestDate(to selectedTime: Date, now: Date, calendar: Calendar = .current) -> Date {
+        let components = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        let second = calendar.component(.second, from: now)
+        guard let today = calendar.date(bySettingHour: components.hour ?? 0,
+                                        minute: components.minute ?? 0,
+                                        second: second,
+                                        of: now)
+        else {
+            return now
+        }
+
+        let offset = today.timeIntervalSince(now)
+        if offset > 12 * 3600 {
+            return calendar.date(byAdding: .day, value: -1, to: today) ?? today
+        }
+        if offset < -12 * 3600 {
+            return calendar.date(byAdding: .day, value: 1, to: today) ?? today
+        }
+        return today
     }
 }
