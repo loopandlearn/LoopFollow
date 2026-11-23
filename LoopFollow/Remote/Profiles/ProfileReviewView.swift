@@ -80,7 +80,7 @@ struct ProfileReviewView: View {
 
     private var problems: [String] {
         guard let limits else { return ["Profiles can not be changed without the limits from \(remote.appName)."] }
-        return ProfileValidation.problems(for: command, limits: limits)
+        return ProfileValidation.problems(for: command, limits: limits, singleTarget: remote.hasSingleTarget)
     }
 
     private static func computePushSize(_ command: ProfileCommand, remote: ProfileRemote) -> Int? {
@@ -107,6 +107,10 @@ struct ProfileReviewView: View {
                 Text(summary)
                 if appliesNow {
                     ActiveProfileWarning(remote: remote)
+                }
+                if !ProfileValidation.unchangedProblems(for: command, limits: limits, singleTarget: remote.hasSingleTarget).isEmpty {
+                    Label("Schedules this change leaves alone stay outside the limits \(remote.appName) shared, so \(remote.appName) would refuse to activate this profile until they are changed too.", systemImage: "exclamationmark.triangle")
+                        .foregroundColor(.orange)
                 }
                 if !increases.isEmpty {
                     MoreInsulinWarning(

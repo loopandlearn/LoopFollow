@@ -57,6 +57,11 @@ struct TherapyProfilesView: View {
                             HStack {
                                 Text(profile.name)
                                 Spacer()
+                                if !ProfileValidation.activationProblems(profile, limits: profileSet.limits).isEmpty {
+                                    Text("Outside Limits")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
                                 if profileSet.isActive(profile) {
                                     Text("Active")
                                         .font(.caption)
@@ -187,6 +192,26 @@ struct TherapyProfilePreviewView: View {
         return increases.isEmpty ? nil : (active, increases)
     }
 
+    /// Why the app would refuse to activate this profile under the limits it shared.
+    private var activationProblems: [String] {
+        guard let profile else { return [] }
+        return ProfileValidation.activationProblems(profile, limits: profileSet?.limits)
+    }
+
+    /// The note for the activation confirmation: the target is outside the limits, or the active profile itself no
+    /// longer fits them.
+    private var activationLimitsText: String? {
+        if !activationProblems.isEmpty {
+            return "This profile is outside the limits \(remote.appName) shared, so \(remote.appName) will likely refuse it."
+        }
+        guard !isActive, let active = profileSet?.activeProfile,
+              !ProfileValidation.activationProblems(active, limits: profileSet?.limits).isEmpty
+        else { return nil }
+        let blocked = ProfileEditing.blocker(for: active, limits: profileSet?.limits, remote: remote) != nil
+        return "\(active.name) no longer fits the limits \(remote.appName) shared, so \(remote.appName) would refuse to activate it again"
+            + (blocked ? "." : " until it is edited.")
+    }
+
     private var activateKey: String { remote.key(.activate, name: name) }
     private var deleteKey: String { remote.key(.delete, name: name) }
 
@@ -241,6 +266,20 @@ struct TherapyProfilePreviewView: View {
         List {
             Section(footer: Text("\(remote.appName) writes the basal rates to the pump when the profile is activated.")) {
                 Text(isActive ? "This is the active profile. \(remote.appName) doses insulin with these values." : "Review the profile before activating it in \(remote.appName).")
+                if !activationProblems.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(isActive
+                            ? "This profile no longer fits the limits \(remote.appName) shared. It stays active, but once another profile is activated, \(remote.appName) would refuse to activate it again" + (editBlocker == nil ? " until it is edited." : ".")
+                            : "\(remote.appName) would refuse to activate this profile under the limits it shared." + (editBlocker == nil ? " Edit it to fit them first." : ""),
+                            systemImage: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                        ForEach(activationProblems, id: \.self) { problem in
+                            Text(problem)
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
                 if let activationIncreases {
                     MoreInsulinWarning(
                         increases: activationIncreases.increases,
@@ -336,6 +375,7 @@ struct TherapyProfilePreviewView: View {
                 title: Text("Activate \(name) in \(remote.appName)?"),
                 message: Text("\(remote.appName) replaces its correction range, carb ratios, basal rates and insulin sensitivities with these values and writes the basal rates to the pump. Dosing changes right away."
                     + (profileSet.flatMap { ScheduledSwitches.holdText($0.scheduledSwitches) }.map { " " + $0 } ?? "")
+                    + (activationLimitsText.map { " " + $0 } ?? "")
                     + MoreInsulinWarning.sentence(activationIncreases?.increases ?? [], comparedWith: activationIncreases?.active.name ?? "")),
                 primaryButton: .default(Text("Activate")) { send(.activate, fingerprint: fingerprint) },
                 secondaryButton: .cancel()

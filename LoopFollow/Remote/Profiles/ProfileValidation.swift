@@ -128,42 +128,80 @@ enum ProfileValidation {
         return nil
     }
 
-    /// Everything that keeps `values` from being sent within `limits`. Empty when the profile can be sent.
-    static func problems(_ values: TherapyProfileValues, limits: ProfileEditLimits) -> [String] {
+    /// Everything that keeps the `schedules` of `values` from being sent within `limits`. Empty when they can be sent.
+    static func problems(
+        _ values: TherapyProfileValues,
+        limits: ProfileEditLimits,
+        schedules: Set<ProfileScheduleKind> = Set(ProfileScheduleKind.allCases)
+    ) -> [String] {
         var problems: [String] = []
         if values.units != limits.normalizedUnits {
             problems.append("The profile is in \(values.units), but the limits are in \(limits.normalizedUnits).")
         }
-        let schedules: [(ProfileScheduleKind, [Int])] = [
+        let starts: [(ProfileScheduleKind, [Int])] = [
             (.correctionRange, values.target.map(\.seconds)),
             (.carbRatio, values.carbRatio.map(\.seconds)),
             (.basal, values.basal.map(\.seconds)),
             (.sensitivity, values.sensitivity.map(\.seconds)),
         ]
-        for (kind, starts) in schedules {
+        for (kind, starts) in starts where schedules.contains(kind) {
             problems += scheduleProblems(starts, kind: kind, limits: limits)
         }
-        for (kind, items) in [(ProfileScheduleKind.carbRatio, values.carbRatio), (.basal, values.basal), (.sensitivity, values.sensitivity)] {
+        for (kind, items) in [(ProfileScheduleKind.carbRatio, values.carbRatio), (.basal, values.basal), (.sensitivity, values.sensitivity)] where schedules.contains(kind) {
             if items.contains(where: { limits.status(of: $0.value, in: kind) == .notAllowed }) {
                 problems.append("\(kind.title): a value is outside what is allowed. \(limits.boundsText(for: kind))")
             }
         }
-        if values.target.contains(where: { limits.status(of: $0.low, in: .correctionRange) == .notAllowed || limits.status(of: $0.high, in: .correctionRange) == .notAllowed }) {
-            problems.append("Correction Range: a value is outside what is allowed. \(limits.boundsText(for: .correctionRange))")
-        }
-        if values.target.contains(where: { $0.low > $0.high + ProfileEditLimits.tolerance }) {
-            problems.append("Correction Range: the low value must not be above the high value.")
+        if schedules.contains(.correctionRange) {
+            if values.target.contains(where: { limits.status(of: $0.low, in: .correctionRange) == .notAllowed || limits.status(of: $0.high, in: .correctionRange) == .notAllowed }) {
+                problems.append("Correction Range: a value is outside what is allowed. \(limits.boundsText(for: .correctionRange))")
+            }
+            if values.target.contains(where: { $0.low > $0.high + ProfileEditLimits.tolerance }) {
+                problems.append("Correction Range: the low value must not be above the high value.")
+            }
         }
         return problems
     }
 
-    /// Everything that keeps `command` from being sent within `limits`. A save that keeps the values of the
-    /// profile it updates (a pure rename) is not checked against the limits, which may have changed since the
-    /// values were stored.
-    static func problems(for command: ProfileCommand, limits: ProfileEditLimits) -> [String] {
+    /// The schedules of `values` that differ from `original`. With `singleTarget`, a correction range also counts as
+    /// unchanged when it matches `original` with each high value set to its low value, as the editor shows it.
+    static func changedSchedules(from original: TherapyProfileValues, to values: TherapyProfileValues, singleTarget: Bool = false) -> Set<ProfileScheduleKind> {
+        var changed = Set<ProfileScheduleKind>()
+        if values.basal != original.basal { changed.insert(.basal) }
+        if values.carbRatio != original.carbRatio { changed.insert(.carbRatio) }
+        if values.sensitivity != original.sensitivity { changed.insert(.sensitivity) }
+        let editorTarget = ProfileDraft(original, singleTarget: singleTarget).values.target
+        if values.target != original.target, values.target != editorTarget { changed.insert(.correctionRange) }
+        return changed
+    }
+
+    /// Everything that keeps `command` from being sent within `limits`. A save of an existing profile is checked only
+    /// in the schedules it changes, as Loop and Trio check it, so a schedule that no longer fits the limits does not
+    /// keep the others from being corrected. A pure rename is not checked against the limits.
+    static func problems(for command: ProfileCommand, limits: ProfileEditLimits, singleTarget: Bool = false) -> [String] {
         guard case let .save(_, original, values) = command else { return [] }
-        if let original, original.values == values { return [] }
-        return problems(values, limits: limits)
+        guard let original else { return problems(values, limits: limits) }
+        let changed = changedSchedules(from: original.values, to: values, singleTarget: singleTarget)
+        if changed.isEmpty { return [] }
+        return problems(values, limits: limits, schedules: changed)
+    }
+
+    /// Why Loop or Trio would refuse to activate `profile` under `limits`, or empty when nothing in the limits stands in
+    /// the way. Empty when the limits are not usable, the profile could not be read completely, or the two are in
+    /// different units, since the profile can't be judged then.
+    static func activationProblems(_ profile: TherapyProfile, limits: ProfileEditLimits?) -> [String] {
+        guard let limits, limits.isUsable, profile.isWellFormed, profile.values.units == limits.normalizedUnits else { return [] }
+        return problems(profile.values, limits: limits)
+    }
+
+    /// The problems of the schedules a save of an existing profile leaves unchanged; they stay stored as they are.
+    static func unchangedProblems(for command: ProfileCommand, limits: ProfileEditLimits?, singleTarget: Bool = false) -> [String] {
+        guard case let .save(_, original?, values) = command, let limits, limits.isUsable, original.isWellFormed,
+              values.units == limits.normalizedUnits
+        else { return [] }
+        let unchanged = Set(ProfileScheduleKind.allCases).subtracting(changedSchedules(from: original.values, to: values, singleTarget: singleTarget))
+        if unchanged.isEmpty { return [] }
+        return problems(values, limits: limits, schedules: unchanged)
     }
 
     static func scheduleProblems(_ starts: [Int], kind: ProfileScheduleKind, limits: ProfileEditLimits) -> [String] {
@@ -173,7 +211,7 @@ enum ProfileValidation {
         if zip(starts, starts.dropFirst()).contains(where: { $0 >= $1 }) {
             problems.append("\(kind.title): each time must be later than the one before.")
         }
-        if starts.contains(where: { $0 < 0 || $0 >= 86400 || $0 % limits.segmentSeconds != 0 }) {
+        if starts.contains(where: { $0 < 0 || $0 >= 86400 || limits.segmentSeconds <= 0 || $0 % limits.segmentSeconds != 0 }) {
             problems.append("\(kind.title): times must be on the \(limits.segmentSeconds / 60)-minute grid.")
         }
         let segmentLimit = limits.segmentLimit(for: kind)

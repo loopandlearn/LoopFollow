@@ -91,9 +91,14 @@ struct ProfileEditorSheet: View {
             ?? ProfileValidation.nameProblem(name, existingNames: profileSet.profiles.map(\.name))
     }
 
+    /// The schedules the draft changes; every schedule for a new profile.
+    private var changedSchedules: Set<ProfileScheduleKind> {
+        isNew ? Set(ProfileScheduleKind.allCases) : ProfileValidation.changedSchedules(from: source.values, to: draft.values, singleTarget: remote.hasSingleTarget)
+    }
+
     private var problems: [String] {
         guard let limits = editableLimits else { return [] }
-        return ProfileValidation.problems(draft.values, limits: limits)
+        return ProfileValidation.problems(draft.values, limits: limits, schedules: changedSchedules)
     }
 
     private var hasChanges: Bool {
@@ -150,7 +155,7 @@ struct ProfileEditorSheet: View {
                 }
 
                 ForEach(ProfileScheduleKind.allCases) { kind in
-                    ProfileValuesEditor(kind: kind, segments: Binding(get: { draft[kind] }, set: { draft[kind] = $0 }), units: draft.units, limits: editableLimits, singleTarget: remote.hasSingleTarget)
+                    ProfileValuesEditor(kind: kind, segments: Binding(get: { draft[kind] }, set: { draft[kind] = $0 }), units: draft.units, limits: editableLimits, singleTarget: remote.hasSingleTarget, isUnchanged: !changedSchedules.contains(kind), isActiveProfile: isEditingActive)
                 }
 
                 if !problems.isEmpty {
